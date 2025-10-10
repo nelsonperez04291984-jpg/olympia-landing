@@ -1,22 +1,26 @@
 import React from 'react'
 import { Heart, Users, Activity, ArrowRight } from 'lucide-react'
 
+// --- 1. UPDATE: Add image property to each service object ---
 const services = [
   { 
     title: 'Skilled Nursing', 
     icon: Heart,
+    image: '/1.png', // Placeholder - Replace with your actual path
     desc: 'Licensed nursing services including wound care, medication management, and clinical assessments.',
     features: ['Wound Care', 'Medication Management', 'Clinical Assessments']
   },
   { 
     title: 'Personal Care Assistance', 
     icon: Users,
+    image: '/2.png', // Placeholder - Replace with your actual path
     desc: 'Assistance with daily living activities to maintain comfort, dignity and independence.',
     features: ['Daily Living Support', 'Personal Hygiene', 'Mobility Assistance']
   },
   { 
     title: 'Therapy Services', 
     icon: Activity,
+    image: '/3.png', // Placeholder - Replace with your actual path
     desc: 'Physical, occupational and speech therapy to support recovery and mobility.',
     features: ['Physical Therapy', 'Occupational Therapy', 'Speech Therapy']
   }
@@ -45,22 +49,39 @@ const Services = () => {
         {/* Services Grid */}
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {services.map((service, i) => {
-            const IconComponent = service.icon
+            // NOTE: IconComponent is no longer used, but kept for reference if you want to use it elsewhere.
+            // const IconComponent = service.icon 
+
             return (
               <div 
                 key={i} 
                 className="group relative bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100"
               >
-                {/* Icon */}
+                
+                {/* --- 2. MODIFIED: Image Block Replacement --- */}
                 <div className="relative mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                    <IconComponent className="text-white" size={32} />
+                  {/* The image itself */}
+                  <div className="w-full h-48 overflow-hidden rounded-xl shadow-lg border-4 border-white/50">
+                    <img 
+                      src={service.image} 
+                      alt={`Image for ${service.title}`}
+                      // Modern style: object-cover ensures the image fills the container without stretching
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
                   </div>
-                  <div className="absolute -top-2 -right-2 w-20 h-20 bg-purple-100 rounded-2xl -z-10 group-hover:scale-110 transition-transform duration-300"></div>
+                  
+                  {/* OPTIONAL: Re-introduce a small icon badge for flair, placed over the image */}
+                  <div className="absolute -bottom-4 left-4 w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-800 rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+                    <service.icon className="text-white" size={20} />
+                  </div>
+                  
                 </div>
+                {/* --- END MODIFIED BLOCK --- */}
+
 
                 {/* Content */}
-                <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-purple-700 transition-colors">
+                {/* Adjusted padding/margin for the new badge icon */}
+                <h3 className="text-2xl font-bold text-gray-900 mb-3 pt-6 group-hover:text-purple-700 transition-colors">
                   {service.title}
                 </h3>
                 <p className="text-gray-600 mb-6 leading-relaxed">
@@ -86,7 +107,7 @@ const Services = () => {
                   <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={18} />
                 </a>
 
-                {/* Decorative gradient */}
+                {/* Decorative gradient (kept this, it looks nice) */}
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
               </div>
             )

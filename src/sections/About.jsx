@@ -1,25 +1,30 @@
 import React from 'react'
 import { Shield, Heart, Users, Award } from 'lucide-react'
 
+// --- 1. UPDATE: Add image property to each value object ---
 const values = [
   {
     icon: Heart,
     title: 'Compassionate',
+    image: '/compassionate.png', // <--- PLACEHOLDER IMAGE PATH
     description: 'We treat every patient with dignity, respect, and genuine care'
   },
   {
     icon: Shield,
     title: 'Professional',
+    image: '/professional.png', // <--- PLACEHOLDER IMAGE PATH
     description: 'Highly trained staff delivering evidence-based care'
   },
   {
     icon: Users,
     title: 'Person-Centered',
+    image: '/person.png', // <--- PLACEHOLDER IMAGE PATH
     description: 'Tailored care plans that honor individual needs and preferences'
   },
   {
     icon: Award,
     title: 'Excellence',
+    image: '/excellence.png', // <--- PLACEHOLDER IMAGE PATH
     description: 'Committed to the highest standards of quality and service'
   }
 ]
@@ -27,13 +32,14 @@ const values = [
 const About = () => {
   return (
     <section id="about" className="py-24 bg-white relative overflow-hidden">
-      {/* Background Elements */}
+      {/* Background Elements (no change here) */}
       <div className="absolute top-20 left-0 w-72 h-72 bg-emerald-100 rounded-full filter blur-3xl opacity-20"></div>
       <div className="absolute bottom-20 right-0 w-96 h-96 bg-purple-100 rounded-full filter blur-3xl opacity-20"></div>
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid md:grid-cols-2 gap-16 items-center">
-          {/* Left Content */}
+          
+          {/* Left Content (no change here) */}
           <div>
             <span className="inline-block px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold mb-4">
               About Us
@@ -72,18 +78,26 @@ const About = () => {
             </a>
           </div>
 
-          {/* Right Content - Values Grid */}
+          {/* Right Content - Values Grid (MODIFIED) */}
           <div className="grid grid-cols-2 gap-6">
             {values.map((value, i) => {
-              const IconComponent = value.icon
+              // const IconComponent = value.icon // Lucide icon component is no longer used here
               return (
                 <div 
                   key={i}
                   className="bg-gradient-to-br from-white to-purple-50/50 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100"
                 >
-                  <div className="w-12 h-12 bg-purple-700 rounded-xl flex items-center justify-center mb-4 shadow-md">
-                    <IconComponent className="text-white" size={24} />
+                  {/* --- 2. MODIFIED: Image Block Replacement --- */}
+                  <div className="w-12 h-12 mb-4">
+                      <img 
+                          src={value.image} 
+                          alt={value.title} 
+                          // Styling for a modern, contained visual
+                          className="w-full h-full object-contain"
+                      />
                   </div>
+                  {/* --- END MODIFIED BLOCK --- */}
+                  
                   <h3 className="text-lg font-bold text-gray-900 mb-2">{value.title}</h3>
                   <p className="text-sm text-gray-600 leading-relaxed">{value.description}</p>
                 </div>
