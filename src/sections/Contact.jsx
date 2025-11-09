@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Mail, Phone, MapPin, Loader2, CheckCircle } from 'lucide-react'
+import { Mail, Phone, MapPin, Loader2, CheckCircle, User, Stethoscope, UploadCloud } from 'lucide-react'
 import CalendlyEmbed from '../widgets/CalendlyEmbed' 
 
-// --- Resettable Intersection Observer hook (Assuming this is a local utility now) ---
+// --- Resettable Intersection Observer hook ---
 const useInView = (threshold = 0.1) => {
     const [isInView, setIsInView] = useState(false)
     const ref = useRef(null)
@@ -26,7 +26,9 @@ const useInView = (threshold = 0.1) => {
     return [ref, isInView]
 }
 
-// Uses Formspree. Replace YOUR_FORMSPREE_ID with your form endpoint id
+// Uses Formspree. Replace YOUR_FORMSPREE_ID with your form endpoint id.
+// NOTE ON FILE UPLOADS: If using Formspree, ensure your account plan supports file uploads
+// and that your form is configured to accept them.
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORMSPREE_ID';
 
 export default function Contact(){
@@ -40,10 +42,12 @@ export default function Contact(){
         setStatus('sending')
         
         try{
+            // Formspree requires headers: { 'Accept': 'application/json' }
+            // when NOT sending files. When sending files (FormData), let the browser handle headers.
             const res = await fetch(FORMSPREE_ENDPOINT, {
                 method: 'POST',
                 body: data,
-                headers: { 'Accept': 'application/json' }
+                // Do not set 'Content-Type': 'multipart/form-data' here; FormData does it.
             })
             if(res.ok){
                 setStatus('sent')
@@ -51,7 +55,8 @@ export default function Contact(){
             } else {
                 setStatus('error')
             }
-        } catch{
+        } catch(error){
+            console.error("Form submission error:", error);
             setStatus('error')
         }
     }
@@ -62,6 +67,9 @@ export default function Contact(){
 
     // Tailwind Class for Inputs
     const inputClasses = "mt-1 w-full rounded-lg p-3 text-gray-800 bg-white/90 border border-purple-300 focus:ring-2 focus:ring-purple-200 transition duration-300 placeholder-gray-500"
+    // Tailwind Class for File Input
+    const fileInputClasses = "mt-1 w-full rounded-lg p-3 text-gray-800 bg-white/90 border border-purple-300 focus:ring-2 focus:ring-purple-200 transition duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200"
+
 
     return (
         <section id="contact" className="py-24 bg-gradient-to-br from-purple-700 to-purple-900 text-white relative overflow-hidden">
@@ -76,61 +84,155 @@ export default function Contact(){
                     style={{ transitionDelay: '300ms' }}
                 >
                     <span className="inline-block px-4 py-1 bg-purple-500/50 text-purple-100 rounded-full text-sm font-semibold mb-4">
-                        Contact Us
+                        Begin Care Coordination
                     </span>
-                    <h2 className="text-4xl md:text-5xl font-bold mb-4">Get in Touch</h2>
-                    <p className="mt-3 text-purple-200 leading-relaxed">
-                        Have questions or need to discuss specific care requirements? Send us a message, and our compassionate team will respond promptly.
+                    <h2 className="text-4xl md:text-5xl font-bold mb-4">Start Your Admission</h2>
+                    
+                    {/* UPDATED COPY TO REFLECT FILE UPLOAD REQUIREMENT */}
+                    <p className="mt-3 text-purple-200 leading-relaxed border-l-4 border-emerald-400 pl-4 py-2 italic">
+                        As a certified Home Health Agency, we require a **Physician's Referral** to initiate services. Please complete the form and **upload the required document** below. Our intake coordinator will then confirm details with the referring physician.
                     </p>
 
                     <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-                        <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-purple-100">Full name</label>
-                            <input 
-                                id="name"
-                                required 
-                                name="name" 
-                                placeholder="John Doe"
-                                className={inputClasses} 
-                                disabled={isSending}
-                            />
+                        
+                        {/* 1. PATIENT AND PRIMARY CONTACT INFORMATION */}
+                        <div className="p-5 rounded-xl bg-purple-800/40 border border-purple-600 space-y-4">
+                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                <User size={20} className='text-emerald-300'/> Patient/Family Contact Details
+                            </h3>
+                            <div className="grid sm:grid-cols-2 gap-4">
+                                {/* Patient Name (New Required Field) */}
+                                <div>
+                                    <label htmlFor="patient_name" className="block text-sm font-medium text-purple-100">Patient's Full Name*</label>
+                                    <input 
+                                        id="patient_name"
+                                        required 
+                                        name="Patient_Name" 
+                                        placeholder="Jane Doe"
+                                        className={inputClasses} 
+                                        disabled={isSending}
+                                    />
+                                </div>
+                                {/* Contact Name (Optional) */}
+                                <div>
+                                    <label htmlFor="name" className="block text-sm font-medium text-purple-100">Contact Person Name (Your Name)</label>
+                                    <input 
+                                        id="name"
+                                        name="Contact_Name" 
+                                        placeholder="John Doe"
+                                        className={inputClasses} 
+                                        disabled={isSending}
+                                    />
+                                </div>
+                            </div>
+                            
+                            <div className="grid sm:grid-cols-2 gap-4">
+                                {/* Email */}
+                                <div>
+                                    <label htmlFor="email" className="block text-sm font-medium text-purple-100">Email*</label>
+                                    <input 
+                                        id="email"
+                                        required 
+                                        type="email" 
+                                        name="Email" 
+                                        placeholder="you@example.com"
+                                        className={inputClasses} 
+                                        disabled={isSending}
+                                    />
+                                </div>
+                                {/* Phone */}
+                                <div>
+                                    <label htmlFor="phone" className="block text-sm font-medium text-purple-100">Contact Phone*</label>
+                                    <input 
+                                        id="phone"
+                                        required
+                                        type="tel" 
+                                        name="Phone" 
+                                        placeholder="(555) 123-4567"
+                                        className={inputClasses} 
+                                        disabled={isSending}
+                                    />
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-purple-100">Email</label>
-                            <input 
-                                id="email"
-                                required 
-                                type="email" 
-                                name="email" 
-                                placeholder="you@example.com"
-                                className={inputClasses} 
-                                disabled={isSending}
-                            />
+
+
+                        {/* 2. REFERRING PHYSICIAN INFORMATION */}
+                        <div className="p-5 rounded-xl bg-purple-800/40 border border-purple-600 space-y-4">
+                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                <Stethoscope size={20} className='text-emerald-300'/> Referring Physician's Information
+                            </h3>
+                            <div className="grid sm:grid-cols-2 gap-4">
+                                {/* Physician Name */}
+                                <div>
+                                    <label htmlFor="dr_name" className="block text-sm font-medium text-purple-100">Physician's Full Name*</label>
+                                    <input 
+                                        id="dr_name"
+                                        required 
+                                        name="Physician_Name" 
+                                        placeholder="Dr. Smith"
+                                        className={inputClasses} 
+                                        disabled={isSending}
+                                    />
+                                </div>
+                                {/* Physician Phone */}
+                                <div>
+                                    <label htmlFor="dr_phone" className="block text-sm font-medium text-purple-100">Physician's Phone Number*</label>
+                                    <input 
+                                        id="dr_phone"
+                                        required 
+                                        type="tel" 
+                                        name="Physician_Phone" 
+                                        placeholder="(555) 987-6543"
+                                        className={inputClasses} 
+                                        disabled={isSending}
+                                    />
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label htmlFor="phone" className="block text-sm font-medium text-purple-100">Phone (Optional)</label>
-                            <input 
-                                id="phone"
-                                type="tel" 
-                                name="phone" 
-                                placeholder="(555) 123-4567"
-                                className={inputClasses} 
-                                disabled={isSending}
-                            />
+
+                        {/* 3. FILE UPLOAD SECTION (NEW) */}
+                        <div className="p-5 rounded-xl bg-emerald-700/40 border border-emerald-500 space-y-4">
+                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                <UploadCloud size={20} className='text-white'/> Upload Referral Document
+                            </h3>
+                            <div>
+                                <label htmlFor="referral_file" className="block text-sm font-medium text-white mb-2">
+                                    Physician's Referral (Required)*
+                                </label>
+                                <input 
+                                    id="referral_file"
+                                    required 
+                                    type="file" 
+                                    name="Referral_Document" 
+                                    accept=".pdf,.doc,.docx,.jpg,.png"
+                                    className={fileInputClasses} 
+                                    disabled={isSending}
+                                />
+                                <p className="text-xs text-white/70 mt-2">Accepted formats: PDF, DOC, DOCX, JPG, PNG. File size limit may apply depending on your form service.</p>
+                            </div>
+                            <div className="text-center p-2 bg-emerald-800/50 rounded-lg">
+                                <p className="text-sm font-semibold text-white">
+                                    Your information is kept confidential and secure.
+                                </p>
+                            </div>
                         </div>
+                        
+                        {/* 4. MESSAGE / CARE NEEDS */}
                         <div>
-                            <label htmlFor="message" className="block text-sm font-medium text-purple-100">Message</label>
+                            <label htmlFor="message" className="block text-sm font-medium text-purple-100">Describe Care Needs / Message*</label>
                             <textarea 
                                 id="message"
                                 required 
-                                name="message" 
+                                name="Message" 
                                 rows="4" 
-                                placeholder="I need assistance with..."
+                                placeholder="E.g., Patient requires post-surgery wound care and physical therapy."
                                 className={inputClasses} 
                                 disabled={isSending}
                             />
                         </div>
 
+                        {/* SUBMIT BUTTON */}
                         <div>
                             <button 
                                 type="submit" 
@@ -148,56 +250,74 @@ export default function Contact(){
                                 {isSending ? (
                                     <>
                                         <Loader2 size={20} className="animate-spin" />
-                                        Sending...
+                                        Sending Referral...
                                     </>
                                 ) : isSent ? (
                                     <>
                                         <CheckCircle size={20} />
-                                        Message Sent!
+                                        Referral Received!
                                     </>
                                 ) : (
                                     <>
                                         <Mail size={20} />
-                                        Send Message
+                                        Submit Care Request
                                     </>
                                 )}
                             </button>
                         </div>
 
-                        {isError && <p className="text-yellow-300 mt-4 flex items-center gap-2">⚠️ There was a problem. Please try again or call us.</p>}
+                        {isError && <p className="text-yellow-300 mt-4 flex items-center gap-2">⚠️ There was a problem submitting your request. Please try again or call us immediately at (657) 377-0776.</p>}
                     </form>
 
                 </div>
-
-                {/* Calendly & Info Section (Animated) */}
+                
+                {/* Right Column: Contact Info / Scheduling */}
                 <div 
-                    className={`transition-all duration-[1500ms] ease-out ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
-                    style={{ transitionDelay: '600ms' }}
+                    className={`transition-all duration-[1500ms] ease-out ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`} 
+                    style={{ transitionDelay: '500ms' }}
                 >
-                    <h3 className="text-3xl font-semibold mb-2">Book Your Free Consultation</h3>
-                    <p className="mt-2 text-purple-200">
-                        Use our calendar to instantly select a convenient date and time for an initial assessment or consultation.
-                    </p>
-                    
-                    {/* Reverted to original Calendly wrapper div */}
-                    <div className="mt-4">
-                        <CalendlyEmbed />
-                    </div>
+                    <div className="p-8 rounded-2xl bg-white/10 backdrop-blur-sm shadow-xl h-full flex flex-col justify-between">
+                        <div>
+                            <h3 className="text-3xl font-bold mb-6">Need Immediate Assistance?</h3>
+                            <p className="text-purple-100 mb-8">
+                                For urgent matters or to speak directly with an intake specialist, please use the contact details below. Our team is available 24/7 for emergency scheduling.
+                            </p>
+                            
+                            <div className="space-y-6">
+                                {/* Phone Number */}
+                                <div className="flex items-start gap-4">
+                                    <Phone size={24} className="flex-shrink-0 mt-1 text-emerald-300" />
+                                    <div>
+                                        <p className="text-lg font-semibold">24/7 Phone Line</p>
+                                        <a href="tel:6573770776" className="text-xl font-bold text-white hover:text-emerald-300 transition-colors">(657) 377-0776</a>
+                                    </div>
+                                </div>
+                                {/* Email */}
+                                <div className="flex items-start gap-4">
+                                    <Mail size={24} className="flex-shrink-0 mt-1 text-emerald-300" />
+                                    <div>
+                                        <p className="text-lg font-semibold">General Inquiries</p>
+                                        <a href="mailto:olympiahomehealthinc@gmail.com" className="text-white hover:text-emerald-300 transition-colors">olympiahomehealthinc@gmail.com</a>
+                                    </div>
+                                </div>
+                                {/* Address */}
+                                <div className="flex items-start gap-4">
+                                    <MapPin size={24} className="flex-shrink-0 mt-1 text-emerald-300" />
+                                    <div>
+                                        <p className="text-lg font-semibold">Office Location</p>
+                                        <p className="text-white">2044 Beach Blvd, Suite 320, Huntington Beach, CA 92648</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Calendly CTA (if enabled) */}
+                        <div className="mt-10 pt-6 border-t border-purple-600">
+                            <h4 className="text-xl font-bold mb-4">Book a Discovery Call</h4>
+                            <p className="text-purple-200 mb-4">You can also use our convenient online scheduler to book a quick call with our intake team.</p>
+                            <CalendlyEmbed />
+                        </div>
 
-                    {/* Contact Details */}
-                    <div className="mt-8 space-y-3 text-purple-100 text-base">
-                        <div className="flex items-center gap-3">
-                            <MapPin size={20} className="text-purple-300"/>
-                            <p>Office: 123 Care Lane, Hometown</p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <Phone size={20} className="text-purple-300"/>
-                            <p>Phone: <a href="tel:5555555555" className="hover:text-white transition">(555) 555-5555</a></p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <Mail size={20} className="text-purple-300"/>
-                            <p>Email: <a href="mailto:info@olympia.example" className="hover:text-white transition">info@olympia.example</a></p>
-                        </div>
                     </div>
                 </div>
             </div>

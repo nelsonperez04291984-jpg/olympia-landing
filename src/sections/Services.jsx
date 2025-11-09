@@ -36,24 +36,92 @@ const Services = () => {
             title: 'Skilled Nursing', 
             icon: Heart,
             image: '/1.png',
-            desc: 'Licensed nursing services including wound care, medication management, and clinical assessments.',
-            features: ['Wound Care', 'Medication Management', 'Clinical Assessments']
+            desc: 'Comprehensive nursing services provided under physician supervision.',
+            features: [ 'Treatment and injections',
+                'Dressing change',
+                'Catheter care',
+                'Supervision of medications',
+                'Diabetic teaching',
+                'Drawing blood and lab work',
+                'IV Fluids and antibiotics therapy',
+                'Wound care',
+                'Ostomy care',
+                'Parenteral nutrition',
+                'Pre-op and post-op care',
+                'Family/patient health teaching']
         },
         { 
-            title: 'Personal Care Assistance', 
+            title: 'Home Health Aide', 
             icon: Users,
             image: '/2.png',
-            desc: 'Assistance with daily living activities to maintain comfort, dignity and independence.',
-            features: ['Daily Living Support', 'Personal Hygiene', 'Mobility Assistance']
+            desc: 'Assistance with personal care, hygiene, ambulation, and exercises under professional supervision.',
+            features: ['Personal care assistance',
+                'Hygiene support',
+                'Ambulation assistance',
+                'Exercise guidance',
+                'Daily living activities']
         },
         { 
-            title: 'Therapy Services', 
+            title: 'Physical Therapy', 
             icon: Activity,
             image: '/3.png',
             image: '/3.png',
             desc: 'Physical, occupational and speech therapy to support recovery and mobility.',
-            features: ['Physical Therapy', 'Occupational Therapy', 'Speech Therapy']
+            features: ['Adaptive equipment utilization',
+                'Rehabilitation aid',
+                'Loss of function restoration',
+                'Range of motion improvement',
+                'Strength building',
+                'Therapeutic exercise']
+        },
+        { 
+            title: 'Speech Therapy', 
+            icon: Activity,
+            image: '/SpeechTherapy.png',
+            image: '/SpeechTherapy.png',
+            desc: 'Assist patients with speech challenges following illness or accident.',
+            features: ['Adaptive equipment utilization',
+                'Speech assessment',
+                'Communication strategies',
+                'Post-illness recovery',
+                'Swallowing therapy']
+        },
+        { 
+            title: 'Occupational Therapy', 
+            icon: Activity,
+            image: '/OccupationalTherapy.png',
+            image: '/OccupationalTherapy.png',
+            desc: 'Assist patients with speech challenges following illness or accident.',
+            features: ['Adaptive equipment utilization',
+                'Speech assessment',
+                'Communication strategies',
+                'Post-illness recovery',
+                'Swallowing therapy']
+        },
+        { 
+            title: 'Social Services', 
+            icon: Activity,
+            image: '/Social.png',
+            image: '/Social.png',
+            desc: 'Support for patients and families coping with illness or disability.',
+            features: ['Emotional support',
+                'Financial resource location',
+                'Community assistance coordination',
+                'Home meal delivery',
+                'Support group connections']
+        },
+        { 
+            title: 'Nutritional Guidance', 
+            icon: Activity,
+            image: '/Nutrition.png',
+            image: '/Nutrition.png',
+            desc: 'Help patients understand and follow special diets prescribed by physicians.',
+            features: ['Diet education',
+                'Meal planning support',
+                'Nutritional counseling',
+                'Special diet guidance']
         }
+
     ]
 
     return (

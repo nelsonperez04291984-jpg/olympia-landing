@@ -8,12 +8,18 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-4">
-              <img src="/logo.jpg" alt="Olympia Logo" className="w-10 h-10 object-contain rounded-full" />
+              <img src="/logo.png" alt="Olympia Logo" className="w-10 h-10 object-contain rounded-full" />
               <span className="font-bold text-xl text-white">Olympia Home Health</span>
             </div>
-            <p className="text-gray-500 max-w-md">
-              Dedicated to delivering exceptional home health care services with compassion and expertise.
+            <p className="text-gray-500 max-w-md mb-4">
+              Caring Beyond Limits - Provides the highest quality of healthcare professionals in the comfort of your home.
             </p>
+            <div className="space-y-2 text-sm text-gray-400">
+              <p>2044 Beach Blvd, Suite 320</p>
+              <p>Huntington Beach, CA 92648</p>
+              <p>Phone: (657) 377-0776</p>
+              <p>Fax: (714) 465-2233</p>
+            </div>
           </div>
           
           <div>

@@ -24,7 +24,7 @@ const Hero = () => {
             <div className="flex items-center gap-3 group">
               <div className="relative">
                 <div className="absolute inset-0 bg-purple-600 rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                <img src="/logo.jpg" alt="Olympia Logo" className="relative w-12 h-12 object-contain rounded-full ring-2 ring-purple-200 group-hover:ring-purple-400 transition-all" />
+                <img src="/logo.png" alt="Olympia Logo" className="relative w-12 h-12 object-contain rounded-full ring-2 ring-purple-200 group-hover:ring-purple-400 transition-all" />
               </div>
               <span className={`font-bold text-xl transition-all duration-300 ${scrolled ? 'text-purple-700' : 'text-white drop-shadow-lg'}`}>
                 Olympia Home Health
@@ -114,7 +114,7 @@ const Hero = () => {
             <div className="relative group">
               <div className="absolute inset-0 bg-white rounded-full blur-2xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
               <img 
-                src="/logo.jpg" 
+                src="/logo.png" 
                 alt="Olympia Logo" 
                 className="relative w-32 h-32 object-contain rounded-full shadow-2xl mx-auto ring-4 ring-white/30 group-hover:ring-white/50 transition-all group-hover:scale-110" 
               />
