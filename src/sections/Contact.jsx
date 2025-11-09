@@ -42,8 +42,6 @@ export default function Contact(){
         setStatus('sending')
         
         try{
-            // Formspree requires headers: { 'Accept': 'application/json' }
-            // when NOT sending files. When sending files (FormData), let the browser handle headers.
             const res = await fetch(FORMSPREE_ENDPOINT, {
                 method: 'POST',
                 body: data,
@@ -88,7 +86,7 @@ export default function Contact(){
                     </span>
                     <h2 className="text-4xl md:text-5xl font-bold mb-4">Start Your Admission</h2>
                     
-                    {/* UPDATED COPY TO REFLECT FILE UPLOAD REQUIREMENT */}
+                    {/* COPY TO REFLECT FILE UPLOAD REQUIREMENT */}
                     <p className="mt-3 text-purple-200 leading-relaxed border-l-4 border-emerald-400 pl-4 py-2 italic">
                         As a certified Home Health Agency, we require a **Physician's Referral** to initiate services. Please complete the form and **upload the required document** below. Our intake coordinator will then confirm details with the referring physician.
                     </p>
@@ -101,7 +99,7 @@ export default function Contact(){
                                 <User size={20} className='text-emerald-300'/> Patient/Family Contact Details
                             </h3>
                             <div className="grid sm:grid-cols-2 gap-4">
-                                {/* Patient Name (New Required Field) */}
+                                {/* Patient Name */}
                                 <div>
                                     <label htmlFor="patient_name" className="block text-sm font-medium text-purple-100">Patient's Full Name*</label>
                                     <input 
@@ -157,7 +155,7 @@ export default function Contact(){
                         </div>
 
 
-                        {/* 2. REFERRING PHYSICIAN INFORMATION */}
+                        {/* 2. REFERRING PHYSICIAN INFORMATION (UPDATED WITH NPI) */}
                         <div className="p-5 rounded-xl bg-purple-800/40 border border-purple-600 space-y-4">
                             <h3 className="text-xl font-bold text-white flex items-center gap-2">
                                 <Stethoscope size={20} className='text-emerald-300'/> Referring Physician's Information
@@ -189,9 +187,27 @@ export default function Contact(){
                                     />
                                 </div>
                             </div>
+                            
+                            {/* NPI Number (NEW FIELD) */}
+                            <div>
+                                <label htmlFor="npi_number" className="block text-sm font-medium text-purple-100">NPI Number*</label>
+                                <input 
+                                    id="npi_number"
+                                    required 
+                                    type="text" 
+                                    name="NPI_Number" 
+                                    placeholder="10-digit NPI (e.g., 1234567890)"
+                                    className={inputClasses} 
+                                    maxLength={10}
+                                    pattern="\d{10}"
+                                    title="NPI must be 10 digits"
+                                    disabled={isSending}
+                                />
+                            </div>
+
                         </div>
 
-                        {/* 3. FILE UPLOAD SECTION (NEW) */}
+                        {/* 3. FILE UPLOAD SECTION */}
                         <div className="p-5 rounded-xl bg-emerald-700/40 border border-emerald-500 space-y-4">
                             <h3 className="text-xl font-bold text-white flex items-center gap-2">
                                 <UploadCloud size={20} className='text-white'/> Upload Referral Document
