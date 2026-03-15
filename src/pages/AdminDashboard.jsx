@@ -15,7 +15,8 @@ import {
   Mail,
   UserCircle,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  X
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -52,6 +53,9 @@ const AdminDashboard = () => {
     });
     const [mgmtStatus, setMgmtStatus] = useState({ type: '', message: '' });
 
+    // Custom deletion modal state
+    const [confirmDelete, setConfirmDelete] = useState({ show: false, type: '', id: null, name: '' });
+
     useEffect(() => {
         const token = localStorage.getItem('olympia_admin_token');
         const role = localStorage.getItem('olympia_admin_role');
@@ -66,7 +70,7 @@ const AdminDashboard = () => {
 
     const fetchDashboardData = async (token) => {
         try {
-            // Parallel fetch for stats and staff if superadmin
+            // Parallel fetch for stats and staff list
             const [statsRes, staffRes] = await Promise.all([
                 fetch('/api/admin/stats', { headers: { 'Authorization': `Bearer ${token}` } }),
                 fetch('/api/admin/staff', { headers: { 'Authorization': `Bearer ${token}` } })
@@ -155,11 +159,8 @@ const AdminDashboard = () => {
         }
     };
 
-    const handleDeleteAccount = async (type, id, name) => {
-        if (!window.confirm(`Are you absolutely sure you want to delete ${name}? This action cannot be undone.`)) {
-            return;
-        }
-
+    const executeDelete = async () => {
+        const { type, id } = confirmDelete;
         try {
             const res = await fetch(`/api/admin/${type === 'provider' ? 'providers' : 'admins'}/${id}`, {
                 method: 'DELETE',
@@ -167,6 +168,7 @@ const AdminDashboard = () => {
             });
             if (res.ok) {
                 fetchDashboardData(localStorage.getItem('olympia_admin_token'));
+                setConfirmDelete({ show: false, type: '', id: null, name: '' });
             } else {
                 alert("Failed to delete account.");
             }
@@ -236,7 +238,37 @@ const AdminDashboard = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 flex">
+        <div className="min-h-screen bg-slate-50 flex relative">
+            {/* Deletion Confirmation Modal */}
+            {confirmDelete.show && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+                    <div className="bg-white rounded-[32px] max-w-md w-full p-8 shadow-2xl border border-slate-100 animate-fadeInUp">
+                        <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-6">
+                            <AlertTriangle className="text-red-500 w-8 h-8" />
+                        </div>
+                        <h3 className="text-2xl font-black text-slate-900 mb-2">Confirm Removal</h3>
+                        <p className="text-slate-500 leading-relaxed mb-8">
+                            Are you sure you want to permanently delete <span className="font-bold text-slate-900">"{confirmDelete.name}"</span>? 
+                            This action will revoke all access immediately and cannot be undone.
+                        </p>
+                        <div className="flex gap-4">
+                            <button 
+                                onClick={() => setConfirmDelete({ show: false, type: '', id: null, name: '' })}
+                                className="flex-1 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black uppercase text-xs tracking-widest rounded-2xl transition-all"
+                            >
+                                Negative
+                            </button>
+                            <button 
+                                onClick={executeDelete}
+                                className="flex-1 py-4 bg-red-500 hover:bg-red-600 text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-lg shadow-red-500/30 transition-all"
+                            >
+                                Affirmative, Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Sidebar */}
             <div className="w-64 bg-slate-900 flex flex-col fixed h-full shadow-2xl z-20">
                 <div className="p-8">
@@ -372,7 +404,7 @@ const AdminDashboard = () => {
                                                     <td className="px-8 py-5 text-slate-500 font-mono text-sm">{p.provider_id}</td>
                                                     <td className="px-8 py-5">
                                                         <button 
-                                                            onClick={() => handleDeleteAccount('provider', p.id, p.name)}
+                                                            onClick={() => setConfirmDelete({ show: true, type: 'provider', id: p.id, name: p.name })}
                                                             className="p-2 text-slate-400 hover:text-red-500 transition-colors"
                                                             title="Delete Provider"
                                                         >
@@ -480,7 +512,7 @@ const AdminDashboard = () => {
                                                     </td>
                                                     <td className="px-8 py-5">
                                                         <button 
-                                                            onClick={() => handleDeleteAccount(mgmtTab, item.id, mgmtTab === 'provider' ? item.name : item.username)}
+                                                            onClick={() => setConfirmDelete({ show: true, type: mgmtTab, id: item.id, name: mgmtTab === 'provider' ? item.name : item.username })}
                                                             className="flex items-center gap-2 text-slate-400 hover:text-red-500 font-bold text-xs uppercase transition-colors"
                                                             disabled={item.username === 'admin'} // Cannot delete self
                                                         >

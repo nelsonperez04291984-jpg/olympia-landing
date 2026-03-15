@@ -186,6 +186,17 @@ app.get('/api/admin/stats', async (req, res) => {
   }
 });
 
+// Schema Fix Route (Role & Timestamps)
+app.get('/api/admin/fix-schema', async (req, res) => {
+  try {
+    await pool.query("ALTER TABLE admins ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'admin'");
+    await pool.query("ALTER TABLE admins ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+    res.json({ status: 'Schema updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Schema fix failed', details: err.message });
+  }
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'API is running' });
 });
