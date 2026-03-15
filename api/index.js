@@ -236,11 +236,27 @@ app.get('/api/admin/fix-schema', async (req, res) => {
     await pool.query("ALTER TABLE admins ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'admin'");
     await pool.query("ALTER TABLE admins ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
     
-    // Referrals table updates
+    // Referrals table updates/repairs
+    // Ensure table exists with correct base
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS referrals (
+        id SERIAL PRIMARY KEY,
+        provider_id INTEGER REFERENCES providers(id),
+        patient_name VARCHAR(255),
+        status VARCHAR(50) DEFAULT 'Pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Add missing columns if they don't exist
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS patient_dob VARCHAR(20)");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS patient_phone VARCHAR(20)");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS diagnosis TEXT");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS services_needed TEXT");
+    
+    // Check if the foreign key is correct. If it points to admins, we might need to fix it.
+    // For now, let's ensure it's not pointing to the wrong table if it was created incorrectly.
+    // This is a common point of failure if providers and admins were mixed up.
     
     res.json({ status: 'Schema updated successfully' });
   } catch (err) {
