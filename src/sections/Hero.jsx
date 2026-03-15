@@ -48,7 +48,7 @@ const Hero = () => {
                 <span className="relative z-10">Contact Us</span>
               </a>
               <a 
-                href="https://login.homecarehomebase.com"
+                href="https://olympia-landing.vercel.app/#contact"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="relative px-6 py-2.5 rounded-full font-semibold text-blue-900 bg-blue-100 hover:bg-white hover:shadow-lg transition-all border border-blue-200"
@@ -87,7 +87,7 @@ const Hero = () => {
                 Contact Us
               </a>
               <a 
-                href="https://login.homecarehomebase.com"
+                href="https://olympia-landing.vercel.app/#contact"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setMobileMenuOpen(false)}
