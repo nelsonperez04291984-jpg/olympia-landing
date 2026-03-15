@@ -34,9 +34,15 @@ async function initDB() {
         id SERIAL PRIMARY KEY,
         username VARCHAR(50) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
+        role VARCHAR(20) DEFAULT 'admin',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+    
+    // Check for role column (if table exists)
+    try {
+      await pool.query("ALTER TABLE admins ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'admin'");
+    } catch (e) {}
 
     // Create the referrals table (to track metrics)
     await pool.query(`
@@ -82,8 +88,11 @@ async function initDB() {
       console.log("Seed admin not found. Creating...");
       const salt = await bcrypt.genSalt(10);
       const hash = await bcrypt.hash("olympia-admin-2026", salt);
-      await pool.query("INSERT INTO admins (username, password_hash) VALUES ($1, $2)", ["admin", hash]);
-      console.log("Seed admin created: admin / olympia-admin-2026");
+      await pool.query("INSERT INTO admins (username, password_hash, role) VALUES ($1, $2, $3)", ["admin", hash, "superadmin"]);
+      console.log("Seed admin created: admin / olympia-admin-2026 (superadmin)");
+    } else if (resAdmin.rows[0].role !== 'superadmin') {
+      await pool.query("UPDATE admins SET role = 'superadmin' WHERE username = 'admin'");
+      console.log("Admin upgraded to superadmin.");
     }
 
   } catch (err) {

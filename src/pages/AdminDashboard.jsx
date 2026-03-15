@@ -9,12 +9,18 @@ import {
   Clock, 
   Activity,
   ArrowRight,
-  Search
+  Search,
+  UserPlus,
+  Lock,
+  Mail,
+  UserCircle
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userRole, setUserRole] = useState('admin');
+    const [activeTab, setActiveTab] = useState('overview'); // 'overview' or 'users'
     const [stats, setStats] = useState({
         provider_count: 0,
         referral_count: 0,
@@ -29,10 +35,24 @@ const AdminDashboard = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
+    // User management state
+    const [mgmtTab, setMgmtTab] = useState('provider'); // 'provider' or 'staff'
+    const [formData, setFormData] = useState({
+        provider_id: '',
+        name: '',
+        email: '',
+        password: '',
+        username: '',
+        role: 'admin'
+    });
+    const [mgmtStatus, setMgmtStatus] = useState({ type: '', message: '' });
+
     useEffect(() => {
         const token = localStorage.getItem('olympia_admin_token');
+        const role = localStorage.getItem('olympia_admin_role');
         if (token) {
             setIsLoggedIn(true);
+            setUserRole(role || 'admin');
             fetchStats(token);
         } else {
             setIsLoading(false);
@@ -69,7 +89,9 @@ const AdminDashboard = () => {
             const data = await res.json();
             if (res.ok) {
                 localStorage.setItem('olympia_admin_token', data.token);
+                localStorage.setItem('olympia_admin_role', data.role);
                 setIsLoggedIn(true);
+                setUserRole(data.role);
                 fetchStats(data.token);
             } else {
                 setError(data.error || 'Invalid credentials');
@@ -83,8 +105,41 @@ const AdminDashboard = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('olympia_admin_token');
+        localStorage.removeItem('olympia_admin_role');
         setIsLoggedIn(false);
         navigate('/admin');
+    };
+
+    const handleCreateAccount = async (e) => {
+        e.preventDefault();
+        setMgmtStatus({ type: 'loading', message: 'Creating account...' });
+        
+        const endpoint = mgmtTab === 'provider' ? '/api/admin/providers' : '/api/admin/admins';
+        const payload = mgmtTab === 'provider' 
+            ? { provider_id: formData.provider_id, name: formData.name, email: formData.email, password: formData.password }
+            : { username: formData.username, password: formData.password, role: formData.role };
+
+        try {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('olympia_admin_token')}`
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setMgmtStatus({ type: 'success', message: data.message });
+                setFormData({ provider_id: '', name: '', email: '', password: '', username: '', role: 'admin' });
+                // Refresh stats to show new provider
+                fetchStats(localStorage.getItem('olympia_admin_token'));
+            } else {
+                setMgmtStatus({ type: 'error', message: data.error || 'Creation failed' });
+            }
+        } catch (err) {
+            setMgmtStatus({ type: 'error', message: 'Connection error' });
+        }
     };
 
     if (!isLoggedIn) {
@@ -157,16 +212,32 @@ const AdminDashboard = () => {
                     </h2>
                 </div>
                 <nav className="flex-1 px-4 space-y-2">
-                    <div className="p-4 bg-teal-500/10 border border-teal-500/20 rounded-xl text-teal-400 font-bold flex items-center gap-3">
+                    <button 
+                        onClick={() => setActiveTab('overview')}
+                        className={`w-full p-4 rounded-xl font-bold flex items-center gap-3 transition-all ${activeTab === 'overview' ? 'bg-teal-500/10 border border-teal-500/20 text-teal-400' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+                    >
                         <TrendingUp size={20} /> Dashboard Home
-                    </div>
-                    <div className="p-4 text-slate-400 hover:bg-white/5 hover:text-white rounded-xl transition-all cursor-pointer flex items-center gap-3">
-                        <Users size={20} /> B2B Partner Portal
-                    </div>
+                    </button>
+                    <button 
+                         onClick={() => setActiveTab('users')}
+                         className={`w-full p-4 rounded-xl font-bold flex items-center gap-3 transition-all ${activeTab === 'users' ? 'bg-teal-500/10 border border-teal-500/20 text-teal-400' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+                    >
+                        <UserPlus size={20} /> User Maintenance
+                    </button>
                     <div className="p-4 text-slate-400 hover:bg-white/5 hover:text-white rounded-xl transition-all cursor-pointer flex items-center gap-3">
                         <MessageSquare size={20} /> AI Conversation Logs
                     </div>
                 </nav>
+                <div className="p-8">
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                        <p className="text-[10px] font-black uppercase text-slate-500 mb-1">Signed in as</p>
+                        <p className="text-xs text-white font-bold">{username}</p>
+                        <div className="mt-2 flex items-center gap-1.5">
+                            <div className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-pulse"></div>
+                            <span className="text-[10px] text-teal-500 font-bold uppercase tracking-widest">{userRole}</span>
+                        </div>
+                    </div>
+                </div>
                 <div className="p-4 border-t border-white/5">
                     <button 
                         onClick={handleLogout}
@@ -181,8 +252,12 @@ const AdminDashboard = () => {
             <div className="flex-1 ml-64 p-8">
                 <header className="flex items-center justify-between mb-12">
                     <div>
-                        <h1 className="text-4xl font-black text-slate-900">System Overview</h1>
-                        <p className="text-slate-500 mt-1">Real-time platform metrics and audit logs.</p>
+                        <h1 className="text-4xl font-black text-slate-900">
+                            {activeTab === 'overview' ? 'System Overview' : 'User Maintenance'}
+                        </h1>
+                        <p className="text-slate-500 mt-1">
+                            {activeTab === 'overview' ? 'Real-time platform metrics and audit logs.' : 'Manage partner providers and internal staff accounts.'}
+                        </p>
                     </div>
                     <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 px-6 h-16">
                         <div className="flex items-center gap-2 text-slate-500">
@@ -196,114 +271,230 @@ const AdminDashboard = () => {
                     </div>
                 </header>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                    <div className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex items-center gap-6">
-                        <div className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center">
-                            <Users className="text-blue-600 w-8 h-8" />
+                {activeTab === 'overview' ? (
+                    <>
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                            <div className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex items-center gap-6 group hover:border-teal-200 transition-all cursor-default">
+                                <div className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <Users className="text-blue-600 w-8 h-8" />
+                                </div>
+                                <div>
+                                    <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Total Providers</p>
+                                    <h3 className="text-4xl font-black text-slate-900">{stats.provider_count}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex items-center gap-6 group hover:border-teal-200 transition-all cursor-default">
+                                <div className="w-16 h-16 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <FileText className="text-teal-600 w-8 h-8" />
+                                </div>
+                                <div>
+                                    <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Total Referrals</p>
+                                    <h3 className="text-4xl font-black text-slate-900">{stats.referral_count}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex items-center gap-6 group hover:border-teal-200 transition-all cursor-default">
+                                <div className="w-16 h-16 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <MessageSquare className="text-purple-600 w-8 h-8" />
+                                </div>
+                                <div>
+                                    <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">AI Logs Retained</p>
+                                    <h3 className="text-4xl font-black text-slate-900">{stats.recent_ai_logs.length}</h3>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Total Providers</p>
-                            <h3 className="text-4xl font-black text-slate-900">{stats.provider_count}</h3>
-                        </div>
-                    </div>
-                    <div className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex items-center gap-6">
-                        <div className="w-16 h-16 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center">
-                            <FileText className="text-teal-600 w-8 h-8" />
-                        </div>
-                        <div>
-                            <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Total Referrals</p>
-                            <h3 className="text-4xl font-black text-slate-900">{stats.referral_count}</h3>
-                        </div>
-                    </div>
-                    <div className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex items-center gap-6">
-                        <div className="w-16 h-16 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center">
-                            <MessageSquare className="text-purple-600 w-8 h-8" />
-                        </div>
-                        <div>
-                            <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">AI Logs Retained</p>
-                            <h3 className="text-4xl font-black text-slate-900">{stats.recent_ai_logs.length}</h3>
-                        </div>
-                    </div>
-                </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Providers Table */}
-                    <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
-                        <div className="p-8 border-b border-slate-50 flex items-center justify-between">
-                            <h3 className="text-xl font-black text-slate-900">Registered Providers</h3>
-                            <button className="text-teal-600 font-bold text-sm hover:underline">View All</button>
-                        </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
-                                <thead className="bg-slate-50 text-slate-400 uppercase text-xs font-black tracking-widest">
-                                    <tr>
-                                        <th className="px-8 py-4">Name</th>
-                                        <th className="px-8 py-4">Provider ID</th>
-                                        <th className="px-8 py-4">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-50">
-                                    {stats.providers.map((p, i) => (
-                                        <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                                            <td className="px-8 py-5">
-                                                <p className="font-bold text-slate-900">{p.name}</p>
-                                                <p className="text-xs text-slate-400">{p.email}</p>
-                                            </td>
-                                            <td className="px-8 py-5 text-slate-500 font-mono text-sm">{p.provider_id}</td>
-                                            <td className="px-8 py-5">
-                                                <span className="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase border border-green-100">Verified</span>
-                                            </td>
-                                        </tr>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            {/* Providers Table */}
+                            <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+                                <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+                                    <h3 className="text-xl font-black text-slate-900">Registered Providers</h3>
+                                    <button onClick={() => setActiveTab('users')} className="text-teal-600 font-bold text-sm hover:underline">Add New</button>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left">
+                                        <thead className="bg-slate-50 text-slate-400 uppercase text-xs font-black tracking-widest">
+                                            <tr>
+                                                <th className="px-8 py-4">Name</th>
+                                                <th className="px-8 py-4">Provider ID</th>
+                                                <th className="px-8 py-4">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-50">
+                                            {stats.providers.map((p, i) => (
+                                                <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                                                    <td className="px-8 py-5">
+                                                        <p className="font-bold text-slate-900">{p.name}</p>
+                                                        <p className="text-xs text-slate-400">{p.email}</p>
+                                                    </td>
+                                                    <td className="px-8 py-5 text-slate-500 font-mono text-sm">{p.provider_id}</td>
+                                                    <td className="px-8 py-5">
+                                                        <span className="px-3 py-1 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase border border-green-100">Verified</span>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* AI Logs */}
+                            <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col">
+                                <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+                                    <h3 className="text-xl font-black text-slate-900">Recent AI Interactions</h3>
+                                    <button className="text-teal-600 font-bold text-sm hover:underline">Full Log</button>
+                                </div>
+                                <div className="flex-1 p-8 overflow-y-auto max-h-[500px] space-y-6">
+                                    {stats.recent_ai_logs.map((log, i) => (
+                                        <div key={i} className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100">
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center">
+                                                    <Users size={14} className="text-slate-600" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-xs font-black text-slate-900 uppercase">User Query</p>
+                                                    <p className="text-sm text-slate-500 font-medium italic">"{log.user_query}"</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center shadow-lg shadow-teal-500/20">
+                                                    <Activity size={14} className="text-white" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-xs font-black text-teal-600 uppercase tracking-widest">Assistant Response</p>
+                                                    <p className="text-sm text-slate-700 leading-relaxed font-medium line-clamp-3">{log.ai_response}</p>
+                                                </div>
+                                            </div>
+                                        </div>
                                     ))}
-                                    {stats.providers.length === 0 && (
-                                        <tr>
-                                            <td colSpan="3" className="px-8 py-12 text-center text-slate-400 font-medium font-italic">No providers found in database.</td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    </>
+                ) : (
+                    <div className="max-w-4xl bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden animate-fadeIn">
+                        <div className="flex border-b border-slate-100 bg-slate-50/30 p-2">
+                             <button 
+                                onClick={() => { setMgmtTab('provider'); setMgmtStatus({type:'', message:''}); }}
+                                className={`flex-1 py-4 px-6 rounded-3xl font-black uppercase text-xs tracking-widest transition-all ${mgmtTab === 'provider' ? 'bg-white text-teal-600 shadow-sm border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
+                             >
+                                <Users size={16} className="inline mr-2" /> Partner Providers
+                             </button>
+                             <button 
+                                onClick={() => { setMgmtTab('staff'); setMgmtStatus({type:'', message:''}); }}
+                                className={`flex-1 py-4 px-6 rounded-3xl font-black uppercase text-xs tracking-widest transition-all ${mgmtTab === 'staff' ? 'bg-white text-blue-600 shadow-sm border border-slate-100' : 'text-slate-400 hover:text-slate-600'}`}
+                             >
+                                <Lock size={16} className="inline mr-2" /> Internal Staff
+                             </button>
+                        </div>
+                        
+                        <div className="p-12">
+                            <div className="mb-8">
+                                <h3 className="text-2xl font-black text-slate-900">
+                                    {mgmtTab === 'provider' ? 'Register New Medical Partner' : 'Create Internal Access Account'}
+                                </h3>
+                                <p className="text-slate-500">Provide the credentials and details to grant system access.</p>
+                            </div>
 
-                    {/* AI Logs */}
-                    <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col">
-                        <div className="p-8 border-b border-slate-50 flex items-center justify-between">
-                            <h3 className="text-xl font-black text-slate-900">Recent AI Interactions</h3>
-                            <button className="text-teal-600 font-bold text-sm hover:underline">Full Log</button>
-                        </div>
-                        <div className="flex-1 p-8 overflow-y-auto max-h-[500px] space-y-6">
-                            {stats.recent_ai_logs.map((log, i) => (
-                                <div key={i} className="bg-slate-50/50 rounded-2xl p-6 border border-slate-100">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center">
-                                            <Users size={14} className="text-slate-600" />
+                            <form onSubmit={handleCreateAccount} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {mgmtTab === 'provider' ? (
+                                    <>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Hospital/Doctor Name</label>
+                                            <div className="relative">
+                                                <UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                <input 
+                                                    type="text" required
+                                                    value={formData.name}
+                                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-12 pr-4 py-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                                                    placeholder="e.g. Dr. Robert Moore"
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="flex-1">
-                                            <p className="text-xs font-black text-slate-900 uppercase">User Query</p>
-                                            <p className="text-sm text-slate-500 font-medium italic">"{log.user_query}"</p>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Professional ID (NPI)</label>
+                                            <input 
+                                                type="text" required
+                                                value={formData.provider_id}
+                                                onChange={(e) => setFormData({...formData, provider_id: e.target.value})}
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                                                placeholder="e.g. NPI-12345"
+                                            />
                                         </div>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center shadow-lg shadow-teal-500/20">
-                                            <Activity size={14} className="text-white" />
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Secure Email</label>
+                                            <div className="relative">
+                                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                <input 
+                                                    type="email" required
+                                                    value={formData.email}
+                                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-12 pr-4 py-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                                                    placeholder="partner@clinic.com"
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="flex-1">
-                                            <p className="text-xs font-black text-teal-600 uppercase tracking-widest">Assistant Response</p>
-                                            <p className="text-sm text-slate-700 leading-relaxed font-medium line-clamp-3">{log.ai_response}</p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Staff Username</label>
+                                            <div className="relative">
+                                                <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                <input 
+                                                    type="text" required
+                                                    value={formData.username}
+                                                    onChange={(e) => setFormData({...formData, username: e.target.value})}
+                                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-12 pr-4 py-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                                    placeholder="e.g. j.doe_admin"
+                                                />
+                                            </div>
                                         </div>
+                                        <div>
+                                            <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Permission Tier</label>
+                                            <select 
+                                                value={formData.role}
+                                                onChange={(e) => setFormData({...formData, role: e.target.value})}
+                                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none font-bold"
+                                            >
+                                                <option value="admin">Employee Admin</option>
+                                                <option value="superadmin">Super Executive Admin</option>
+                                            </select>
+                                        </div>
+                                    </>
+                                )}
+                                <div>
+                                    <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Assign Initial Password</label>
+                                    <div className="relative">
+                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                        <input 
+                                            type="password" required
+                                            value={formData.password}
+                                            onChange={(e) => setFormData({...formData, password: e.target.value})}
+                                            className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-12 pr-4 py-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                            placeholder="••••••••"
+                                        />
                                     </div>
                                 </div>
-                            ))}
-                            {stats.recent_ai_logs.length === 0 && (
-                                <div className="flex flex-col items-center justify-center p-12 text-center">
-                                    <MessageSquare size={48} className="text-slate-100 mb-4" />
-                                    <p className="text-slate-400 font-medium">No artificial intelligence interaction logs recorded yet.</p>
+
+                                <div className="md:col-span-2 pt-4">
+                                    {mgmtStatus.message && (
+                                        <div className={`mb-6 p-4 rounded-2xl text-sm font-bold border ${mgmtStatus.type === 'success' ? 'bg-green-50 border-green-100 text-green-600' : 'bg-red-50 border-red-100 text-red-600'}`}>
+                                            {mgmtStatus.message}
+                                        </div>
+                                    )}
+                                    <button 
+                                        type="submit"
+                                        className={`w-full py-5 rounded-2xl font-black uppercase text-sm tracking-widest shadow-xl transition-all active:scale-[0.98] ${mgmtTab === 'provider' ? 'bg-teal-500 hover:bg-teal-400 text-white shadow-teal-500/20' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20'} ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        Deploy New {mgmtTab === 'provider' ? 'Provider Portal' : 'Staff Account'}
+                                    </button>
                                 </div>
-                            )}
+                            </form>
                         </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );

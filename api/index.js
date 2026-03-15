@@ -90,14 +90,46 @@ app.post('/api/admin/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: admin.id, username: admin.username, role: 'admin' },
+      { id: admin.id, username: admin.username, role: admin.role || 'admin' },
       JWT_SECRET,
       { expiresIn: '4h' }
     );
 
-    res.json({ token, username: admin.username });
+    res.json({ token, username: admin.username, role: admin.role || 'admin' });
   } catch (err) {
     res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+// Admin Create Provider
+app.post('/api/admin/providers', async (req, res) => {
+  const { provider_id, name, email, password } = req.body;
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+    await pool.query(
+      "INSERT INTO providers (provider_id, name, email, password_hash) VALUES ($1, $2, $3, $4)",
+      [provider_id, name, email, hash]
+    );
+    res.json({ message: 'Provider created successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create provider', details: err.message });
+  }
+});
+
+// Admin Create Admin Account
+app.post('/api/admin/admins', async (req, res) => {
+  const { username, password, role } = req.body;
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+    await pool.query(
+      "INSERT INTO admins (username, password_hash, role) VALUES ($1, $2, $3)",
+      [username, hash, role || 'admin']
+    );
+    res.json({ message: 'Staff account created successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create staff account', details: err.message });
   }
 });
 
