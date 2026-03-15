@@ -254,9 +254,14 @@ app.get('/api/admin/fix-schema', async (req, res) => {
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS diagnosis TEXT");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS services_needed TEXT");
     
-    // Check if the foreign key is correct. If it points to admins, we might need to fix it.
-    // For now, let's ensure it's not pointing to the wrong table if it was created incorrectly.
-    // This is a common point of failure if providers and admins were mixed up.
+    // Check if the foreign key is correct. 
+    // If it was created pointing to admins(id) by mistake, we fix it here.
+    try {
+      await pool.query("ALTER TABLE referrals DROP CONSTRAINT IF EXISTS referrals_provider_id_fkey");
+      await pool.query("ALTER TABLE referrals ADD CONSTRAINT referrals_provider_id_fkey FOREIGN KEY (provider_id) REFERENCES providers(id)");
+    } catch (err) {
+      console.log("Constraint fix skipped or failed (might not exist yet):", err.message);
+    }
     
     res.json({ status: 'Schema updated successfully' });
   } catch (err) {
