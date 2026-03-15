@@ -14,6 +14,11 @@ app.use(cors());
 app.use(express.json());
 
 const { Pool } = pg;
+
+if (!process.env.POSTGRES_URL) {
+  console.error("FATAL ERROR: POSTGRES_URL environment variable is not set.");
+}
+
 const pool = new Pool({
   connectionString: process.env.POSTGRES_URL,
 });
