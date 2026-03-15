@@ -216,7 +216,7 @@ app.get('/api/admin/referrals', async (req, res) => {
     const result = await pool.query(`
       SELECT r.*, p.name as provider_name 
       FROM referrals r
-      JOIN providers p ON r.provider_id = p.id
+      JOIN providers p ON r.provider_id::text = p.id::text
       ORDER BY r.created_at DESC
     `);
     res.json(result.rows);
