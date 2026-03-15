@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Quote, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Quote, Star, ChevronLeft, ChevronRight, X, Loader2, CheckCircle, MessageSquarePlus } from 'lucide-react';
 
 const useInView = (threshold = 0.1) => {
     const [isInView, setIsInView] = useState(false)
@@ -27,6 +27,39 @@ const useInView = (threshold = 0.1) => {
 const Testimonials = () => {
     const [ref, isInView] = useInView();
     const [activeIndex, setActiveIndex] = useState(0);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [formStatus, setFormStatus] = useState(null); // 'sending', 'sent', 'error'
+
+    const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xbdzaokz';
+
+    const handleReviewSubmit = async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const data = new FormData(form);
+        data.append("Source", "Website Testimonial Submission");
+        
+        setFormStatus('sending');
+
+        try {
+            const res = await fetch(FORMSPREE_ENDPOINT, {
+                method: 'POST',
+                body: data,
+                headers: { 'Accept': 'application/json' }
+            });
+            if (res.ok) {
+                setFormStatus('sent');
+                setTimeout(() => {
+                    setIsModalOpen(false);
+                    setFormStatus(null);
+                }, 3000); // Close modal automatically after 3 seconds on success
+            } else {
+                setFormStatus('error');
+            }
+        } catch (error) {
+            console.error("Testimonial submission error:", error);
+            setFormStatus('error');
+        }
+    };
 
     const testimonials = [
         {
@@ -154,9 +187,101 @@ const Testimonials = () => {
                             />
                         ))}
                     </div>
-                </div>
 
+                    {/* Add Review Button */}
+                    <div className="flex justify-center mt-12">
+                        <button 
+                            onClick={() => setIsModalOpen(true)}
+                            className="group flex items-center gap-2 px-8 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 rounded-full font-semibold transition-all hover:scale-105 shadow-lg"
+                        >
+                            <MessageSquarePlus className="text-purple-300 group-hover:text-white transition-colors" />
+                            <span>Share Your Experience</span>
+                        </button>
+                    </div>
+                </div>
             </div>
+
+            {/* Testimonial Submission Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4 text-gray-800">
+                    <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-fadeInUp">
+                        
+                        <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50">
+                            <h3 className="text-2xl font-bold flex items-center gap-2">
+                                <Star className="text-yellow-400 fill-yellow-400 w-6 h-6" />
+                                Leave a Review
+                            </h3>
+                            <button 
+                                onClick={() => setIsModalOpen(false)}
+                                className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 md:p-8">
+                            {formStatus === 'sent' ? (
+                                <div className="text-center py-8 animate-fadeIn">
+                                    <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                                    <h4 className="text-xl font-bold text-gray-900 mb-2">Thank you!</h4>
+                                    <p className="text-gray-600">Your experience has been sent to our team.</p>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleReviewSubmit} className="space-y-5">
+                                    <p className="text-gray-600 text-sm mb-6">
+                                        We value your feedback. Please share your experience with Olympia Home Health. (Your review will be sent to our team for approval before appearing on the site).
+                                    </p>
+                                    
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-1">Your Name/Initials*</label>
+                                            <input required type="text" name="Reviewer_Name" className="w-full rounded-lg p-3 bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition outline-none" placeholder="e.g. John D." />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-1">City*</label>
+                                            <input required type="text" name="Reviewer_City" className="w-full rounded-lg p-3 bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition outline-none" placeholder="e.g. Irvine" />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Star Rating</label>
+                                        <select name="Star_Rating" className="w-full rounded-lg p-3 bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-purple-500 outline-none">
+                                            <option value="5">⭐⭐⭐⭐⭐ (5 Stars)</option>
+                                            <option value="4">⭐⭐⭐⭐ (4 Stars)</option>
+                                            <option value="3">⭐⭐⭐ (3 Stars)</option>
+                                            <option value="2">⭐⭐ (2 Stars)</option>
+                                            <option value="1">⭐ (1 Star)</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-semibold text-gray-700 mb-1">Your Story*</label>
+                                        <textarea required name="Review_Text" rows="4" className="w-full rounded-lg p-3 bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition outline-none resize-none" placeholder="Tell us about the care you or your loved one received..."></textarea>
+                                    </div>
+
+                                    {formStatus === 'error' && (
+                                        <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+                                            There was an error sending your review. Please try again.
+                                        </div>
+                                    )}
+
+                                    <button 
+                                        type="submit"
+                                        disabled={formStatus === 'sending'}
+                                        className="w-full py-3 bg-purple-600 text-white rounded-lg font-bold hover:bg-purple-700 transition flex items-center justify-center gap-2 disabled:opacity-70 mt-4"
+                                    >
+                                        {formStatus === 'sending' ? (
+                                            <><Loader2 className="animate-spin" size={20}/> Sending...</>
+                                        ) : (
+                                            'Submit Experience'
+                                        )}
+                                    </button>
+                                </form>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 };
