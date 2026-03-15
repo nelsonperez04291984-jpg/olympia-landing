@@ -239,6 +239,7 @@ app.get('/api/admin/fix-schema', async (req, res) => {
     // Referrals table updates
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS patient_dob VARCHAR(20)");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS patient_phone VARCHAR(20)");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS diagnosis TEXT");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS services_needed TEXT");
     
     res.json({ status: 'Schema updated successfully' });
