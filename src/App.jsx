@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Hero from './sections/Hero'
 import About from './sections/About'
 import Services from './sections/Services'
@@ -7,15 +7,29 @@ import Contact from './sections/Contact'
 import Footer from './sections/Footer'
 import ScrollToTop from './components/ScrollToTop'
 import ChatWidget from './components/ChatWidget'
+import AIFaq from './sections/AIFaq'
+import Testimonials from './sections/Testimonials'
+import ProviderPortal from './components/ProviderPortal'
 
 export default function App() {
+  const [isPortalOpen, setIsPortalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpenPortal = () => setIsPortalOpen(true);
+    window.addEventListener('open-provider-portal', handleOpenPortal);
+    return () => window.removeEventListener('open-provider-portal', handleOpenPortal);
+  }, []);
+
   return (
     <div className="font-sans text-gray-800 overflow-x-hidden">
+      <ProviderPortal isOpen={isPortalOpen} onClose={() => setIsPortalOpen(false)} />
       <ChatWidget />
       <Hero />
       <main>
         <About />
         <Services />
+        <AIFaq />
+        <Testimonials />
         <Leadership />
         <Contact />
       </main>

@@ -29,7 +29,7 @@ const useInView = (threshold = 0.1) => {
 // Uses Formspree. Replace YOUR_FORMSPREE_ID with your form endpoint id.
 // NOTE ON FILE UPLOADS: If using Formspree, ensure your account plan supports file uploads
 // and that your form is configured to accept them.
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORMSPREE_ID';
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xbdzaokz';
 
 export default function Contact(){
     const [status, setStatus] = useState(null) // null, 'sending', 'sent', 'error'

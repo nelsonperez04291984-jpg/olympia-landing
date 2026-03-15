@@ -47,6 +47,12 @@ const Hero = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-purple-800 transition-transform group-hover:scale-105"></div>
                 <span className="relative z-10">Contact Us</span>
               </a>
+              <button 
+                onClick={() => window.dispatchEvent(new CustomEvent('open-provider-portal'))}
+                className="relative px-6 py-2.5 rounded-full font-semibold text-blue-900 bg-blue-100 hover:bg-white hover:shadow-lg transition-all border border-blue-200"
+              >
+                Provider Portal
+              </button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -78,6 +84,15 @@ const Hero = () => {
               >
                 Contact Us
               </a>
+              <button 
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  window.dispatchEvent(new CustomEvent('open-provider-portal'));
+                }}
+                className="w-full mt-2 bg-blue-100 text-blue-900 border border-blue-200 px-6 py-2.5 rounded-full text-center hover:bg-blue-200 transition-all font-semibold"
+              >
+                Provider Portal
+              </button>
             </div>
           )}
         </div>

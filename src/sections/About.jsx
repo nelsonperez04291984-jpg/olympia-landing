@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Shield, Heart, Users, Award, Clock, MapPin, Phone, Mail, CheckCircle, Search, XCircle, ArrowRight, Loader2 } from 'lucide-react'
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // --- 1. Intersection Observer hook ---
 const useInView = (threshold = 0.1) => {
@@ -36,12 +37,13 @@ const CommitmentCard = ({ title, description, icon: Icon }) => (
     </div>
 );
 
-// --- NEW COMPONENT: Interactive Service Area Checker ---
+// --- NEW COMPONENT: Interactive Service Area Checker (AI Powered) ---
 const ServiceAreaChecker = ({ serviceAreas }) => {
     const [location, setLocation] = useState('');
     const [status, setStatus] = useState('initial'); // 'initial', 'checking', 'served', 'unserved'
+    const [explanation, setExplanation] = useState('');
 
-    const checkServiceArea = (e) => {
+    const checkServiceArea = async (e) => {
         e.preventDefault();
         if (!location.trim()) {
             setStatus('initial');
@@ -49,43 +51,95 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
         }
 
         setStatus('checking');
+        setExplanation('');
         
-        // --- SIMULATED ASYNC CHECK ---
-        setTimeout(() => {
-            const normalizedInput = location.toLowerCase().trim();
-            
-            // Logic: Check if the input (city or zip) is in the service area list
-            const isServed = serviceAreas.some(area => 
-                area.toLowerCase().includes(normalizedInput)
-            );
+        const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-            if (isServed) {
-                setStatus('served');
-            } else {
-                setStatus('unserved');
+        if (!API_KEY) {
+            // Fallback simulated async check if no API key
+            setTimeout(() => {
+                const normalizedInput = location.toLowerCase().trim();
+                const isServed = serviceAreas.some(area => 
+                    area.toLowerCase().includes(normalizedInput)
+                );
+                if (isServed) {
+                    setStatus('served');
+                    setExplanation("Demo Mode: Area matches our basic list.");
+                } else {
+                    setStatus('unserved');
+                    setExplanation("Demo Mode: Area not recognized in basic list.");
+                }
+            }, 800);
+            return;
+        }
+
+        try {
+            const genAI = new GoogleGenerativeAI(API_KEY);
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+            
+            const prompt = `
+            You are an intelligent intake assistant for Olympia Home Health (based in Orange County, CA).
+            A user has entered the following message to check if we serve them: "${location}".
+            
+            Our primary service areas (cities and zip codes): ${serviceAreas.join(', ')}.
+            
+            Task:
+            1. Determine if the location mentioned is within our service area. If they don't mention a location, assume we need to ask.
+            2. If they mentioned any specific medical needs (e.g. physical therapy, post-surgery, dementia), acknowledge it gently.
+            
+            Respond with a strict JSON object exactly in this format without any markdown wrappers (no \`\`\`json):
+            {
+              "isServed": true or false,
+              "message": "A short, empathetic sentence explaining the result. E.g., 'Great news! We serve Huntington Beach and can definitely help with post-surgery physical therapy.' OR 'We primarily serve Orange County, but let's see what we can do for your specific needs.'"
             }
-        }, 800); // Increased timeout to 800ms to make the 'checking' state more visible
+            `;
+            
+            const result = await model.generateContent(prompt);
+            let responseText = result.response.text().trim();
+            console.log("Raw Gemini Response:", responseText); // Debugging line
+            
+            // Clean up any potential markdown formatting the model might still add
+            responseText = responseText.replace(/```json/g, '').replace(/```/g, '');
+            const match = responseText.match(/\{[\s\S]*\}/);
+            if (match) {
+                responseText = match[0];
+            }
+            
+            const data = JSON.parse(responseText);
+            
+            setExplanation(data.message);
+            setStatus(data.isServed ? 'served' : 'unserved');
+        } catch (error) {
+            console.error("AI Service Area check error:", error);
+            // Fallback to basic string matching
+            const normalizedInput = location.toLowerCase().trim();
+            const isServed = serviceAreas.some(area => area.toLowerCase().includes(normalizedInput));
+            setStatus(isServed ? 'served' : 'unserved');
+            setExplanation(isServed ? "Great New! We serve your area." : "Please call to confirm availability.");
+        }
     };
     
     const renderStatusMessage = () => {
         switch (status) {
             case 'served':
                 return (
-                    <div className="bg-emerald-100 border-l-4 border-emerald-500 text-emerald-800 p-4 rounded-lg flex items-center gap-3 mt-6">
-                        <CheckCircle size={24} className="flex-shrink-0"/>
+                    <div className="bg-emerald-100 border-l-4 border-emerald-500 text-emerald-800 p-4 rounded-lg flex items-start gap-3 mt-6">
+                        <CheckCircle size={24} className="flex-shrink-0 mt-0.5"/>
                         <div>
-                            <p className="font-bold text-lg">Great News! We Serve Your Area.</p>
-                            <p>You qualify for immediate care coordination. Click below to start your free assessment.</p>
+                            <p className="font-bold text-lg mb-1">Care is Available</p>
+                            <p className="text-emerald-700">{explanation}</p>
+                            <p className="mt-2 text-sm">You qualify for immediate care coordination. Click below to start your free assessment.</p>
                         </div>
                     </div>
                 );
             case 'unserved':
                 return (
-                    <div className="bg-red-100 border-l-4 border-red-500 text-red-800 p-4 rounded-lg flex items-center gap-3 mt-6">
-                        <XCircle size={24} className="flex-shrink-0"/>
+                    <div className="bg-red-100 border-l-4 border-red-500 text-red-800 p-4 rounded-lg flex items-start gap-3 mt-6">
+                        <XCircle size={24} className="flex-shrink-0 mt-0.5"/>
                         <div>
-                            <p className="font-bold text-lg">Check Required.</p>
-                            <p>We primarily serve Orange County, but please call us immediately at **(657) 377-0776** to confirm availability outside our standard range.</p>
+                            <p className="font-bold text-lg mb-1">Let's Discuss Your Needs</p>
+                            <p className="text-red-700">{explanation}</p>
+                            <p className="mt-2 text-sm">Please call us immediately at **(657) 377-0776** to confirm if we can accommodate your specific situation.</p>
                         </div>
                     </div>
                 );
@@ -93,45 +147,47 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
                 return (
                     <div className="bg-purple-100 text-purple-800 p-4 rounded-lg flex items-center justify-center gap-3 mt-6">
                         <Loader2 size={20} className="animate-spin"/>
-                        <p>Confirming your service area...</p>
+                        <p>Analyzing your request...</p>
                     </div>
                 );
             case 'initial':
             default:
                 return (
-                    <p className="text-gray-600 mt-4 text-center">Enter your city or zip code above to confirm instant service availability.</p>
+                    <p className="text-gray-600 mt-4 text-center">Type your city, zip code, or specific needs (e.g. "Physical therapy in Irvine").</p>
                 );
         }
     }
 
 
     return (
-        <div className="max-w-xl mx-auto p-8 bg-white rounded-3xl shadow-xl border-t-4 border-purple-500">
-            <h4 className="text-2xl font-bold text-gray-900 text-center mb-4">
-                Verify Instant Coverage
+        <div className="max-w-2xl mx-auto p-8 bg-white rounded-3xl shadow-xl border-t-4 border-purple-500 relative overflow-hidden">
+             
+            <h4 className="text-2xl font-bold text-gray-900 text-center mb-2">
+                Intelligent Care Matcher
             </h4>
-            <form onSubmit={checkServiceArea} className="flex gap-3">
+            <p className="text-center text-sm text-gray-500 mb-6">Powered by AI</p>
+
+            <form onSubmit={checkServiceArea} className="flex flex-col sm:flex-row gap-3">
                 <input
                     type="text"
-                    placeholder="Enter City or Zip Code (e.g., 92648 or Huntington Beach)"
+                    placeholder='e.g., "My dad needs physical therapy in Huntington Beach"'
                     value={location}
                     onChange={(e) => {
                         setLocation(e.target.value);
-                        // Reset status immediately on typing to encourage new search
                         if (status !== 'initial') setStatus('initial'); 
                     }}
                     required
-                    className="flex-grow p-4 border border-purple-300 rounded-xl focus:ring-2 focus:ring-purple-500 transition duration-300 text-gray-800"
+                    className="flex-grow p-4 border border-purple-300 rounded-xl focus:ring-2 focus:ring-purple-500 transition duration-300 text-gray-800 placeholder-gray-400"
                 />
                 <button
                     type="submit"
                     disabled={status === 'checking' || location.trim() === ''}
-                    className="flex items-center justify-center p-4 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition duration-300 disabled:bg-purple-300"
+                    className="flex items-center justify-center p-4 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition duration-300 disabled:bg-purple-300 sm:w-auto w-full"
                 >
                     {status === 'checking' ? (
-                        <Loader2 size={24} className="animate-spin" />
+                        <span className="flex items-center gap-2"><Loader2 size={20} className="animate-spin" /> Checking</span>
                     ) : (
-                        <Search size={24} />
+                        <span className="flex items-center gap-2"><Search size={20} /> Match Care</span>
                     )}
                 </button>
             </form>
