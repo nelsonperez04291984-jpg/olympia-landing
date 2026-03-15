@@ -133,17 +133,51 @@ app.post('/api/admin/admins', async (req, res) => {
   }
 });
 
+// Admin Get Staff List
+app.get('/api/admin/staff', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, username, role, created_at FROM admins ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch staff list' });
+  }
+});
+
+// Admin Delete Provider
+app.delete('/api/admin/providers/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM providers WHERE id = $1', [id]);
+    res.json({ message: 'Provider deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete provider' });
+  }
+});
+
+// Admin Delete Admin/Staff
+app.delete('/api/admin/admins/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM admins WHERE id = $1', [id]);
+    res.json({ message: 'Staff member deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete staff member' });
+  }
+});
+
 // Admin Dashboard Stats
 app.get('/api/admin/stats', async (req, res) => {
   try {
     const providerCount = await pool.query('SELECT COUNT(*) FROM providers');
     const referralCount = await pool.query('SELECT COUNT(*) FROM referrals');
+    const staffCount = await pool.query('SELECT COUNT(*) FROM admins');
     const recentLogs = await pool.query('SELECT * FROM ai_logs ORDER BY created_at DESC LIMIT 10');
-    const providers = await pool.query('SELECT name, provider_id, email FROM providers');
+    const providers = await pool.query('SELECT id, name, provider_id, email FROM providers');
 
     res.json({
       provider_count: parseInt(providerCount.rows[0].count),
       referral_count: parseInt(referralCount.rows[0].count),
+      staff_count: parseInt(staffCount.rows[0].count),
       recent_ai_logs: recentLogs.rows,
       providers: providers.rows
     });
