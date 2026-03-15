@@ -72,8 +72,70 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// Admin Login
+app.post('/api/admin/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const result = await pool.query('SELECT * FROM admins WHERE username = $1', [username]);
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid admin credentials' });
+    }
+
+    const admin = result.rows[0];
+    const validPassword = await bcrypt.compare(password, admin.password_hash);
+    
+    if (!validPassword) {
+      return res.status(401).json({ error: 'Invalid admin credentials' });
+    }
+
+    const token = jwt.sign(
+      { id: admin.id, username: admin.username, role: 'admin' },
+      JWT_SECRET,
+      { expiresIn: '4h' }
+    );
+
+    res.json({ token, username: admin.username });
+  } catch (err) {
+    res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+// Admin Dashboard Stats
+app.get('/api/admin/stats', async (req, res) => {
+  try {
+    const providerCount = await pool.query('SELECT COUNT(*) FROM providers');
+    const referralCount = await pool.query('SELECT COUNT(*) FROM referrals');
+    const recentLogs = await pool.query('SELECT * FROM ai_logs ORDER BY created_at DESC LIMIT 10');
+    const providers = await pool.query('SELECT name, provider_id, email FROM providers');
+
+    res.json({
+      provider_count: parseInt(providerCount.rows[0].count),
+      referral_count: parseInt(referralCount.rows[0].count),
+      recent_ai_logs: recentLogs.rows,
+      providers: providers.rows
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch stats' });
+  }
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'API is running' });
+});
+
+// Optional: Route to log AI queries
+app.post('/api/log-ai', async (req, res) => {
+  const { query, response, session_id } = req.body;
+  try {
+    await pool.query(
+      'INSERT INTO ai_logs (user_query, ai_response, session_id) VALUES ($1, $2, $3)',
+      [query, response, session_id]
+    );
+    res.json({ status: 'logged' });
+  } catch (err) {
+    res.status(500).json({ error: 'Logging failed' });
+  }
 });
 
 // For local development, if this file is run directly by node

@@ -27,27 +27,63 @@ async function initDB() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-    console.log("Providers table ready.");
 
-    // Check if the seed user exists
-    const res = await pool.query("SELECT * FROM providers WHERE provider_id = $1", ["provider123"]);
+    // Create the admins table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS admins (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Create the referrals table (to track metrics)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS referrals (
+        id SERIAL PRIMARY KEY,
+        patient_name VARCHAR(100),
+        provider_id VARCHAR(50) REFERENCES providers(provider_id),
+        status VARCHAR(20) DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // Create the ai_logs table (to track AI interactions)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS ai_logs (
+        id SERIAL PRIMARY KEY,
+        user_query TEXT,
+        ai_response TEXT,
+        session_id VARCHAR(100),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    console.log("Database schema updated.");
+
+    // Check if the seed provider exists
+    const resProvider = await pool.query("SELECT * FROM providers WHERE provider_id = $1", ["provider123"]);
     
-    if (res.rows.length === 0) {
+    if (resProvider.rows.length === 0) {
       console.log("Seed provider not found. Creating...");
-      
-      // Hash a default password
       const salt = await bcrypt.genSalt(10);
       const hash = await bcrypt.hash("password123", salt);
-
       await pool.query(
         "INSERT INTO providers (provider_id, name, email, password_hash) VALUES ($1, $2, $3, $4)",
         ["provider123", "Dr. Jane Smith", "jane.smith@example.com", hash]
       );
-      
       console.log("Seed provider created!");
-      console.log("Username: provider123 | Password: password123");
-    } else {
-      console.log("Seed provider already exists. Skipping creation.");
+    }
+
+    // Check if seed admin exists
+    const resAdmin = await pool.query("SELECT * FROM admins WHERE username = $1", ["admin"]);
+    if (resAdmin.rows.length === 0) {
+      console.log("Seed admin not found. Creating...");
+      const salt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash("olympia-admin-2026", salt);
+      await pool.query("INSERT INTO admins (username, password_hash) VALUES ($1, $2)", ["admin", hash]);
+      console.log("Seed admin created: admin / olympia-admin-2026");
     }
 
   } catch (err) {

@@ -32,6 +32,19 @@ const Footer = () => {
                   </a>
                 </li>
               ))}
+              <li>
+                <hr className="border-gray-800 my-2 w-1/2" />
+              </li>
+              <li>
+                <a href="/provider-login" className="hover:text-teal-400 transition-colors text-sm">
+                  Provider Portal
+                </a>
+              </li>
+              <li>
+                <a href="/admin" className="hover:text-amber-400 transition-colors text-xs opacity-60">
+                  Staff Login
+                </a>
+              </li>
             </ul>
           </div>
           

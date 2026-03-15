@@ -9,20 +9,34 @@ import ScrollToTop from './components/ScrollToTop'
 import ChatWidget from './components/ChatWidget'
 import AIFaq from './sections/AIFaq'
 import Testimonials from './sections/Testimonials'
+import ProviderLogin from './pages/ProviderLogin'
+import AdminDashboard from './pages/AdminDashboard'
+import { Routes, Route } from 'react-router-dom'
+
+const MainLanding = () => (
+  <>
+    <Hero />
+    <main>
+      <About />
+      <Services />
+      <AIFaq />
+      <Testimonials />
+      <Leadership />
+      <Contact />
+    </main>
+  </>
+);
 
 export default function App() {
   return (
     <div className="font-sans text-gray-800 overflow-x-hidden">
       <ChatWidget />
-      <Hero />
-      <main>
-        <About />
-        <Services />
-        <AIFaq />
-        <Testimonials />
-        <Leadership />
-        <Contact />
-      </main>
+      <Routes>
+        <Route path="/" element={<MainLanding />} />
+        <Route path="/provider-login" element={<ProviderLogin />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+      </Routes>
       <Footer />
       <ScrollToTop />
       

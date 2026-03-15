@@ -82,6 +82,17 @@ const ChatWidget = () => {
         const result = await chatSession.sendMessage(userMessage);
         const responseText = result.response.text();
         
+        // Log to database
+        fetch('/api/log-ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                query: userMessage,
+                response: responseText,
+                session_id: 'browser-session' // Future: use a real UUID
+            })
+        }).catch(err => console.error("Logging error:", err));
+
         setMessages(prev => [...prev, { role: 'model', content: responseText }]);
     } catch (error) {
         console.error("Chat error:", error);
