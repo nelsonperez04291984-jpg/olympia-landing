@@ -208,6 +208,39 @@ app.get('/api/referrals/my', async (req, res) => {
   }
 });
 
+// --- Admin Referral Management ---
+
+// Get All Referrals (for Intake)
+app.get('/api/admin/referrals', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT r.*, p.name as provider_name 
+      FROM referrals r
+      JOIN providers p ON r.provider_id = p.id
+      ORDER BY r.created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch referrals', details: err.message });
+  }
+});
+
+// Update Referral Status
+app.patch('/api/admin/referrals/:id', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  try {
+    const result = await pool.query(
+      'UPDATE referrals SET status = $1 WHERE id = $2 RETURNING *',
+      [status, id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Referral not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update referral', details: err.message });
+  }
+});
+
 // Admin Dashboard Stats
 app.get('/api/admin/stats', async (req, res) => {
   try {

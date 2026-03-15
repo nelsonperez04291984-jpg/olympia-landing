@@ -16,7 +16,11 @@ import {
   UserCircle,
   Trash2,
   AlertTriangle,
-  X
+  X,
+  ClipboardCheck,
+  Package,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -32,6 +36,7 @@ const AdminDashboard = () => {
         providers: []
     });
     const [staffList, setStaffList] = useState([]);
+    const [referrals, setReferrals] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -70,10 +75,11 @@ const AdminDashboard = () => {
 
     const fetchDashboardData = async (token) => {
         try {
-            // Parallel fetch for stats and staff list
-            const [statsRes, staffRes] = await Promise.all([
+            // Parallel fetch for stats, staff list, and referrals
+            const [statsRes, staffRes, referralsRes] = await Promise.all([
                 fetch('/api/admin/stats', { headers: { 'Authorization': `Bearer ${token}` } }),
-                fetch('/api/admin/staff', { headers: { 'Authorization': `Bearer ${token}` } })
+                fetch('/api/admin/staff', { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch('/api/admin/referrals', { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
 
             if (statsRes.ok) {
@@ -84,6 +90,11 @@ const AdminDashboard = () => {
             if (staffRes.ok) {
                 const staffData = await staffRes.json();
                 setStaffList(staffData);
+            }
+
+            if (referralsRes.ok) {
+                const referralsData = await referralsRes.json();
+                setReferrals(referralsData);
             }
         } catch (err) {
             console.error("Data fetch error:", err);
@@ -174,6 +185,26 @@ const AdminDashboard = () => {
             }
         } catch (err) {
             console.error("Delete error:", err);
+        }
+    };
+
+    const handleUpdateReferralStatus = async (id, newStatus) => {
+        try {
+            const res = await fetch(`/api/admin/referrals/${id}`, {
+                method: 'PATCH',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('olympia_admin_token')}`
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+            if (res.ok) {
+                fetchDashboardData(localStorage.getItem('olympia_admin_token'));
+            } else {
+                alert("Failed to update status.");
+            }
+        } catch (err) {
+            console.error("Update status error:", err);
         }
     };
 
@@ -289,6 +320,12 @@ const AdminDashboard = () => {
                     >
                         <UserPlus size={20} /> User Maintenance
                     </button>
+                    <button 
+                        onClick={() => setActiveTab('referrals')}
+                        className={`w-full p-4 rounded-xl font-bold flex items-center gap-3 transition-all ${activeTab === 'referrals' ? 'bg-teal-500/10 border border-teal-500/20 text-teal-400' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+                    >
+                        <ClipboardCheck size={20} /> Referral Intake
+                    </button>
                     <div className="p-4 text-slate-400 hover:bg-white/5 hover:text-white rounded-xl transition-all cursor-pointer flex items-center gap-3">
                         <MessageSquare size={20} /> AI Conversation Logs
                     </div>
@@ -318,10 +355,10 @@ const AdminDashboard = () => {
                 <header className="flex items-center justify-between mb-12">
                     <div>
                         <h1 className="text-4xl font-black text-slate-900">
-                            {activeTab === 'overview' ? 'System Overview' : 'User Maintenance'}
+                            {activeTab === 'overview' ? 'System Overview' : activeTab === 'referrals' ? 'Referral Intake' : 'User Maintenance'}
                         </h1>
                         <p className="text-slate-500 mt-1">
-                            {activeTab === 'overview' ? 'Real-time platform metrics and audit logs.' : 'Manage partner providers and internal staff accounts.'}
+                            {activeTab === 'overview' ? 'Real-time platform metrics and audit logs.' : activeTab === 'referrals' ? 'Review and approve incoming patient referrals.' : 'Manage partner providers and internal staff accounts.'}
                         </p>
                     </div>
                     <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 px-6 h-16">
@@ -451,6 +488,104 @@ const AdminDashboard = () => {
                             </div>
                         </div>
                     </>
+                ) : activeTab === 'referrals' ? (
+                    <div className="space-y-8 animate-fadeIn">
+                        <div className="bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+                            <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                                <div>
+                                    <h3 className="text-2xl font-black text-slate-900">Intake Queue</h3>
+                                    <p className="text-slate-500">Processing incoming patient referrals from medical partners.</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <span className="px-4 py-2 bg-white rounded-xl border border-slate-200 text-xs font-bold text-slate-600 flex items-center gap-2">
+                                        <div className="w-2 h-2 bg-yellow-400 rounded-full"></div> {referrals.filter(r => r.status === 'Pending').length} PENDING
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead className="bg-slate-100/50 text-slate-400 uppercase text-[10px] font-black tracking-widest">
+                                        <tr>
+                                            <th className="px-8 py-4">Patient Details</th>
+                                            <th className="px-8 py-4">Clinical Info</th>
+                                            <th className="px-8 py-4">Referring Provider</th>
+                                            <th className="px-8 py-4">Status & Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                        {referrals.map((r, i) => (
+                                            <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                                                <td className="px-8 py-6">
+                                                    <p className="font-bold text-slate-900 text-lg">{r.patient_name}</p>
+                                                    <div className="flex flex-col gap-1 mt-1">
+                                                        <span className="text-xs text-slate-500 flex items-center gap-1.5"><Clock size={12} /> DOB: {r.patient_dob}</span>
+                                                        <span className="text-xs text-slate-500 flex items-center gap-1.5"><Mail size={12} /> {r.patient_phone || 'N/A'}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    <p className="text-xs font-black text-slate-400 uppercase mb-1">Diagnosis</p>
+                                                    <p className="text-sm text-slate-700 font-medium line-clamp-2">{r.diagnosis}</p>
+                                                    <p className="text-xs font-black text-slate-400 uppercase mt-3 mb-1">Services Needed</p>
+                                                    <p className="text-xs text-slate-600 bg-slate-100 p-2 rounded-lg">{r.services_needed}</p>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    <p className="font-bold text-slate-900">{r.provider_name}</p>
+                                                    <p className="text-[10px] text-slate-400 uppercase font-black tracking-tighter">Verified Partner</p>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    <div className="flex flex-col gap-3">
+                                                        <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest w-fit shadow-sm ${
+                                                            r.status === 'Pending' ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' :
+                                                            r.status === 'Processing' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+                                                            r.status === 'Admitted' ? 'bg-green-100 text-green-700 border border-green-200' :
+                                                            'bg-slate-100 text-slate-600'
+                                                        }`}>
+                                                            {r.status}
+                                                        </span>
+                                                        <div className="flex gap-2">
+                                                            {r.status === 'Pending' && (
+                                                                <button 
+                                                                    onClick={() => handleUpdateReferralStatus(r.id, 'Processing')}
+                                                                    className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                                                                    title="Mark as Processing"
+                                                                >
+                                                                    <Activity size={16} />
+                                                                </button>
+                                                            )}
+                                                            {r.status === 'Processing' && (
+                                                                <button 
+                                                                    onClick={() => handleUpdateReferralStatus(r.id, 'Admitted')}
+                                                                    className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors"
+                                                                    title="Accept & Admit"
+                                                                >
+                                                                    <CheckCircle size={16} />
+                                                                </button>
+                                                            )}
+                                                            <button 
+                                                                onClick={() => handleUpdateReferralStatus(r.id, 'Rejected')}
+                                                                className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                                                                title="Reject Referral"
+                                                            >
+                                                                <X size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        {referrals.length === 0 && (
+                                            <tr>
+                                                <td colSpan="4" className="px-8 py-16 text-center">
+                                                    <Package className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                                                    <p className="text-slate-400 italic">No referrals in the queue yet.</p>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 ) : (
                     <div className="max-w-6xl bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden animate-fadeIn">
                         <div className="flex border-b border-slate-100 bg-slate-50/30 p-2">
