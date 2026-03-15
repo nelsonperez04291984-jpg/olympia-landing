@@ -4,18 +4,94 @@ import { Hospital, Lock, User, ArrowLeft, Loader2 } from 'lucide-react';
 const ProviderLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const [providerName, setProviderName] = useState('');
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
-    // Simulate network request
-    setTimeout(() => {
+    const provider_id = e.target.provider_id.value;
+    const password = e.target.password.value;
+
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider_id, password })
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      // Store JWT
+      localStorage.setItem('provider_token', data.token);
+      setProviderName(data.provider.name);
+      setSuccess(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
       setIsLoading(false);
-      setError('Invalid Provider ID or Password. Please contact your system administrator.');
-    }, 1500);
+    }
   };
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-80 bg-gradient-to-br from-teal-700 to-blue-900 z-0"></div>
+        <div className="relative z-10 flex flex-col items-center w-full max-w-4xl mx-auto animate-fadeInUp">
+          
+          <div className="w-full mb-6">
+            <button onClick={() => { setSuccess(false); localStorage.removeItem('provider_token'); }} className="inline-flex items-center gap-2 text-white hover:text-teal-200 transition-colors font-medium">
+                <ArrowLeft size={18} /> Secure Sign Out
+            </button>
+          </div>
+
+          <div className="bg-white w-full rounded-2xl shadow-2xl p-8 md:p-12 border border-gray-100">
+            <div className="flex items-center justify-between mb-8 pb-8 border-b border-gray-100">
+                <div>
+                    <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {providerName}</h2>
+                    <p className="text-gray-500">Olympia Auth: Authenticated Session Active</p>
+                </div>
+                <div className="hidden sm:flex items-center justify-center w-16 h-16 rounded-full bg-teal-50 border-4 border-teal-100">
+                    <User className="w-8 h-8 text-teal-600" />
+                </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="p-6 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl border border-indigo-100/50 shadow-sm">
+                    <h3 className="text-lg font-bold text-indigo-900 mb-1">Total Referrals</h3>
+                    <p className="text-3xl font-black text-indigo-600">0</p>
+                </div>
+                <div className="p-6 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-xl border border-teal-100/50 shadow-sm">
+                    <h3 className="text-lg font-bold text-teal-900 mb-1">Active Patients</h3>
+                    <p className="text-3xl font-black text-teal-600">0</p>
+                </div>
+                <div className="p-6 bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl border border-orange-100/50 shadow-sm">
+                    <h3 className="text-lg font-bold text-orange-900 mb-1">Pending Orders</h3>
+                    <p className="text-3xl font-black text-orange-600">0</p>
+                </div>
+            </div>
+
+            <div className="p-6 bg-blue-50/50 text-blue-900 rounded-xl border border-blue-100">
+               <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+                 <Lock className="w-5 h-5" /> JWT Secure Session Token Issued
+               </h3>
+               <p className="text-blue-800/80 leading-relaxed text-sm">
+                 Your authentication token has been securely issued by the generic Vercel Serverless Function and stored in localStorage. 
+                 Since this is a simulated dashboard environment right now, you would normally see real real-time data from the `providers` PostgreSQL database table here.
+               </p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
