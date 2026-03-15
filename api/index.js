@@ -165,6 +165,49 @@ app.delete('/api/admin/admins/:id', async (req, res) => {
   }
 });
 
+// --- Provider Referral Endpoints ---
+
+// Create Referral
+app.post('/api/referrals', async (req, res) => {
+  const { patient_name, patient_dob, patient_phone, diagnosis, services_needed } = req.body;
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) return res.status(401).json({ error: 'No token provided' });
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const providerId = decoded.id;
+
+    const result = await pool.query(
+      `INSERT INTO referrals (provider_id, patient_name, patient_dob, patient_phone, diagnosis, services_needed, status) 
+       VALUES ($1, $2, $3, $4, $5, $6, 'Pending') RETURNING *`,
+      [providerId, patient_name, patient_dob, patient_phone, diagnosis, services_needed]
+    );
+    res.json({ message: 'Referral submitted successfully', referral: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to submit referral', details: err.message });
+  }
+});
+
+// Get My Referrals
+app.get('/api/referrals/my', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: 'No token provided' });
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const result = await pool.query(
+      'SELECT * FROM referrals WHERE provider_id = $1 ORDER BY created_at DESC',
+      [decoded.id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch referrals' });
+  }
+});
+
 // Admin Dashboard Stats
 app.get('/api/admin/stats', async (req, res) => {
   try {
@@ -186,11 +229,18 @@ app.get('/api/admin/stats', async (req, res) => {
   }
 });
 
-// Schema Fix Route (Role & Timestamps)
+// Schema Fix Route (Role & Timestamps & Referral Fields)
 app.get('/api/admin/fix-schema', async (req, res) => {
   try {
+    // Admin table updates
     await pool.query("ALTER TABLE admins ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'admin'");
     await pool.query("ALTER TABLE admins ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+    
+    // Referrals table updates
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS patient_dob VARCHAR(20)");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS patient_phone VARCHAR(20)");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS services_needed TEXT");
+    
     res.json({ status: 'Schema updated successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Schema fix failed', details: err.message });

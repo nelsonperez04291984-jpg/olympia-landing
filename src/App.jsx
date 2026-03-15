@@ -11,6 +11,7 @@ import AIFaq from './sections/AIFaq'
 import Testimonials from './sections/Testimonials'
 import ProviderLogin from './pages/ProviderLogin'
 import AdminDashboard from './pages/AdminDashboard'
+import ProviderDashboard from './pages/ProviderDashboard'
 import { Routes, Route } from 'react-router-dom'
 
 const MainLanding = () => (
@@ -34,6 +35,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<MainLanding />} />
         <Route path="/provider-login" element={<ProviderLogin />} />
+        <Route path="/provider-dashboard" element={<ProviderDashboard />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
       </Routes>

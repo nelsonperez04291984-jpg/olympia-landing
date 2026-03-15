@@ -29,7 +29,8 @@ const ProviderLogin = () => {
       }
 
       // Store JWT
-      localStorage.setItem('provider_token', data.token);
+      localStorage.setItem('olympia_token', data.token);
+      localStorage.setItem('olympia_provider', JSON.stringify(data.provider));
       setProviderName(data.provider.name);
       setSuccess(true);
     } catch (err) {
@@ -77,14 +78,21 @@ const ProviderLogin = () => {
                 </div>
             </div>
 
-            <div className="p-6 bg-blue-50/50 text-blue-900 rounded-xl border border-blue-100">
-               <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
-                 <Lock className="w-5 h-5" /> JWT Secure Session Token Issued
-               </h3>
-               <p className="text-blue-800/80 leading-relaxed text-sm">
-                 Your authentication token has been securely issued by the generic Vercel Serverless Function and stored in localStorage. 
-                 Since this is a simulated dashboard environment right now, you would normally see real real-time data from the `providers` PostgreSQL database table here.
-               </p>
+            <div className="p-6 bg-blue-50/50 text-blue-900 rounded-xl border border-blue-100 flex flex-col md:flex-row items-center gap-6">
+               <div className="flex-1">
+                 <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+                   <Lock className="w-5 h-5 text-blue-600" /> Secure Medical Portal Access
+                 </h3>
+                 <p className="text-blue-800/80 leading-relaxed text-sm">
+                   Your account is authenticated and ready. You can now access your private dashboard to submit new patient referrals and track care history.
+                 </p>
+               </div>
+               <a 
+                href="/provider-dashboard"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20 whitespace-nowrap"
+               >
+                 Go to Dashboard
+               </a>
             </div>
 
           </div>
