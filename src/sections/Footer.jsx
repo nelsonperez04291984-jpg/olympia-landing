@@ -1,11 +1,13 @@
 import React from 'react'
 import { Linkedin, Mail } from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
+import { Link } from 'react-router-dom'
 
 const Footer = () => {
   return (
     <footer className="py-12 bg-gray-900 text-gray-400">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
+        <div className="grid md:grid-cols-5 gap-8 mb-8">
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-4">
               <img src="/logo.png" alt="Olympia Logo" className="w-10 h-10 object-contain rounded-full" />
@@ -61,6 +63,20 @@ const Footer = () => {
                 </a>
               ))}
             </div>
+          </div>
+          
+          <div>
+            <h4 className="text-white font-semibold mb-4">Scan & Visit</h4>
+            <Link to="/qr" className="inline-block p-3 bg-white rounded-xl hover:shadow-lg hover:shadow-purple-500/20 transition-all hover:scale-105">
+              <QRCodeSVG
+                value="https://olympia-landing.vercel.app/"
+                size={100}
+                level="H"
+                bgColor="#ffffff"
+                fgColor="#1a1a2e"
+              />
+            </Link>
+            <p className="text-xs text-gray-500 mt-2">Scan or click to share</p>
           </div>
         </div>
         

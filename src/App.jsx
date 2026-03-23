@@ -12,6 +12,7 @@ import Testimonials from './sections/Testimonials'
 import ProviderLogin from './pages/ProviderLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import ProviderDashboard from './pages/ProviderDashboard'
+import QRCodePage from './pages/QRCodePage'
 import { Routes, Route } from 'react-router-dom'
 
 const MainLanding = () => (
@@ -38,6 +39,7 @@ export default function App() {
         <Route path="/provider-dashboard" element={<ProviderDashboard />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/qr" element={<QRCodePage />} />
       </Routes>
       <Footer />
       <ScrollToTop />
