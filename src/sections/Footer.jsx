@@ -17,13 +17,13 @@ const Footer = () => {
               Caring Beyond Limits - Provides the highest quality of healthcare professionals in the comfort of your home.
             </p>
             <div className="space-y-2 text-sm text-gray-400">
-              <p>2044 Beach Blvd, Suite 320</p>
+              <p>20422 Beach Blvd, Suite 320</p>
               <p>Huntington Beach, CA 92648</p>
               <p>Phone: (657) 377-0776</p>
               <p>Fax: (714) 465-2233</p>
             </div>
           </div>
-          
+
           <div>
             <h4 className="text-white font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
@@ -49,7 +49,7 @@ const Footer = () => {
               </li>
             </ul>
           </div>
-          
+
           <div>
             <h4 className="text-white font-semibold mb-4">Connect</h4>
             <div className="flex gap-3">
@@ -64,7 +64,7 @@ const Footer = () => {
               ))}
             </div>
           </div>
-          
+
           <div>
             <h4 className="text-white font-semibold mb-4">Scan & Visit</h4>
             <Link to="/qr" className="inline-block p-3 bg-white rounded-xl hover:shadow-lg hover:shadow-purple-500/20 transition-all hover:scale-105">
@@ -79,7 +79,7 @@ const Footer = () => {
             <p className="text-xs text-gray-500 mt-2">Scan or click to share</p>
           </div>
         </div>
-        
+
         <div className="border-t border-gray-800 pt-8 text-center text-sm">
           <p>© {new Date().getFullYear()} Olympia Home Health Inc. — All rights reserved.</p>
         </div>
