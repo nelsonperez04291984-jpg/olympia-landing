@@ -321,7 +321,7 @@ export default function Contact(){
                                     <MapPin size={24} className="flex-shrink-0 mt-1 text-emerald-300" />
                                     <div>
                                         <p className="text-lg font-semibold">Office Location</p>
-                                        <p className="text-white">2044 Beach Blvd, Suite 320, Huntington Beach, CA 92648</p>
+                                        <p className="text-white">20422 Beach Blvd, Suite 320, Huntington Beach, CA 92648</p>
                                     </div>
                                 </div>
                             </div>

@@ -372,7 +372,7 @@ const About = () => {
                             <div className="relative">
                                 <div className="bg-white rounded-2xl p-4 shadow-2xl">
                                     <iframe
-                                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106428.47489186373!2d-118.00065764999999!3d33.7174708!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80dd27b61c4d60cf%3A0x999c4f2b8f49f20!2s2044%20Beach%20Blvd%20%23320%2C%20Huntington%20Beach%2C%20CA%2092648!5e0!3m2!1sen!2sus!4v1234567890" 
+                                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3322.123!2d-117.9530!3d33.6846!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80dd268e46639c73%3A0x5fa279993a2740d6!2s20422%20Beach%20Blvd%20%23320%2C%20Huntington%20Beach%2C%20CA%2092648!5e0!3m2!1sen!2sus!4v1234567890" 
                                         width="100%"
                                         height="400"
                                         style={{ border: 0, borderRadius: '12px' }}
@@ -383,7 +383,7 @@ const About = () => {
                                     ></iframe>
                                     <div className="mt-4 text-center">
                                         <p className="text-gray-900 font-semibold">Our Office</p>
-                                        <p className="text-gray-600 text-sm">2044 Beach Blvd, Suite 320, Huntington Beach, CA 92648</p>
+                                        <p className="text-gray-600 text-sm">20422 Beach Blvd, Suite 320, Huntington Beach, CA 92648</p>
                                     </div>
                                 </div>
                             </div>
