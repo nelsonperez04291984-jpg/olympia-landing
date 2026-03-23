@@ -78,10 +78,10 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
             const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
             
             const prompt = `
-            You are an intelligent intake assistant for Olympia Home Health (based in Orange County, CA).
+            You are an intelligent intake assistant for Olympia Home Health (based in Huntington Beach, CA).
             A user has entered the following message to check if we serve them: "${location}".
             
-            Our primary service areas (cities and zip codes): ${serviceAreas.join(', ')}.
+            Our coverage spans from San Diego County to Kern County, including all of Southern California. Our primary service areas (cities and counties): ${serviceAreas.join(', ')}.
             
             Task:
             1. Determine if the location mentioned is within our service area. If they don't mention a location, assume we need to ask.
@@ -211,10 +211,22 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
 const About = () => {
     const [ref, isInView] = useInView() 
 
-    // Combined list of cities and common zip codes for simple detection
+    // Coverage from San Diego County to Kern County
     const serviceAreas = [
-        'Huntington Beach', 'Fountain Valley', 'Westminster', 'Garden Grove', 'Costa Mesa', 'Newport Beach', 'Santa Ana', 'Anaheim', 'Orange', 'Irvine', 'Tustin', 'Seal Beach',
-        '92648', '92649', '92708', '92704', '92703', '92843', '92844', '92627', '92660', '92705', '92806', '92868', '92780', '92605' 
+        // Orange County
+        'Huntington Beach', 'Fountain Valley', 'Westminster', 'Garden Grove', 'Costa Mesa', 'Newport Beach', 'Santa Ana', 'Anaheim', 'Orange', 'Irvine', 'Tustin', 'Seal Beach', 'Fullerton', 'Laguna Beach', 'Mission Viejo', 'Lake Forest',
+        // San Diego County
+        'San Diego', 'Chula Vista', 'Oceanside', 'Escondido', 'Carlsbad', 'Vista', 'El Cajon', 'Encinitas',
+        // Riverside County
+        'Riverside', 'Corona', 'Temecula', 'Murrieta', 'Palm Springs', 'Moreno Valley', 'Hemet',
+        // San Bernardino County
+        'San Bernardino', 'Ontario', 'Rancho Cucamonga', 'Fontana', 'Victorville', 'Redlands',
+        // Los Angeles County
+        'Los Angeles', 'Long Beach', 'Pasadena', 'Torrance', 'Pomona', 'Downey', 'Whittier', 'Burbank', 'Santa Clarita',
+        // Ventura County
+        'Ventura', 'Oxnard', 'Thousand Oaks', 'Simi Valley', 'Camarillo',
+        // Kern County
+        'Bakersfield', 'Tehachapi', 'Ridgecrest', 'Delano',
     ];
 
     // Data for the Core Commitment section
@@ -256,7 +268,7 @@ const About = () => {
                         Bringing Exceptional Care and Comfort Right to Your Doorstep.
                     </p>
                     <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                        Olympia Home Health Inc is dedicated to providing coordinated, comprehensive, and patient-centered services to homebound individuals across Orange County.
+                        Olympia Home Health Inc is dedicated to providing coordinated, comprehensive, and patient-centered services to homebound individuals across Southern California — from San Diego to Kern County.
                     </p>
                 </div>
 
@@ -277,7 +289,7 @@ const About = () => {
                             </p>
                             <div className="mt-8 p-3 bg-emerald-100 rounded-lg text-center">
                                 <p className="text-sm font-bold text-emerald-800">
-                                    Emergency Care and Scheduling are available **24/7** by phone.
+                                    Care and Scheduling inquiries are available **Monday–Friday, 9AM–5PM** by phone.
                                 </p>
                             </div>
                         </div>
@@ -325,24 +337,33 @@ const About = () => {
                             <div>
                                 <div className="flex items-center gap-3 mb-6">
                                     <MapPin className="text-purple-200" size={32} />
-                                    <h3 className="text-3xl font-bold">Comprehensive Coverage in Orange County</h3>
+                                    <h3 className="text-3xl font-bold">Comprehensive Coverage — San Diego to Kern County</h3>
                                 </div>
                                 <p className="text-purple-100 mb-8 text-lg">
-                                    Professional home health care services available throughout these communities and surrounding areas:
+                                    Professional home health care services available across Southern California, spanning 7 counties:
                                 </p>
-                                <div className="grid grid-cols-2 gap-4">
-                                    {serviceAreas.filter(a => !a.match(/^\d+$/)).slice(0, 12).map((area, i) => ( // Display top 12 cities
-                                        <div key={i} className="flex items-center gap-3 group">
-                                            <CheckCircle className="text-emerald-400 flex-shrink-0 group-hover:scale-125 transition-transform" size={20} />
-                                            <span className="text-purple-50 font-medium group-hover:text-white transition-colors">
-                                                {area}
-                                            </span>
+                                <div className="space-y-4">
+                                    {[
+                                        { county: 'Orange County', cities: 'Huntington Beach, Irvine, Anaheim, Santa Ana, Newport Beach & more' },
+                                        { county: 'San Diego County', cities: 'San Diego, Chula Vista, Oceanside, Carlsbad & more' },
+                                        { county: 'Los Angeles County', cities: 'Los Angeles, Long Beach, Pasadena, Torrance & more' },
+                                        { county: 'Riverside County', cities: 'Riverside, Corona, Temecula, Palm Springs & more' },
+                                        { county: 'San Bernardino County', cities: 'San Bernardino, Ontario, Rancho Cucamonga & more' },
+                                        { county: 'Ventura County', cities: 'Ventura, Oxnard, Thousand Oaks, Simi Valley & more' },
+                                        { county: 'Kern County', cities: 'Bakersfield, Tehachapi, Delano & more' },
+                                    ].map((item, i) => (
+                                        <div key={i} className="flex items-start gap-3 group">
+                                            <CheckCircle className="text-emerald-400 flex-shrink-0 mt-0.5 group-hover:scale-125 transition-transform" size={18} />
+                                            <div>
+                                                <span className="text-white font-semibold">{item.county}</span>
+                                                <span className="text-purple-200 text-sm ml-2">— {item.cities}</span>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
                                 <div className="mt-8 p-4 bg-white/10 backdrop-blur-sm rounded-xl">
                                     <p className="text-purple-100 text-sm">
-                                        <strong className="text-white">Need Confirmation?</strong> If your area isn't listed, please contact us 24/7 at <a href="tel:6573770776" className="text-emerald-300 hover:text-emerald-200 transition-colors font-semibold">(657) 377-0776</a> to confirm availability.
+                                        <strong className="text-white">Need Confirmation?</strong> If your area isn't listed, please contact us Monday–Friday, 9AM–5PM at <a href="tel:6573770776" className="text-emerald-300 hover:text-emerald-200 transition-colors font-semibold">(657) 377-0776</a> to confirm availability.
                                     </p>
                                 </div>
                             </div>

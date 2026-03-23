@@ -296,7 +296,7 @@ export default function Contact(){
                         <div>
                             <h3 className="text-3xl font-bold mb-6">Need Immediate Assistance?</h3>
                             <p className="text-purple-100 mb-8">
-                                For urgent matters or to speak directly with an intake specialist, please use the contact details below. Our team is available 24/7 for emergency scheduling.
+                                For urgent matters or to speak directly with an intake specialist, please use the contact details below. Our team is available Monday–Friday, 9AM–5PM.
                             </p>
                             
                             <div className="space-y-6">
@@ -304,7 +304,7 @@ export default function Contact(){
                                 <div className="flex items-start gap-4">
                                     <Phone size={24} className="flex-shrink-0 mt-1 text-emerald-300" />
                                     <div>
-                                        <p className="text-lg font-semibold">24/7 Phone Line</p>
+                                        <p className="text-lg font-semibold">Office Phone Line</p>
                                         <a href="tel:6573770776" className="text-xl font-bold text-white hover:text-emerald-300 transition-colors">(657) 377-0776</a>
                                     </div>
                                 </div>

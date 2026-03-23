@@ -9,7 +9,7 @@ Olympia Home Health Knowledge Base:
 - Services provided: Skilled Nursing, Physical Therapy, Occupational Therapy, Speech Therapy, Medical Social Worker services, and Certified Home Health Aides.
 - Service Area: Orange County, California.
 - Location: 2044 Beach Blvd, Suite 320, Huntington Beach, CA 92648.
-- Contact: Phone (657) 377-0776. Emergency care and scheduling available 24/7 by phone.
+- Contact: Phone (657) 377-0776. Office hours Monday–Friday, 9AM–5PM.
 - Insurance/Payment: We accept Medicare and select private insurances. Patients should call to verify specific coverage.
 - Compliance: We provide equal opportunity care and do not discriminate based on race, color, national origin, disability, or age.
 - Mission: To provide the highest quality of healthcare professionals in the comfort of your home, ensuring exceptional care with unparalleled compassion. RN-led clinical oversight.

@@ -56,19 +56,13 @@ const QRCodePage = () => {
         {/* QR Card */}
         <div className="bg-white rounded-3xl shadow-2xl p-10 text-center print:shadow-none print:rounded-none">
           {/* Logo & Branding */}
-          <div className="flex items-center justify-center gap-3 mb-2">
+          <div className="flex flex-col items-center justify-center mb-4">
             <img
-              src="/logo.png"
-              alt="Olympia Logo"
-              className="w-12 h-12 object-contain rounded-full"
+              src="/logo-qr-trimmed.png"
+              alt="Olympia Home Health Logo"
+              className="w-28 h-auto object-contain mb-2"
             />
-            <h1 className="text-2xl font-bold text-gray-900">
-              Olympia Home Health
-            </h1>
           </div>
-          <p className="text-gray-500 text-sm mb-8">
-            Caring Beyond Limits
-          </p>
 
           {/* QR Code */}
           <div className="inline-block p-6 bg-white rounded-2xl border-2 border-gray-100 mb-6">
@@ -77,15 +71,15 @@ const QRCodePage = () => {
               value={SITE_URL}
               size={256}
               level="H"
-              includeMargin={false}
+              includeMargin={true}
               bgColor="#ffffff"
               fgColor="#1a1a2e"
               imageSettings={{
-                src: '/logo.png',
+                src: '/logo-qr-trimmed.png',
                 x: undefined,
                 y: undefined,
-                height: 40,
-                width: 40,
+                height: 56,
+                width: 48,
                 excavate: true,
               }}
             />
