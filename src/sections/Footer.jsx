@@ -15,7 +15,9 @@ const Footer = () => {
                 <span className="font-bold text-xl text-white">Olympia Home Health</span>
               </div>
               <div className="h-8 w-px bg-gray-700 mx-2 hidden sm:block"></div>
-              <img src="/achc-logo.png" alt="ACHC Accredited" className="w-12 h-12 object-contain" />
+              <div className="achc-seal-container achc-seal-shadow-dark w-12 h-12">
+                <img src="/ACHC.png" alt="ACHC Accredited" />
+              </div>
             </div>
             <p className="text-gray-500 max-w-md mb-4">
               Caring Beyond Limits - Provides the highest quality of healthcare professionals in the comfort of your home.

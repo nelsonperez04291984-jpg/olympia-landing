@@ -6,23 +6,23 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const useInView = (threshold = 0.1) => {
     const [isInView, setIsInView] = useState(false)
     const ref = useRef(null)
-    
+
     useEffect(() => {
         const observer = new IntersectionObserver(([entry]) => {
             setIsInView(entry.isIntersecting)
-        }, { threshold }) 
-        
+        }, { threshold })
+
         if (ref.current) {
             observer.observe(ref.current)
         }
-        
+
         return () => {
             if (ref.current) {
                 observer.unobserve(ref.current)
             }
         }
     }, [threshold])
-    
+
     return [ref, isInView]
 }
 
@@ -52,14 +52,14 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
 
         setStatus('checking');
         setExplanation('');
-        
+
         const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
         if (!API_KEY) {
             // Fallback simulated async check if no API key
             setTimeout(() => {
                 const normalizedInput = location.toLowerCase().trim();
-                const isServed = serviceAreas.some(area => 
+                const isServed = serviceAreas.some(area =>
                     area.toLowerCase().includes(normalizedInput)
                 );
                 if (isServed) {
@@ -76,7 +76,7 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
         try {
             const genAI = new GoogleGenerativeAI(API_KEY);
             const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-            
+
             const prompt = `
             You are an intelligent intake assistant for Olympia Home Health (based in Huntington Beach, CA).
             A user has entered the following message to check if we serve them: "${location}".
@@ -93,20 +93,20 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
               "message": "A short, empathetic sentence explaining the result. E.g., 'Great news! We serve Huntington Beach and can definitely help with post-surgery physical therapy.' OR 'We primarily serve Orange County, but let's see what we can do for your specific needs.'"
             }
             `;
-            
+
             const result = await model.generateContent(prompt);
             let responseText = result.response.text().trim();
             console.log("Raw Gemini Response:", responseText); // Debugging line
-            
+
             // Clean up any potential markdown formatting the model might still add
             responseText = responseText.replace(/```json/g, '').replace(/```/g, '');
             const match = responseText.match(/\{[\s\S]*\}/);
             if (match) {
                 responseText = match[0];
             }
-            
+
             const data = JSON.parse(responseText);
-            
+
             setExplanation(data.message);
             setStatus(data.isServed ? 'served' : 'unserved');
         } catch (error) {
@@ -118,13 +118,13 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
             setExplanation(isServed ? "Great New! We serve your area." : "Please call to confirm availability.");
         }
     };
-    
+
     const renderStatusMessage = () => {
         switch (status) {
             case 'served':
                 return (
                     <div className="bg-emerald-100 border-l-4 border-emerald-500 text-emerald-800 p-4 rounded-lg flex items-start gap-3 mt-6">
-                        <CheckCircle size={24} className="flex-shrink-0 mt-0.5"/>
+                        <CheckCircle size={24} className="flex-shrink-0 mt-0.5" />
                         <div>
                             <p className="font-bold text-lg mb-1">Care is Available</p>
                             <p className="text-emerald-700">{explanation}</p>
@@ -135,7 +135,7 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
             case 'unserved':
                 return (
                     <div className="bg-red-100 border-l-4 border-red-500 text-red-800 p-4 rounded-lg flex items-start gap-3 mt-6">
-                        <XCircle size={24} className="flex-shrink-0 mt-0.5"/>
+                        <XCircle size={24} className="flex-shrink-0 mt-0.5" />
                         <div>
                             <p className="font-bold text-lg mb-1">Let's Discuss Your Needs</p>
                             <p className="text-red-700">{explanation}</p>
@@ -146,7 +146,7 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
             case 'checking':
                 return (
                     <div className="bg-purple-100 text-purple-800 p-4 rounded-lg flex items-center justify-center gap-3 mt-6">
-                        <Loader2 size={20} className="animate-spin"/>
+                        <Loader2 size={20} className="animate-spin" />
                         <p>Analyzing your request...</p>
                     </div>
                 );
@@ -161,7 +161,7 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
 
     return (
         <div className="max-w-2xl mx-auto p-8 bg-white rounded-3xl shadow-xl border-t-4 border-purple-500 relative overflow-hidden">
-             
+
             <h4 className="text-2xl font-bold text-gray-900 text-center mb-2">
                 Intelligent Care Matcher
             </h4>
@@ -174,7 +174,7 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
                     value={location}
                     onChange={(e) => {
                         setLocation(e.target.value);
-                        if (status !== 'initial') setStatus('initial'); 
+                        if (status !== 'initial') setStatus('initial');
                     }}
                     required
                     className="flex-grow p-4 border border-purple-300 rounded-xl focus:ring-2 focus:ring-purple-500 transition duration-300 text-gray-800 placeholder-gray-400"
@@ -191,15 +191,15 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
                     )}
                 </button>
             </form>
-            
+
             {renderStatusMessage()}
 
             {status === 'served' && (
-                <a 
-                    href="#contact" 
+                <a
+                    href="#contact"
                     className="mt-6 w-full inline-flex items-center justify-center px-6 py-3 text-lg font-bold text-white bg-emerald-500 rounded-xl hover:bg-emerald-600 transition-all"
                 >
-                    Start My Care Now <ArrowRight size={20} className="ml-2"/>
+                    Start My Care Now <ArrowRight size={20} className="ml-2" />
                 </a>
             )}
         </div>
@@ -209,7 +209,7 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
 
 
 const About = () => {
-    const [ref, isInView] = useInView() 
+    const [ref, isInView] = useInView()
 
     // Coverage from San Diego County to Kern County
     const serviceAreas = [
@@ -253,9 +253,9 @@ const About = () => {
             {/* Background Elements */}
             <div className="absolute top-20 left-0 w-96 h-96 bg-emerald-100 rounded-full filter blur-3xl opacity-20"></div>
             <div className="absolute bottom-20 right-0 w-96 h-96 bg-purple-100 rounded-full filter blur-3xl opacity-20"></div>
-            
+
             <div ref={ref} className="max-w-7xl mx-auto px-6 relative z-10">
-                
+
                 {/* Section Header */}
                 <div className={`text-center mb-16 transition-all duration-1000 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
                     <span className="inline-block px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold mb-4">
@@ -274,7 +274,7 @@ const About = () => {
 
                 {/* Main Content Grid - Mission Statement and Commitments */}
                 <div className="grid md:grid-cols-2 gap-12 items-start mb-16">
-                    
+
                     {/* Left Column: Mission Statement */}
                     <div className={`transition-all duration-1000 ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`}>
                         <div className="bg-gradient-to-br from-purple-50 to-white rounded-3xl p-8 shadow-2xl border-2 border-purple-200 h-full">
@@ -298,14 +298,14 @@ const About = () => {
                     {/* Right Column: Core Commitments */}
                     <div className={`transition-all duration-1000 delay-300 ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`}>
                         <div className="bg-gradient-to-br from-white to-purple-100 rounded-3xl p-8 shadow-2xl border-2 border-purple-200 h-full">
-                             <h3 className="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                            <h3 className="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-3">
                                 <Award className="text-purple-600 w-8 h-8" /> Our Unwavering Commitments
                             </h3>
                             <div className="space-y-4">
                                 {commitments.map((item, i) => (
-                                    <CommitmentCard 
-                                        key={i} 
-                                        title={item.title} 
+                                    <CommitmentCard
+                                        key={i}
+                                        title={item.title}
                                         description={item.description}
                                         icon={item.icon}
                                     />
@@ -320,15 +320,16 @@ const About = () => {
                     <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-3xl p-8 border-2 border-yellow-200 shadow-xl overflow-hidden relative">
                         {/* Decorative background circle */}
                         <div className="absolute -right-20 -top-20 w-64 h-64 bg-yellow-200 rounded-full opacity-20"></div>
-                        
+
                         <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
                             <div className="relative group">
                                 <div className="absolute inset-0 bg-yellow-400/20 rounded-full blur-2xl animate-pulse"></div>
-                                <img 
-                                    src="/achc-logo.png" 
-                                    alt="ACHC Certification" 
-                                    className="relative w-40 h-40 object-contain drop-shadow-xl transform transition-transform group-hover:rotate-6 active:scale-95" 
-                                />
+                                <div className="achc-seal-container achc-seal-shadow w-40 h-40 transform transition-transform group-hover:rotate-6 active:scale-95">
+                                    <img
+                                        src="/ACHC.png"
+                                        alt="ACHC Certification"
+                                    />
+                                </div>
                             </div>
                             <div className="flex-1 text-center md:text-left">
                                 <span className="inline-block px-4 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm font-bold mb-3 uppercase tracking-wider">
@@ -355,7 +356,7 @@ const About = () => {
                     <p className="text-lg text-gray-600 mb-10 text-center max-w-3xl mx-auto">
                         **We bring exceptional, trusted healthcare directly to your home.** Verify your service availability instantly and start your care plan today.
                     </p>
-                    
+
                     <ServiceAreaChecker serviceAreas={serviceAreas} />
                 </div>
 
@@ -363,7 +364,7 @@ const About = () => {
                 <div className={`mb-16 transition-all duration-1000 delay-600 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
                     <div className="bg-gradient-to-br from-purple-600 to-purple-900 rounded-3xl p-8 md:p-12 shadow-2xl text-white">
                         <div className="grid md:grid-cols-2 gap-12 items-center">
-                            
+
                             {/* Left: Service Areas List */}
                             <div>
                                 <div className="flex items-center gap-3 mb-6">
@@ -396,27 +397,27 @@ const About = () => {
                                     <p className="text-purple-100 text-sm">
                                         <strong className="text-white">Need Confirmation?</strong> If your area isn't listed, please contact us Monday–Friday, 9AM–5PM at <a href="tel:6573770776" className="text-emerald-300 hover:text-emerald-200 transition-colors font-semibold">(657) 377-0776</a> to confirm availability.
                                     </p>
-                                                    {/* Right: Interactive Map */}
-                            <div className="relative">
-                                <div className="bg-white rounded-2xl p-4 shadow-2xl">
-                                    <iframe
-                                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3322.123!2d-117.9530!3d33.6846!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80dd268e46639c73%3A0x5fa279993a2740d6!2s20422%20Beach%20Blvd%20%23320%2C%20Huntington%20Beach%2C%20CA%2092648!5e0!3m2!1sen!2sus!4v1234567890" 
-                                        width="100%"
-                                        height="400"
-                                        style={{ border: 0, borderRadius: '12px' }}
-                                        allowFullScreen=""
-                                        loading="lazy"
-                                        referrerPolicy="no-referrer-when-downgrade"
-                                        title="Olympia Home Health Location"
-                                    ></iframe>
-                                    <div className="mt-4 text-center">
-                                        <p className="text-gray-900 font-semibold">Our Office</p>
-                                        <p className="text-gray-600 text-sm">20422 Beach Blvd, Suite 320, Huntington Beach, CA 92648</p>
+                                    {/* Right: Interactive Map */}
+                                    <div className="relative">
+                                        <div className="bg-white rounded-2xl p-4 shadow-2xl">
+                                            <iframe
+                                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3322.123!2d-117.9530!3d33.6846!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80dd268e46639c73%3A0x5fa279993a2740d6!2s20422%20Beach%20Blvd%20%23320%2C%20Huntington%20Beach%2C%20CA%2092648!5e0!3m2!1sen!2sus!4v1234567890"
+                                                width="100%"
+                                                height="400"
+                                                style={{ border: 0, borderRadius: '12px' }}
+                                                allowFullScreen=""
+                                                loading="lazy"
+                                                referrerPolicy="no-referrer-when-downgrade"
+                                                title="Olympia Home Health Location"
+                                            ></iframe>
+                                            <div className="mt-4 text-center">
+                                                <p className="text-gray-900 font-semibold">Our Office</p>
+                                                <p className="text-gray-600 text-sm">20422 Beach Blvd, Suite 320, Huntington Beach, CA 92648</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-        </div>
-        </div>
                         </div>
                     </div>
                 </div>
@@ -431,8 +432,8 @@ const About = () => {
 
                 {/* CTA Button - HIGHLY IMPROVED MARKETING CTA */}
                 <div className="text-center">
-                    <a 
-                        href="#contact" 
+                    <a
+                        href="#contact"
                         className="inline-flex items-center justify-center px-10 py-5 text-xl font-bold text-white bg-gradient-to-r from-purple-600 to-purple-800 rounded-full hover:from-purple-700 hover:to-purple-900 shadow-xl transition-all hover:scale-105 hover:shadow-purple-400/50"
                     >
                         Schedule Your Free Consultation

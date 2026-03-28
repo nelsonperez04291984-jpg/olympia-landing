@@ -27,7 +27,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import ICD10Search from '../components/ICD10Search';
 
 const AdminDashboard = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userRole, setUserRole] = useState('admin');
     const [activeTab, setActiveTab] = useState('overview'); // 'overview' or 'users'
     const [stats, setStats] = useState({

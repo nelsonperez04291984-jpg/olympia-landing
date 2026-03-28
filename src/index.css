@@ -9,33 +9,41 @@ html, body, #root {
 /* small helpers */
 .shadow-soft { box-shadow: 0 6px 24px rgba(16,24,40,0.08); }
 
-/* --- START SCROLLBAR CUSTOMIZATION FOR PURPLE BACKGROUND ---
-  This targets the white scrollbar track shown on the right side of the viewport.
-*/
-
-/* Custom Scrollbar for Webkit (Chrome, Safari, Edge) */
-body::-webkit-scrollbar {
-  width: 12px; /* Defines the overall width of the scrollbar */
-}
-
-body::-webkit-scrollbar-track {
-  /* Sets the background of the track to match a deep purple */
-  background: #3e277c; 
-}
-
+/* --- START SCROLLBAR CUSTOMIZATION FOR PURPLE BACKGROUND --- */
+body::-webkit-scrollbar { width: 12px; }
+body::-webkit-scrollbar-track { background: #3e277c; }
 body::-webkit-scrollbar-thumb {
-  /* Styles the movable handle */
-  background-color: #a96cd1; /* Lighter purple for visibility/contrast */
+  background-color: #a96cd1;
   border-radius: 20px;
-  /* Adds a border that matches the track color to prevent gaps */
   border: 3px solid #3e277c; 
 }
-
-/* Custom Scrollbar for Firefox */
 html {
-  /* Sets thumb color (#a96cd1) and track color (#3e277c) */
   scrollbar-color: #a96cd1 #3e277c; 
-  scrollbar-width: thin; /* Reduces width slightly for a cleaner look */
+  scrollbar-width: thin;
+}
+/* --- END SCROLLBAR CUSTOMIZATION --- */
+
+/* --- ACHC Seal Fixes --- */
+.achc-seal-container {
+    display: inline-block;
+    border-radius: 9999px; /* Circle */
+    overflow: hidden;
+    background: white; /* Fallback to solid white if transparent fails */
+    line-height: 0;
 }
 
-/* --- END SCROLLBAR CUSTOMIZATION --- */
+.achc-seal-container img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.05); /* Slight zoom to push checkerboard out of bounds */
+}
+
+.achc-seal-shadow {
+    filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.15));
+}
+
+.achc-seal-shadow-dark {
+    filter: drop-shadow(0 0 20px rgba(24acc, 179, 8, 0.3));
+}
