@@ -37,6 +37,8 @@ const ICD10Search = () => {
                 "code": "ICD-10 Code",
                 "description": "Full Official Description",
                 "pdgm_grouping": "PDGM Clinical Grouping",
+                "reimbursement_weight": "Estimated Reimbursement Impact (e.g. High, Medium, Standard)",
+                "clinical_rank": "Clinical Priority Ranking (1-10 or Primary/Secondary)",
                 "is_primary_allowed": true/false,
                 "comorbidity_hits": "Description of comorbidity tier impact",
                 "clinical_tips": ["Tip 1", "Tip 2"],
@@ -145,10 +147,18 @@ const ICD10Search = () => {
                                     </div>
                                     <h4 className="text-3xl font-black mb-4 leading-tight">{results.description}</h4>
                                     
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
                                         <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
                                             <p className="text-[10px] font-black uppercase text-teal-400 mb-1">Clinical Grouping</p>
                                             <p className="font-bold text-slate-200">{results.pdgm_grouping || 'N/A'}</p>
+                                        </div>
+                                        <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
+                                            <p className="text-[10px] font-black uppercase text-teal-400 mb-1">Reimbursement Tier</p>
+                                            <p className="font-bold text-slate-200">{results.reimbursement_weight || 'Standard'}</p>
+                                        </div>
+                                        <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
+                                            <p className="text-[10px] font-black uppercase text-teal-400 mb-1">Clinical Priority</p>
+                                            <p className="font-bold text-slate-200">{results.clinical_rank || 'N/A'}</p>
                                         </div>
                                         <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
                                             <p className="text-[10px] font-black uppercase text-teal-400 mb-1">Comorbidity Impact</p>
