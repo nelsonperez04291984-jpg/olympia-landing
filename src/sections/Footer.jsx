@@ -9,9 +9,13 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid md:grid-cols-5 gap-8 mb-8">
           <div className="md:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
-              <img src="/logo.png" alt="Olympia Logo" className="w-10 h-10 object-contain rounded-full" />
-              <span className="font-bold text-xl text-white">Olympia Home Health</span>
+            <div className="flex items-center gap-6 mb-4">
+              <div className="flex items-center gap-3">
+                <img src="/logo.png" alt="Olympia Logo" className="w-10 h-10 object-contain rounded-full" />
+                <span className="font-bold text-xl text-white">Olympia Home Health</span>
+              </div>
+              <div className="h-8 w-px bg-gray-700 mx-2 hidden sm:block"></div>
+              <img src="/achc-logo.png" alt="ACHC Accredited" className="w-12 h-12 object-contain" />
             </div>
             <p className="text-gray-500 max-w-md mb-4">
               Caring Beyond Limits - Provides the highest quality of healthcare professionals in the comfort of your home.

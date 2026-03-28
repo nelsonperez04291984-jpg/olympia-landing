@@ -171,6 +171,22 @@ const Hero = () => {
             </a>
           </div>
 
+          {/* ACHC Accreditation Badge */}
+          <div className="mt-12 flex flex-col items-center animate-fadeInUp animation-delay-1000">
+            <div className="relative group cursor-pointer">
+              <div className="absolute inset-0 bg-yellow-400/20 rounded-full blur-xl group-hover:bg-yellow-400/30 transition-all"></div>
+              <img 
+                src="/achc-logo.png" 
+                alt="ACHC Accredited" 
+                className="relative w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-2xl transition-transform group-hover:scale-110" 
+              />
+            </div>
+            <p className="mt-4 text-yellow-100 font-semibold tracking-wide uppercase text-sm md:text-base">
+              Accredited by the Accreditation Commission for Health Care
+            </p>
+            <div className="w-24 h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent mt-2 opacity-50"></div>
+          </div>
+
           {/* Scroll Indicator */}
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
             <ChevronDown className="text-white" size={32} />
