@@ -20,9 +20,11 @@ import {
   ClipboardCheck,
   Package,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Stethoscope
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import ICD10Search from '../components/ICD10Search';
 
 const AdminDashboard = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -326,6 +328,12 @@ const AdminDashboard = () => {
                     >
                         <ClipboardCheck size={20} /> Referral Intake
                     </button>
+                    <button 
+                        onClick={() => setActiveTab('clinical')}
+                        className={`w-full p-4 rounded-xl font-bold flex items-center gap-3 transition-all ${activeTab === 'clinical' ? 'bg-teal-500/10 border border-teal-500/20 text-teal-400' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+                    >
+                        <Stethoscope size={20} /> Clinical Tools
+                    </button>
                     <div className="p-4 text-slate-400 hover:bg-white/5 hover:text-white rounded-xl transition-all cursor-pointer flex items-center gap-3">
                         <MessageSquare size={20} /> AI Conversation Logs
                     </div>
@@ -355,10 +363,10 @@ const AdminDashboard = () => {
                 <header className="flex items-center justify-between mb-12">
                     <div>
                         <h1 className="text-4xl font-black text-slate-900">
-                            {activeTab === 'overview' ? 'System Overview' : activeTab === 'referrals' ? 'Referral Intake' : 'User Maintenance'}
+                            {activeTab === 'overview' ? 'System Overview' : activeTab === 'referrals' ? 'Referral Intake' : activeTab === 'clinical' ? 'Clinical Tools' : 'User Maintenance'}
                         </h1>
                         <p className="text-slate-500 mt-1">
-                            {activeTab === 'overview' ? 'Real-time platform metrics and audit logs.' : activeTab === 'referrals' ? 'Review and approve incoming patient referrals.' : 'Manage partner providers and internal staff accounts.'}
+                            {activeTab === 'overview' ? 'Real-time platform metrics and audit logs.' : activeTab === 'referrals' ? 'Review and approve incoming patient referrals.' : activeTab === 'clinical' ? 'AI-powered clinical coding and PDGM intelligence.' : 'Manage partner providers and internal staff accounts.'}
                         </p>
                     </div>
                     <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 px-6 h-16">
@@ -585,6 +593,10 @@ const AdminDashboard = () => {
                                 </table>
                             </div>
                         </div>
+                    </div>
+                ) : activeTab === 'clinical' ? (
+                    <div className="animate-fadeIn">
+                        <ICD10Search />
                     </div>
                 ) : (
                     <div className="max-w-6xl bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden animate-fadeIn">

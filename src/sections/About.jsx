@@ -396,10 +396,7 @@ const About = () => {
                                     <p className="text-purple-100 text-sm">
                                         <strong className="text-white">Need Confirmation?</strong> If your area isn't listed, please contact us Monday–Friday, 9AM–5PM at <a href="tel:6573770776" className="text-emerald-300 hover:text-emerald-200 transition-colors font-semibold">(657) 377-0776</a> to confirm availability.
                                     </p>
-                                </div>
-                            </div>
-
-                            {/* Right: Interactive Map (Original structure preserved) */}
+                                                    {/* Right: Interactive Map */}
                             <div className="relative">
                                 <div className="bg-white rounded-2xl p-4 shadow-2xl">
                                     <iframe
@@ -418,6 +415,8 @@ const About = () => {
                                     </div>
                                 </div>
                             </div>
+        </div>
+        </div>
                         </div>
                     </div>
                 </div>
