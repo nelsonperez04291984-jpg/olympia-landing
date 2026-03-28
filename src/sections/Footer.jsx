@@ -11,7 +11,7 @@ const Footer = () => {
           <div className="md:col-span-2">
             <div className="flex items-center gap-6 mb-4">
               <div className="flex items-center gap-3">
-                <img src="/logo_latest.png" alt="Olympia Logo" className="w-10 h-10 object-contain rounded-full" />
+                <img src="/log_latest.png" alt="Olympia Logo" className="w-10 h-10 object-contain rounded-full" />
                 <span className="font-bold text-xl text-white">Olympia Home Health</span>
               </div>
               <div className="h-8 w-px bg-gray-700 mx-2 hidden sm:block"></div>
