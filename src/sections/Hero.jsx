@@ -25,7 +25,7 @@ const Hero = () => {
               <div className="relative">
                 <div className="absolute inset-0 bg-purple-600 rounded-full blur-md opacity-50 group-hover:opacity-75 transition-opacity"></div>
                 {/* FIX: removed rounded-full and ring classes from img; the logo is already circular */}
-                <img src="/logo.png" alt="Olympia Logo" className="relative w-12 h-12 object-contain" />
+                <img src="/logo_latest.png" alt="Olympia Logo" className="relative w-12 h-12 object-contain" />
               </div>
               <span className={`font-bold text-xl transition-all duration-300 ${scrolled ? 'text-purple-700' : 'text-white drop-shadow-lg'}`}>
                 Olympia Home Health
@@ -133,7 +133,7 @@ const Hero = () => {
               <div className="absolute inset-0 bg-white rounded-full blur-2xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
               {/* FIX: removed rounded-full and ring classes from img; the logo is already circular */}
               <img
-                src="/logo.png"
+                src="/logo_latest.png"
                 alt="Olympia Logo"
                 className="relative w-32 h-32 object-contain shadow-2xl mx-auto group-hover:scale-110 transition-all"
               />
