@@ -39,9 +39,31 @@ const AdminDashboard = () => {
     });
     const [staffList, setStaffList] = useState([]);
     const [referrals, setReferrals] = useState([]);
+    const [activeEpisode, setActiveEpisode] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+
+    const handleAssessAndCode = (referral) => {
+        setActiveEpisode(referral);
+        setActiveTab('clinical');
+    };
+
+    const handleSaveDiagnosis = (referralId, diagnosisData) => {
+        // Update local state for immediate UI feedback
+        setReferrals(prev => prev.map(r => 
+            r.id === referralId 
+                ? { 
+                    ...r, 
+                    status: 'Processing',
+                    icd_primary: diagnosisData.primary,
+                    icd_secondary: diagnosisData.secondary,
+                    pdgm_weight: diagnosisData.weight
+                  } 
+                : r
+        ));
+        setActiveEpisode(null);
+    };
 
     // Admin login inputs
     const [username, setUsername] = useState('');
@@ -560,6 +582,13 @@ const AdminDashboard = () => {
                                                                     <Activity size={16} />
                                                                 </button>
                                                             )}
+                                                            <button 
+                                                                onClick={() => handleAssessAndCode(r)}
+                                                                className="p-2 bg-teal-50 text-teal-600 rounded-lg hover:bg-teal-100 transition-colors"
+                                                                title="Assess & Code Diagnosis"
+                                                            >
+                                                                <Stethoscope size={16} />
+                                                            </button>
                                                             {r.status === 'Processing' && (
                                                                 <button 
                                                                     onClick={() => handleUpdateReferralStatus(r.id, 'Admitted')}
@@ -577,6 +606,11 @@ const AdminDashboard = () => {
                                                                 <X size={16} />
                                                             </button>
                                                         </div>
+                                                        {r.icd_primary && (
+                                                            <div className="flex items-center gap-1.5 text-[9px] font-black text-teal-600 uppercase tracking-widest bg-teal-50 px-2 py-1 rounded-md border border-teal-100 mt-1">
+                                                                <ShieldCheck size={10} /> ICD CODES ASSIGNED
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -596,7 +630,10 @@ const AdminDashboard = () => {
                     </div>
                 ) : activeTab === 'clinical' ? (
                     <div className="animate-fadeIn">
-                        <DiagnosisAssessment />
+                        <DiagnosisAssessment 
+                            referralData={activeEpisode} 
+                            onSave={(data) => handleSaveDiagnosis(activeEpisode.id, data)}
+                        />
                     </div>
                 ) : (
                     <div className="max-w-6xl bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden animate-fadeIn">

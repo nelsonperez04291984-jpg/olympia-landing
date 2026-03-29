@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import ICD10Search from './ICD10Search';
 
-const DiagnosisAssessment = () => {
+const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
     const [primaryDiagnosis, setPrimaryDiagnosis] = useState(null);
     const [secondaryDiagnoses, setSecondaryDiagnoses] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -36,6 +36,10 @@ const DiagnosisAssessment = () => {
             // Avoid duplicates
             if (!secondaryDiagnoses.find(d => d.code === codeData.code)) {
                 setSecondaryDiagnoses([...secondaryDiagnoses, codeData]);
+                // Automatically set low comorbidity if this is the first secondary
+                if (secondaryDiagnoses.length === 0 && comorbidityAdjustment === 'none') {
+                    setComorbidityAdjustment('low');
+                }
             }
         }
         setIsSearching(false);
@@ -45,20 +49,42 @@ const DiagnosisAssessment = () => {
         setSecondaryDiagnoses(secondaryDiagnoses.filter(d => d.code !== code));
     };
 
-    const totalEstimatedPayment = useMemo(() => {
-        if (!primaryDiagnosis) return 0;
+    const calculatePDGMData = (baseWeight) => {
+        if (!baseWeight) return { amount: '0.00', weight: '0.0000' };
         
-        let base = parseFloat(primaryDiagnosis.calculated_payment);
+        const BASE_RATE = 2038.39;
+        let multiplier = 1.0;
+
+        // Apply Factors
+        if (admissionSource === 'institutional') multiplier *= 1.2;
+        if (episodeTiming === 'early') multiplier *= 1.15;
         
-        // Comorbidity boost sim logic
-        if (secondaryDiagnoses.length > 0) {
-            base *= 1.1; // Simple comorbidity boost for demo
-        }
-        
-        return base.toFixed(2);
-    }, [primaryDiagnosis, secondaryDiagnoses]);
+        if (functionalLevel === 'high') multiplier *= 1.4;
+        else if (functionalLevel === 'medium') multiplier *= 1.25;
+
+        if (comorbidityAdjustment === 'high') multiplier *= 1.2;
+        else if (comorbidityAdjustment === 'low') multiplier *= 1.1;
+
+        const finalWeight = (parseFloat(baseWeight) * multiplier).toFixed(4);
+        const amount = (parseFloat(finalWeight) * BASE_RATE).toFixed(2);
+
+        return { amount, weight: finalWeight };
+    };
+
+    const analytics = useMemo(() => {
+        return calculatePDGMData(primaryDiagnosis?.base_weight || 0);
+    }, [primaryDiagnosis, admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment]);
 
     const handleSave = () => {
+        if (onSave) {
+            onSave({
+                primary: primaryDiagnosis?.code,
+                secondary: secondaryDiagnoses.map(d => d.code),
+                weight: analytics.weight,
+                payment: analytics.amount,
+                context: { admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment }
+            });
+        }
         setShowSaveMessage(true);
         setTimeout(() => setShowSaveMessage(false), 3000);
     };
@@ -69,13 +95,24 @@ const DiagnosisAssessment = () => {
             {/* Main Assessment Area */}
             <div className="lg:col-span-8 space-y-6">
                 
-                {/* SOC Navigation Breadcrumb */}
-                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 bg-white/50 w-fit px-4 py-2 rounded-full border border-slate-100">
-                    <span>Patient Chart</span>
-                    <ChevronRight size={10} />
-                    <span>Start of Care Assessment</span>
-                    <ChevronRight size={10} />
-                    <span className="text-teal-600">Diagnoses Section</span>
+                {/* SOC Navigation Breadcrumb + Patient Context */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 bg-white/50 w-fit px-4 py-2 rounded-full border border-slate-100">
+                        <span>Patient Chart</span>
+                        <ChevronRight size={10} />
+                        <span>SOC Assessment</span>
+                        <ChevronRight size={10} />
+                        <span className="text-teal-600">Diagnoses</span>
+                    </div>
+                    {referralData && (
+                        <div className="flex items-center gap-3 bg-slate-900 text-white px-5 py-2 rounded-2xl shadow-lg border border-slate-800">
+                            <div className="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-[10px] font-black">{referralData.patient_name.charAt(0)}</div>
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-tighter leading-none">Active Case</p>
+                                <p className="text-xs font-bold text-teal-400">{referralData.patient_name} <span className="text-slate-500 mx-1">|</span> {referralData.patient_dob}</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
@@ -110,7 +147,7 @@ const DiagnosisAssessment = () => {
                                             <h5 className="text-xl font-black text-slate-900 mb-2">{primaryDiagnosis.description}</h5>
                                             <div className="flex items-center gap-4">
                                                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Group: {primaryDiagnosis.pdgm_grouping}</span>
-                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Weight: {primaryDiagnosis.final_weight}</span>
+                                                <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest bg-teal-50 px-2 py-0.5 rounded">Current Case Weight: {analytics.weight}</span>
                                             </div>
                                         </div>
                                         <button 
@@ -228,6 +265,17 @@ const DiagnosisAssessment = () => {
                                 ))}
                             </div>
                         </div>
+                        <div className="space-y-2">
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Comorbidity Adjustment</label>
+                            <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-100">
+                                {['none', 'low', 'high'].map(level => (
+                                    <button key={level} onClick={() => setComorbidityAdjustment(level)} className={`flex-1 py-2 text-[9px] font-black rounded-lg transition-all uppercase ${comorbidityAdjustment === level ? 'bg-white text-orange-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>{level}</button>
+                                ))}
+                            </div>
+                            <p className="text-[8px] text-slate-400 italic ml-1 mt-1">
+                                {secondaryDiagnoses.length > 0 ? 'Secondary codes detected (Assigned: Lower/Higher).' : 'No secondary codes selected.'}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -240,9 +288,9 @@ const DiagnosisAssessment = () => {
                     <div className="space-y-8 relative z-10">
                         <div>
                             <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Estimated Episode Payment</p>
-                            <h2 className="text-4xl font-black text-white flex items-start gap-1">
+                            <h2 className="text-4xl font-black text-white flex items-start gap-1 tabular-nums transition-all">
                                 <span className="text-xl mt-1 text-teal-500 font-bold">$</span>
-                                {parseFloat(totalEstimatedPayment).toLocaleString()}
+                                <span key={analytics.amount} className="animate-pulse-subtle">{parseFloat(analytics.amount).toLocaleString()}</span>
                             </h2>
                         </div>
 
@@ -253,15 +301,15 @@ const DiagnosisAssessment = () => {
                             </div>
                             <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
                                 <p className="text-[8px] font-black uppercase text-teal-400 mb-1">Combined Weight</p>
-                                <p className="font-bold text-xs">{primaryDiagnosis ? (secondaryDiagnoses.length > 0 ? (parseFloat(primaryDiagnosis.final_weight) * 1.1).toFixed(4) : primaryDiagnosis.final_weight) : '0.0000'}</p>
+                                <p className="font-bold text-xs">{analytics.weight}</p>
                             </div>
                         </div>
 
-                        {primaryDiagnosis && secondaryDiagnoses.length > 0 && (
-                            <div className="flex items-center gap-3 p-4 bg-teal-500/10 border border-teal-500/20 rounded-2xl animate-pulse">
+                        {comorbidityAdjustment !== 'none' && (
+                            <div className="flex items-center gap-3 p-4 bg-teal-500/10 border border-teal-500/20 rounded-2xl">
                                 <Zap size={16} className="text-teal-400 flex-shrink-0" />
-                                <p className="text-[10px] font-bold text-teal-100 leading-tight">
-                                    Comorbidity adjustment applied. Revenue impact: +10.0%
+                                <p className="text-[10px] font-bold text-teal-100 leading-tight uppercase tracking-widest">
+                                    {comorbidityAdjustment} Comorbidity adjustment applied
                                 </p>
                             </div>
                         )}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Loader2, Clipboard, CheckCircle2, AlertCircle, Stethoscope, Info, TrendingUp, DollarSign, Activity, FileText } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
@@ -16,9 +16,9 @@ const ICD10Search = ({ isEmbedded = false, onSelect = null, externalContext = nu
 
     const BASE_RATE = 2038.39; 
 
-    const calculateReimbursement = (baseWeight) => {
-        // Use external context if provided (embedded mode), otherwise use local state
-        const ctx = externalContext || { admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment };
+    const calculateReimbursement = (baseWeight, ctxOverride = null) => {
+        // Use provided context, external context, or local state
+        const ctx = ctxOverride || externalContext || { admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment };
         
         let multiplier = 1.0;
         if (ctx.admissionSource === 'institutional') multiplier *= 1.2;
@@ -28,12 +28,31 @@ const ICD10Search = ({ isEmbedded = false, onSelect = null, externalContext = nu
         if (ctx.comorbidityAdjustment === 'high') multiplier *= 1.2;
         else if (ctx.comorbidityAdjustment === 'low') multiplier *= 1.1;
 
-        const weight = baseWeight * multiplier;
+        const weight = parseFloat(baseWeight) * multiplier;
         return {
             amount: (BASE_RATE * weight).toFixed(2),
             finalWeight: weight.toFixed(4)
         };
     };
+
+    // Keep results reactive to context changes
+    useEffect(() => {
+        if (results && results.length > 0) {
+            const updatedResults = results.map(item => {
+                const calc = calculateReimbursement(item.base_weight);
+                return {
+                    ...item,
+                    calculated_payment: calc.amount,
+                    final_weight: calc.finalWeight
+                };
+            }).sort((a, b) => b.calculated_payment - a.calculated_payment);
+            
+            // Only update if the values actually changed to avoid infinite loops
+            if (JSON.stringify(updatedResults) !== JSON.stringify(results)) {
+                setResults(updatedResults);
+            }
+        }
+    }, [externalContext, admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment]);
 
     const handleSearch = async (e) => {
         e.preventDefault();
