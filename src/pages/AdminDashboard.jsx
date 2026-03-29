@@ -630,10 +630,59 @@ const AdminDashboard = () => {
                     </div>
                 ) : activeTab === 'clinical' ? (
                     <div className="animate-fadeIn">
-                        <DiagnosisAssessment 
-                            referralData={activeEpisode} 
-                            onSave={(data) => handleSaveDiagnosis(activeEpisode.id, data)}
-                        />
+                        {!activeEpisode ? (
+                            <div className="max-w-6xl mx-auto space-y-8">
+                                <div className="bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden text-center p-20">
+                                    <div className="w-24 h-24 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-8">
+                                        <Stethoscope className="text-teal-600 w-12 h-12" />
+                                    </div>
+                                    <h3 className="text-3xl font-black text-slate-900 mb-4 uppercase tracking-tight">Clinical Episode Directory</h3>
+                                    <p className="text-slate-500 max-w-md mx-auto mb-12">Search or select a patient referral below to begin the clinical assessment and PDGM coding process.</p>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+                                        {referrals.filter(r => r.status !== 'Rejected').map((r, i) => (
+                                            <button 
+                                                key={i} 
+                                                onClick={() => setActiveEpisode(r)}
+                                                className="p-6 bg-slate-50 border border-slate-100 rounded-[32px] hover:border-teal-500 hover:bg-white hover:shadow-xl transition-all group group-hover:scale-[1.02]"
+                                            >
+                                                <div className="flex items-center gap-4 mb-4">
+                                                    <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-black text-xs uppercase group-hover:bg-teal-500 group-hover:text-white transition-colors">
+                                                        {r.patient_name.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-black text-slate-900 uppercase text-xs tracking-tight">{r.patient_name}</p>
+                                                        <p className="text-[10px] font-bold text-slate-400">DOB: {r.patient_dob}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center justify-between pt-4 border-t border-slate-200/50">
+                                                    <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">Open Episode</span>
+                                                    <ArrowRight size={14} className="text-slate-300 group-hover:text-teal-500 group-hover:translate-x-1 transition-all" />
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between max-w-[1400px] mx-auto mb-4 px-2">
+                                    <button 
+                                        onClick={() => setActiveEpisode(null)}
+                                        className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-red-500 transition-colors"
+                                    >
+                                        <X size={14} /> Close Active Episode
+                                    </button>
+                                    <div className="flex items-center gap-2 text-[10px] font-black text-teal-600 bg-teal-50 px-4 py-2 rounded-full border border-teal-100 uppercase tracking-widest animate-pulse">
+                                        <div className="w-2 h-2 bg-teal-500 rounded-full"></div> Case Locks in 48h
+                                    </div>
+                                </div>
+                                <DiagnosisAssessment 
+                                    referralData={activeEpisode} 
+                                    onSave={(data) => handleSaveDiagnosis(activeEpisode.id, data)}
+                                />
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="max-w-6xl bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden animate-fadeIn">
