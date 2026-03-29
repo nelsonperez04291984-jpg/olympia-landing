@@ -578,9 +578,9 @@ const AdminDashboard = () => {
                             {item.icon} {item.label}
                         </button>
                     ))}
-                    /*<button style={styles.navBtnPlain}>
+                    {/*<button style={styles.navBtnPlain}>
                         <MessageSquare size={16} /> AI Conversation Logs
-                    </button>
+                    </button>*/}
                 </nav>
 
                 <div style={styles.staffCard}>
