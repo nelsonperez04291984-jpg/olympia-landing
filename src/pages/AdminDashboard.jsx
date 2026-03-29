@@ -24,7 +24,7 @@ import {
   Stethoscope
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import ICD10Search from '../components/ICD10Search';
+import DiagnosisAssessment from '../components/DiagnosisAssessment';
 
 const AdminDashboard = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -596,7 +596,7 @@ const AdminDashboard = () => {
                     </div>
                 ) : activeTab === 'clinical' ? (
                     <div className="animate-fadeIn">
-                        <ICD10Search />
+                        <DiagnosisAssessment />
                     </div>
                 ) : (
                     <div className="max-w-6xl bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden animate-fadeIn">

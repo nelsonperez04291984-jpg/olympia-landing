@@ -2,33 +2,31 @@ import React, { useState } from 'react';
 import { Search, Loader2, Clipboard, CheckCircle2, AlertCircle, Stethoscope, Info, TrendingUp, DollarSign, Activity, FileText } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const ICD10Search = () => {
+const ICD10Search = ({ isEmbedded = false, onSelect = null, externalContext = null }) => {
     const [query, setQuery] = useState('');
     const [results, setResults] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     
-    // Patient Context State for PDGM
-    const [admissionSource, setAdmissionSource] = useState('community'); // 'community' | 'institutional'
-    const [episodeTiming, setEpisodeTiming] = useState('early'); // 'early' | 'late'
-    const [functionalLevel, setFunctionalLevel] = useState('medium'); // 'low' | 'medium' | 'high'
-    const [comorbidityAdjustment, setComorbidityAdjustment] = useState('none'); // 'none' | 'low' | 'high'
+    // Patient Context State for standalone mode
+    const [admissionSource, setAdmissionSource] = useState('community'); 
+    const [episodeTiming, setEpisodeTiming] = useState('early'); 
+    const [functionalLevel, setFunctionalLevel] = useState('medium'); 
+    const [comorbidityAdjustment, setComorbidityAdjustment] = useState('none'); 
 
-    const BASE_RATE = 2038.39; // 2024 PDGM Base Rate
+    const BASE_RATE = 2038.39; 
 
     const calculateReimbursement = (baseWeight) => {
-        // Simplified PDGM calculation logic
-        // Factors based on typical CMS 2024 Case-Mix weight variations
+        // Use external context if provided (embedded mode), otherwise use local state
+        const ctx = externalContext || { admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment };
+        
         let multiplier = 1.0;
-        
-        if (admissionSource === 'institutional') multiplier *= 1.2;
-        if (episodeTiming === 'early') multiplier *= 1.15;
-        
-        if (functionalLevel === 'high') multiplier *= 1.4;
-        else if (functionalLevel === 'medium') multiplier *= 1.25;
-        
-        if (comorbidityAdjustment === 'high') multiplier *= 1.2;
-        else if (comorbidityAdjustment === 'low') multiplier *= 1.1;
+        if (ctx.admissionSource === 'institutional') multiplier *= 1.2;
+        if (ctx.episodeTiming === 'early') multiplier *= 1.15;
+        if (ctx.functionalLevel === 'high') multiplier *= 1.4;
+        else if (ctx.functionalLevel === 'medium') multiplier *= 1.25;
+        if (ctx.comorbidityAdjustment === 'high') multiplier *= 1.2;
+        else if (ctx.comorbidityAdjustment === 'low') multiplier *= 1.1;
 
         const weight = baseWeight * multiplier;
         return {
@@ -55,23 +53,25 @@ const ICD10Search = () => {
 
         try {
             const genAI = new GoogleGenerativeAI(API_KEY);
-            // Current 2026 Flagship model
             const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
             const prompt = `
             You are a professional Medical Coding & PDGM Analyst.
             Search for ICD-10 diagnosis codes related to: "${query}".
             
-            Return a list of the top 4 most relevant codes.
+            IMPORTANT: Support natural language, abbreviations (CVA, CHF, HTN), and clinical synonyms.
+            Return a list of the top 5 most relevant codes.
+            
             For each code, provide:
             1. Official ICD-10 code and description.
-            2. PDGM Clinical Group (e.g., Neuro Rehab, MMTA, Wounds).
-            3. Estimated base Case-Mix Weight (between 0.8 and 2.5).
+            2. PDGM Clinical Group.
+            3. Estimated base Case-Mix Weight (0.8 - 2.5).
             4. Clinical Priority (Primary vs Secondary).
-            5. Implementation tips for documentation.
-            6. Whether it is allowed as a primary diagnosis under PDGM.
+            5. Clinical reasoning for why this code might be a better choice for reimbursement.
+            6. Implementation tips for documentation.
+            7. Whether it is allowed as a primary diagnosis under PDGM.
 
-            Respond ONLY with a strict JSON array of objects.
+            Respond ONLY with a strict JSON array of objects. No markdown.
             [
                 {
                     "code": "ICD-10 Code",
@@ -79,7 +79,8 @@ const ICD10Search = () => {
                     "pdgm_grouping": "Clinical Group",
                     "base_weight": 1.25,
                     "is_primary_allowed": true,
-                    "priority": "Primary",
+                    "priority_recommendation": "Primary/Secondary",
+                    "reasoning": "Brief clinical benefit explanation",
                     "tips": ["Tip 1", "Tip 2"]
                 }
             ]
@@ -93,7 +94,6 @@ const ICD10Search = () => {
             
             const data = JSON.parse(jsonMatch[0]);
             
-            // Calculate and Rank
             const enrichedResults = data.map(item => {
                 const calc = calculateReimbursement(item.base_weight);
                 return {
@@ -112,9 +112,73 @@ const ICD10Search = () => {
         }
     };
 
+    const searchInputUI = (
+        <form onSubmit={handleSearch} className="relative group">
+            <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none transition-colors">
+                <Search className={`w-5 h-5 ${query ? 'text-teal-500' : 'text-slate-400'}`} />
+            </div>
+            <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={isEmbedded ? "Search ICD code or condition (e.g. CVA, stroke, diabetes)..." : "Enter diagnosis description or code to rank reimbursement impact..."}
+                className={`w-full bg-slate-50 border-2 border-slate-100 rounded-2xl pl-14 pr-32 text-slate-900 font-medium focus:outline-none focus:border-teal-500/50 focus:bg-white transition-all shadow-sm ${isEmbedded ? 'py-4 text-sm' : 'py-5'}`}
+            />
+            <button
+                type="submit"
+                disabled={isLoading}
+                className={`absolute right-3 top-1/2 -translate-y-1/2 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg transition-all active:scale-95 disabled:opacity-50 ${isEmbedded ? 'px-4 py-2 text-[10px]' : 'px-8 py-3'}`}
+            >
+                {isLoading ? <Loader2 size={14} className="animate-spin" /> : (isEmbedded ? 'Find Codes' : 'Run PDGM Logic')}
+            </button>
+        </form>
+    );
+
+    if (isEmbedded) {
+        return (
+            <div className="space-y-4">
+                {searchInputUI}
+                {error && <p className="text-xs text-red-500 font-bold ml-1 flex items-center gap-1"><AlertCircle size={14} /> {error}</p>}
+                {results && (
+                    <div className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden shadow-xl animate-fadeInUp max-h-[400px] overflow-y-auto custom-scrollbar">
+                        {results.map((item, index) => (
+                            <div key={item.code} className={`p-4 border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors ${index === 0 ? 'bg-teal-50/10' : ''}`}>
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="px-2 py-0.5 bg-slate-900 text-white rounded text-[10px] font-black">{item.code}</span>
+                                            {index === 0 && <span className="bg-teal-500 text-white px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-tighter shadow-sm shadow-teal-500/20">Recommended</span>}
+                                        </div>
+                                        <h5 className="text-sm font-bold text-slate-900 leading-tight mb-1">{item.description}</h5>
+                                        <div className="flex items-center gap-3 text-[10px] font-medium text-slate-500">
+                                            <span className="flex items-center gap-1"><TrendingUp size={10} className="text-teal-500" /> ${parseFloat(item.calculated_payment).toLocaleString()}</span>
+                                            <span className="flex items-center gap-1 uppercase tracking-tighter text-[9px] font-black text-slate-400">|</span>
+                                            <span className="uppercase tracking-widest text-[8px] font-bold">{item.pdgm_grouping}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col gap-1.5 min-w-[100px]">
+                                        <button 
+                                            onClick={() => onSelect && onSelect(item, 'primary')}
+                                            disabled={!item.is_primary_allowed}
+                                            className="w-full py-1.5 px-3 bg-teal-500 hover:bg-teal-400 disabled:opacity-30 disabled:hover:bg-teal-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all"
+                                        >Primary</button>
+                                        <button 
+                                            onClick={() => onSelect && onSelect(item, 'secondary')}
+                                            className="w-full py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all"
+                                        >+ Comorbidity</button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
     return (
         <div className="max-w-6xl mx-auto animate-fadeIn space-y-8">
-            {/* Header & Context Selector */}
+            {/* Standard standalone UI remains unchanged for backward compatibility or direct access */}
             <div className="bg-white rounded-[32px] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
                 <div className="p-8 border-b border-slate-50 bg-slate-50/30">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -136,43 +200,27 @@ const ICD10Search = () => {
                 </div>
 
                 <div className="p-8 space-y-8">
-                    {/* Patient Context Selectors */}
+                    {/* Patient Context Selectors (Local state used here) */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-6 rounded-3xl border border-slate-100">
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Admission Source</label>
                             <div className="flex bg-white p-1 rounded-xl border border-slate-200">
-                                <button 
-                                    onClick={() => setAdmissionSource('community')}
-                                    className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all ${admissionSource === 'community' ? 'bg-teal-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
-                                >COMMUNITY</button>
-                                <button 
-                                    onClick={() => setAdmissionSource('institutional')}
-                                    className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all ${admissionSource === 'institutional' ? 'bg-teal-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
-                                >INSTITUTIONAL</button>
+                                <button onClick={() => setAdmissionSource('community')} className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all ${admissionSource === 'community' ? 'bg-teal-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>COMMUNITY</button>
+                                <button onClick={() => setAdmissionSource('institutional')} className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all ${admissionSource === 'institutional' ? 'bg-teal-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>INSTITUTIONAL</button>
                             </div>
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Episode Timing</label>
                             <div className="flex bg-white p-1 rounded-xl border border-slate-200">
-                                <button 
-                                    onClick={() => setEpisodeTiming('early')}
-                                    className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all ${episodeTiming === 'early' ? 'bg-blue-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
-                                >EARLY</button>
-                                <button 
-                                    onClick={() => setEpisodeTiming('late')}
-                                    className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all ${episodeTiming === 'late' ? 'bg-blue-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
-                                >LATE</button>
+                                <button onClick={() => setEpisodeTiming('early')} className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all ${episodeTiming === 'early' ? 'bg-blue-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>EARLY</button>
+                                <button onClick={() => setEpisodeTiming('late')} className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all ${episodeTiming === 'late' ? 'bg-blue-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>LATE</button>
                             </div>
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Functional Level</label>
                             <div className="flex bg-white p-1 rounded-xl border border-slate-200">
                                 {['low', 'medium', 'high'].map(level => (
-                                    <button 
-                                        key={level}
-                                        onClick={() => setFunctionalLevel(level)}
-                                        className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all uppercase ${functionalLevel === level ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
-                                    >{level}</button>
+                                    <button key={level} onClick={() => setFunctionalLevel(level)} className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all uppercase ${functionalLevel === level ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>{level}</button>
                                 ))}
                             </div>
                         </div>
@@ -180,36 +228,12 @@ const ICD10Search = () => {
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Comorbidity</label>
                             <div className="flex bg-white p-1 rounded-xl border border-slate-200">
                                 {['none', 'low', 'high'].map(adj => (
-                                    <button 
-                                        key={adj}
-                                        onClick={() => setComorbidityAdjustment(adj)}
-                                        className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all uppercase ${comorbidityAdjustment === adj ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
-                                    >{adj}</button>
+                                    <button key={adj} onClick={() => setComorbidityAdjustment(adj)} className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all uppercase ${comorbidityAdjustment === adj ? 'bg-orange-500 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>{adj}</button>
                                 ))}
                             </div>
                         </div>
                     </div>
-
-                    {/* Search Form */}
-                    <form onSubmit={handleSearch} className="relative group">
-                        <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none transition-colors">
-                            <Search className={`w-5 h-5 ${query ? 'text-teal-500' : 'text-slate-400'}`} />
-                        </div>
-                        <input
-                            type="text"
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            placeholder="Enter diagnosis description or code to rank reimbursement impact..."
-                            className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl pl-14 pr-32 py-5 text-slate-900 font-medium focus:outline-none focus:border-teal-500/50 focus:bg-white transition-all shadow-sm"
-                        />
-                        <button
-                            type="submit"
-                            disabled={isLoading}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 px-8 py-3 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg transition-all active:scale-95 disabled:opacity-50"
-                        >
-                            {isLoading ? <Loader2 size={16} className="animate-spin" /> : 'Run PDGM Logic'}
-                        </button>
-                    </form>
+                    {searchInputUI}
                 </div>
             </div>
 
@@ -222,7 +246,6 @@ const ICD10Search = () => {
 
             {results && (
                 <div className="grid grid-cols-1 gap-6 animate-fadeInUp">
-                    {/* Results Table/List */}
                     <div className="bg-white rounded-[32px] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
                         <div className="p-8 border-b border-slate-50 flex items-center justify-between">
                             <h4 className="text-xl font-black text-slate-900 flex items-center gap-2">
@@ -245,85 +268,54 @@ const ICD10Search = () => {
                                 <tbody className="divide-y divide-slate-50">
                                     {results.map((item, index) => (
                                         <React.Fragment key={item.code}>
-                                        <tr className={`hover:bg-slate-50/50 transition-colors group cursor-default ${index === 0 ? 'bg-teal-50/20' : ''}`}>
-                                            <td className="px-8 py-6 text-center">
-                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm mx-auto shadow-sm ${
-                                                    index === 0 ? 'bg-teal-500 text-white ring-4 ring-teal-500/20' : 'bg-slate-100 text-slate-400'
-                                                }`}>
-                                                    #{index + 1}
-                                                </div>
-                                            </td>
-                                            <td className="px-8 py-6">
-                                                <div className="flex items-center gap-3 mb-1">
-                                                    <span className="px-2 py-0.5 bg-slate-900 text-white rounded text-[10px] font-black uppercase tracking-tighter">
-                                                        {item.code}
-                                                    </span>
-                                                    {item.is_primary_allowed && (
-                                                        <span className="text-[10px] font-black text-green-500 uppercase tracking-widest flex items-center gap-1">
-                                                            <CheckCircle2 size={10} /> Primary Allowed
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <p className="font-bold text-slate-900 text-lg leading-tight">{item.description}</p>
-                                            </td>
-                                            <td className="px-8 py-6">
-                                                <div className="flex flex-col gap-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Group:</span>
-                                                        <span className="text-xs font-bold text-slate-700">{item.pdgm_grouping}</span>
+                                            <tr className={`hover:bg-slate-50/50 transition-colors group cursor-default ${index === 0 ? 'bg-teal-50/20' : ''}`}>
+                                                <td className="px-8 py-6 text-center">
+                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm mx-auto shadow-sm ${index === 0 ? 'bg-teal-500 text-white ring-4 ring-teal-500/20' : 'bg-slate-100 text-slate-400'}`}>#{index + 1}</div>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    <div className="flex items-center gap-3 mb-1">
+                                                        <span className="px-2 py-0.5 bg-slate-900 text-white rounded text-[10px] font-black uppercase tracking-tighter">{item.code}</span>
+                                                        {item.is_primary_allowed && <span className="text-[10px] font-black text-green-500 uppercase tracking-widest flex items-center gap-1"><CheckCircle2 size={10} /> Primary Allowed</span>}
                                                     </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Case-Mix:</span>
-                                                        <span className="text-xs font-bold text-slate-700">{item.final_weight}</span>
+                                                    <p className="font-bold text-slate-900 text-lg leading-tight">{item.description}</p>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Group:</span>
+                                                            <span className="text-xs font-bold text-slate-700">{item.pdgm_grouping}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Case-Mix:</span>
+                                                            <span className="text-xs font-bold text-slate-700">{item.final_weight}</span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-8 py-6 text-right">
-                                                <p className={`text-2xl font-black ${index === 0 ? 'text-teal-600' : 'text-slate-900'}`}>
-                                                    <span className="text-sm align-top mr-0.5">$</span>
-                                                    {parseFloat(item.calculated_payment).toLocaleString()}
-                                                </p>
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">30-Day Payment</p>
-                                            </td>
-                                        </tr>
-                                        {/* Nested documentation tips */}
-                                        <tr className={`${index === 0 ? 'bg-teal-50/10' : ''}`}>
-                                            <td colSpan="4" className="px-8 pb-6">
-                                                <div className="bg-white/50 border border-slate-100 rounded-2xl p-4 flex gap-6 overflow-x-auto no-scrollbar">
-                                                    <div className="flex-shrink-0 flex items-center gap-2">
-                                                        <Clipboard size={14} className="text-slate-400" />
-                                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Coding Tips:</span>
+                                                </td>
+                                                <td className="px-8 py-6 text-right">
+                                                    <p className={`text-2xl font-black ${index === 0 ? 'text-teal-600' : 'text-slate-900'}`}><span className="text-sm align-top mr-0.5">$</span>{parseFloat(item.calculated_payment).toLocaleString()}</p>
+                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">30-Day Payment</p>
+                                                </td>
+                                            </tr>
+                                            <tr className={`${index === 0 ? 'bg-teal-50/10' : ''}`}>
+                                                <td colSpan="4" className="px-8 pb-6">
+                                                    <div className="bg-white/50 border border-slate-100 rounded-2xl p-4 flex gap-6 overflow-x-auto no-scrollbar">
+                                                        <div className="flex-shrink-0 flex items-center gap-2"><Clipboard size={14} className="text-slate-400" /><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Coding Tips:</span></div>
+                                                        <div className="flex gap-4">
+                                                            {item.tips.map((tip, i) => (
+                                                                <div key={i} className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 whitespace-nowrap"><div className="w-4 h-4 rounded-full bg-teal-100 flex items-center justify-center text-[8px] font-black text-teal-600">{i+1}</div><p className="text-[10px] text-slate-600 font-bold">{tip}</p></div>
+                                                            ))}
+                                                        </div>
                                                     </div>
-                                                    <div className="flex gap-4">
-                                                        {item.tips.map((tip, i) => (
-                                                            <div key={i} className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 whitespace-nowrap">
-                                                                <div className="w-4 h-4 rounded-full bg-teal-100 flex items-center justify-center text-[8px] font-black text-teal-600">
-                                                                    {i+1}
-                                                                </div>
-                                                                <p className="text-[10px] text-slate-600 font-bold">{tip}</p>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                                </td>
+                                            </tr>
                                         </React.Fragment>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
-                        
-                        {/* Legend / Info */}
                         <div className="p-6 bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-6">
-                            <div className="flex items-center gap-3">
-                                <Info className="text-teal-400" size={20} />
-                                <p className="text-[11px] font-medium text-slate-300 max-w-xl">
-                                    Calculations based on <span className="text-teal-400 font-black">PDGM 2024 National Base Rate</span>. Ranking is determined by payment potential after applying clinical group weights and patient context modifiers.
-                                </p>
-                            </div>
-                            <button className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
-                                Export Analysis Report
-                            </button>
+                            <div className="flex items-center gap-3"><Info className="text-teal-400" size={20} /><p className="text-[11px] font-medium text-slate-300 max-w-xl">Calculations based on <span className="text-teal-400 font-black">PDGM 2024 National Base Rate</span>. Ranking is determined by payment potential after applying clinical group weights and patient context modifiers.</p></div>
+                            <button className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Export Analysis Report</button>
                         </div>
                     </div>
                 </div>
