@@ -12,7 +12,8 @@ import {
   AlertCircle,
   CheckCircle2,
   Info,
-  DollarSign
+  DollarSign,
+  Activity
 } from 'lucide-react';
 import ICD10Search from './ICD10Search';
 

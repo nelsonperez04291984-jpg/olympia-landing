@@ -42,6 +42,7 @@ const AdminDashboard = () => {
     const [activeEpisode, setActiveEpisode] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    const [directorySearch, setDirectorySearch] = useState('');
     const navigate = useNavigate();
 
     const handleAssessAndCode = (referral) => {
@@ -639,13 +640,34 @@ const AdminDashboard = () => {
                                     <h3 className="text-3xl font-black text-slate-900 mb-4 uppercase tracking-tight">Clinical Episode Directory</h3>
                                     <p className="text-slate-500 max-w-md mx-auto mb-12">Search or select a patient referral below to begin the clinical assessment and PDGM coding process.</p>
                                     
+                                    {/* Directory Search Bar */}
+                                    <div className="max-w-md mx-auto mb-12 relative group">
+                                        <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none transition-colors">
+                                            <Search className={`w-5 h-5 ${directorySearch ? 'text-teal-500' : 'text-slate-400'}`} />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={directorySearch}
+                                            onChange={(e) => setDirectorySearch(e.target.value)}
+                                            placeholder="Search by patient name or DOB..."
+                                            className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl py-5 pl-14 pr-6 text-slate-900 font-bold focus:outline-none focus:border-teal-500/30 focus:bg-white transition-all shadow-sm"
+                                        />
+                                    </div>
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
-                                        {referrals.filter(r => r.status !== 'Rejected').map((r, i) => (
-                                            <button 
-                                                key={i} 
-                                                onClick={() => setActiveEpisode(r)}
-                                                className="p-6 bg-slate-50 border border-slate-100 rounded-[32px] hover:border-teal-500 hover:bg-white hover:shadow-xl transition-all group group-hover:scale-[1.02]"
-                                            >
+                                        {referrals
+                                            .filter(r => r.status !== 'Rejected')
+                                            .filter(r => 
+                                                r.patient_name.toLowerCase().includes(directorySearch.toLowerCase()) ||
+                                                r.patient_dob.includes(directorySearch)
+                                            )
+                                            .map((r, i) => (
+                                                <button 
+                                                    key={i} 
+                                                    onClick={() => setActiveEpisode(r)}
+                                                    className="p-6 bg-slate-50 border border-slate-100 rounded-[32px] hover:border-teal-500 hover:bg-white hover:shadow-xl transition-all group group-hover:scale-[1.02] animate-fadeInUp"
+                                                    style={{ animationDelay: `${i * 50}ms` }}
+                                                >
                                                 <div className="flex items-center gap-4 mb-4">
                                                     <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-black text-xs uppercase group-hover:bg-teal-500 group-hover:text-white transition-colors">
                                                         {r.patient_name.charAt(0)}
