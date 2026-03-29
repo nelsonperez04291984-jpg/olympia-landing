@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     Users,
     FileText,
-    MessageSquare,
+    //MessageSquare,
     ShieldCheck,
     LogOut,
     TrendingUp,
@@ -578,7 +578,7 @@ const AdminDashboard = () => {
                             {item.icon} {item.label}
                         </button>
                     ))}
-                    <button style={styles.navBtnPlain}>
+                    /*<button style={styles.navBtnPlain}>
                         <MessageSquare size={16} /> AI Conversation Logs
                     </button>
                 </nav>
@@ -627,7 +627,7 @@ const AdminDashboard = () => {
                                 { label: 'Total Providers', value: stats.provider_count, icon: <Users size={26} color={PURPLE_LIGHT} />, bg: '#F3EFF9', border: '#E9D5FF' },
                                 { label: 'Total Referrals', value: stats.referral_count, icon: <FileText size={26} color={GOLD_DARK} />, bg: `rgba(245,200,66,0.08)`, border: `rgba(245,200,66,0.25)` },
                                 { label: 'Staff Accounts', value: stats.staff_count, icon: <ShieldCheck size={26} color={PURPLE_MID} />, bg: '#EDE9FE', border: '#D8B4FE' },
-                                { label: 'AI Logs Retained', value: stats.recent_ai_logs.length, icon: <MessageSquare size={26} color={PURPLE_SOFT} />, bg: '#FAF5FF', border: '#E9D5FF' },
+                                /*{ label: 'AI Logs Retained', value: stats.recent_ai_logs.length, icon: <MessageSquare size={26} color={PURPLE_SOFT} />, bg: '#FAF5FF', border: '#E9D5FF' },*/
                             ].map((s, i) => (
                                 <div key={i} style={styles.statCard}>
                                     <div style={styles.statIconWrap(s.bg, s.border)}>{s.icon}</div>
