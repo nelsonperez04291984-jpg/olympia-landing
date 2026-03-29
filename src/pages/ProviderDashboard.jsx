@@ -1,21 +1,8 @@
-import React, { useState } from "react";
-import {
-    PlusCircle,
-    History,
-    LogOut,
-    Stethoscope,
-    User,
-    Calendar,
-    Phone,
-    Search,
-    CheckCircle2,
-    X
-} from "lucide-react";
-import ICD10Search from "../components/ICD10Search";
+import { useState } from "react";
+import { Search, CheckCircle2 } from "lucide-react";
 
-const ProviderDashboard = () => {
+export default function PatientReferral() {
 
-    const [activeView, setActiveView] = useState("new");
     const [step, setStep] = useState(1);
 
     const [formData, setFormData] = useState({
@@ -27,319 +14,308 @@ const ProviderDashboard = () => {
     });
 
     const [primaryDiagnosis, setPrimaryDiagnosis] = useState(null);
-    const [selectedServices, setSelectedServices] = useState([]);
-    const [showSearch, setShowSearch] = useState(false);
 
-    const SERVICES = [
+    const [selectedServices, setSelectedServices] = useState([]);
+
+    const services = [
         "Skilled Nursing",
         "Physical Therapy",
         "Occupational Therapy",
         "Speech Therapy",
-        "Wound Care",
-        "Medication Management"
+        "Medical Social Worker",
+        "Home Health Aide"
     ];
 
+    const handleSubmit = async () => {
+
+        if (!formData.first_name || !formData.last_name || !primaryDiagnosis) {
+            alert("First name, last name and diagnosis are required.");
+            return;
+        }
+
+        const payload = {
+            patient_first_name: formData.first_name,
+            patient_middle_name: formData.middle_name,
+            patient_last_name: formData.last_name,
+            patient_dob: formData.dob,
+            patient_phone: formData.phone,
+            diagnosis: primaryDiagnosis.code + " - " + primaryDiagnosis.description,
+            services_needed: selectedServices.join(", ")
+        };
+
+        try {
+
+            const token = localStorage.getItem("olympia_token");
+
+            const res = await fetch("/api/referrals", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+
+                alert("Referral submitted successfully!");
+
+                setStep(1);
+
+                setPrimaryDiagnosis(null);
+                setSelectedServices([]);
+
+                setFormData({
+                    first_name: "",
+                    middle_name: "",
+                    last_name: "",
+                    dob: "",
+                    phone: ""
+                });
+
+            } else {
+                alert(data.error || "Submission failed.");
+            }
+
+        } catch (err) {
+            console.error(err);
+            alert("Network error.");
+        }
+
+    };
+
     const toggleService = (service) => {
-        setSelectedServices(prev =>
-            prev.includes(service)
-                ? prev.filter(s => s !== service)
-                : [...prev, service]
-        );
+
+        if (selectedServices.includes(service)) {
+            setSelectedServices(selectedServices.filter(s => s !== service));
+        } else {
+            setSelectedServices([...selectedServices, service]);
+        }
+
     };
 
     return (
 
-        <div className="flex min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-[#F5F3FF]">
 
-            {/* Sidebar */}
+            {/* Header */}
 
-            <aside className="w-72 bg-white border-r flex flex-col p-6">
+            <div className="bg-gradient-to-r from-[#6A1B9A] to-[#8E24AA] text-white py-10 shadow">
 
-                <div className="flex items-center gap-3 mb-10">
-                    <Stethoscope className="text-teal-500" />
-                    <h1 className="font-bold text-xl">Olympia Provider</h1>
+                <div className="max-w-5xl mx-auto px-6">
+
+                    <h1 className="text-3xl font-bold">
+                        Patient Referral
+                    </h1>
+
+                    <p className="text-purple-100 mt-2">
+                        Submit a new home health referral
+                    </p>
+
                 </div>
 
-                <button
-                    onClick={() => setActiveView("new")}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100"
-                >
-                    <PlusCircle size={18} />
-                    New Referral
-                </button>
+            </div>
 
-                <button
-                    onClick={() => setActiveView("history")}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100"
-                >
-                    <History size={18} />
-                    History
-                </button>
+            {/* Main Card */}
 
-                <div className="mt-auto">
-                    <button className="flex items-center gap-2 text-red-500">
-                        <LogOut size={18} />
-                        Logout
-                    </button>
-                </div>
+            <div className="max-w-5xl mx-auto px-6 py-10">
 
-            </aside>
+                <div className="bg-white rounded-xl shadow-lg p-8">
 
-            {/* Main Content */}
+                    {/* STEP 1 */}
 
-            <main className="flex-1 p-10">
+                    {step === 1 && (
 
-                {activeView === "new" ? (
+                        <div>
 
-                    <div className="max-w-4xl mx-auto">
+                            <h2 className="text-xl font-semibold mb-6">
+                                Patient Information
+                            </h2>
 
-                        <h2 className="text-3xl font-bold mb-8">
-                            New Patient Referral
-                        </h2>
+                            <div className="grid grid-cols-3 gap-4">
 
-                        {/* Step indicator */}
+                                <input
+                                    placeholder="First Name"
+                                    value={formData.first_name}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, first_name: e.target.value })
+                                    }
+                                    className="border rounded-lg p-3"
+                                />
 
-                        <div className="flex gap-4 mb-10">
+                                <input
+                                    placeholder="Middle Name"
+                                    value={formData.middle_name}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, middle_name: e.target.value })
+                                    }
+                                    className="border rounded-lg p-3"
+                                />
 
-                            {[1, 2, 3, 4].map((s) => (
-                                <div
-                                    key={s}
-                                    className={`px-4 py-2 rounded-full text-sm ${step >= s
-                                            ? "bg-teal-500 text-white"
-                                            : "bg-slate-200 text-slate-500"
-                                        }`}
-                                >
-                                    Step {s}
-                                </div>
-                            ))}
+                                <input
+                                    placeholder="Last Name"
+                                    value={formData.last_name}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, last_name: e.target.value })
+                                    }
+                                    className="border rounded-lg p-3"
+                                />
+
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 mt-4">
+
+                                <input
+                                    type="date"
+                                    value={formData.dob}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, dob: e.target.value })
+                                    }
+                                    className="border rounded-lg p-3"
+                                />
+
+                                <input
+                                    placeholder="Phone"
+                                    value={formData.phone}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, phone: e.target.value })
+                                    }
+                                    className="border rounded-lg p-3"
+                                />
+
+                            </div>
+
+                            <button
+                                onClick={() => setStep(2)}
+                                className="mt-6 bg-[#7B1FA2] hover:bg-[#6A1B9A] text-white px-6 py-3 rounded-lg"
+                            >
+                                Next
+                            </button>
 
                         </div>
 
-                        {/* STEP 1 PATIENT INFO */}
+                    )}
 
-                        {step === 1 && (
+                    {/* STEP 2 */}
 
-                            <div className="bg-white rounded-xl p-8 shadow space-y-6">
+                    {step === 2 && (
 
-                                <h3 className="font-semibold text-lg">
-                                    Patient Information
-                                </h3>
+                        <div>
 
-                                <div className="grid grid-cols-3 gap-4">
+                            <h2 className="text-xl font-semibold mb-6">
+                                Diagnosis
+                            </h2>
 
-                                    <input
-                                        placeholder="First Name"
-                                        className="border rounded-lg p-3"
-                                        value={formData.first_name}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, first_name: e.target.value })
-                                        }
-                                    />
+                            <div className="border rounded-lg p-4 flex items-center gap-3">
 
-                                    <input
-                                        placeholder="Middle Name"
-                                        className="border rounded-lg p-3"
-                                        value={formData.middle_name}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, middle_name: e.target.value })
-                                        }
-                                    />
+                                <Search size={18} />
 
-                                    <input
-                                        placeholder="Last Name"
-                                        className="border rounded-lg p-3"
-                                        value={formData.last_name}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, last_name: e.target.value })
-                                        }
-                                    />
-
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-
-                                    <input
-                                        type="date"
-                                        className="border rounded-lg p-3"
-                                        value={formData.dob}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, dob: e.target.value })
-                                        }
-                                    />
-
-                                    <input
-                                        placeholder="Phone Number"
-                                        className="border rounded-lg p-3"
-                                        value={formData.phone}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, phone: e.target.value })
-                                        }
-                                    />
-
-                                </div>
-
-                                <button
-                                    onClick={() => setStep(2)}
-                                    className="bg-teal-500 text-white px-6 py-3 rounded-lg"
-                                >
-                                    Continue
-                                </button>
+                                <input
+                                    placeholder="Search ICD-10 code (example: stroke)"
+                                    className="flex-1 outline-none"
+                                />
 
                             </div>
-                        )}
 
-                        {/* STEP 2 DIAGNOSIS */}
+                            {primaryDiagnosis && (
 
-                        {step === 2 && (
+                                <div className="mt-4 bg-purple-50 border rounded-lg p-4">
 
-                            <div className="bg-white rounded-xl p-8 shadow space-y-6">
-
-                                <h3 className="font-semibold text-lg">
-                                    Primary Diagnosis
-                                </h3>
-
-                                {!primaryDiagnosis && (
-                                    <button
-                                        onClick={() => setShowSearch(true)}
-                                        className="border-dashed border p-6 rounded-lg w-full text-left"
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <Search size={18} />
-                                            Search ICD-10 diagnosis
-                                        </div>
-                                    </button>
-                                )}
-
-                                {primaryDiagnosis && (
-                                    <div className="border rounded-lg p-5 flex justify-between">
-
-                                        <div>
-                                            <div className="font-semibold">
-                                                {primaryDiagnosis.code}
-                                            </div>
-                                            <div className="text-sm text-slate-600">
-                                                {primaryDiagnosis.description}
-                                            </div>
-                                        </div>
-
-                                        <button onClick={() => setPrimaryDiagnosis(null)}>
-                                            <X />
-                                        </button>
-
+                                    <div className="font-semibold">
+                                        {primaryDiagnosis.code}
                                     </div>
-                                )}
 
-                                {showSearch && (
-                                    <ICD10Search
-                                        isEmbedded={true}
-                                        onSelect={(code) => {
-                                            setPrimaryDiagnosis(code);
-                                            setShowSearch(false);
-                                        }}
-                                    />
-                                )}
+                                    <div className="text-gray-600">
+                                        {primaryDiagnosis.description}
+                                    </div>
+
+                                </div>
+
+                            )}
+
+                            <div className="flex gap-4 mt-6">
+
+                                <button
+                                    onClick={() => setStep(1)}
+                                    className="border px-6 py-3 rounded-lg"
+                                >
+                                    Back
+                                </button>
 
                                 <button
                                     onClick={() => setStep(3)}
-                                    className="bg-teal-500 text-white px-6 py-3 rounded-lg"
+                                    className="bg-[#7B1FA2] hover:bg-[#6A1B9A] text-white px-6 py-3 rounded-lg"
                                 >
-                                    Continue
+                                    Next
                                 </button>
 
                             </div>
-                        )}
 
-                        {/* STEP 3 SERVICES */}
+                        </div>
 
-                        {step === 3 && (
+                    )}
 
-                            <div className="bg-white rounded-xl p-8 shadow">
+                    {/* STEP 3 */}
 
-                                <h3 className="font-semibold text-lg mb-6">
-                                    Requested Services
-                                </h3>
+                    {step === 3 && (
 
-                                <div className="grid grid-cols-2 gap-4">
+                        <div>
 
-                                    {SERVICES.map(service => (
-                                        <button
-                                            key={service}
-                                            onClick={() => toggleService(service)}
-                                            className={`p-4 border rounded-lg text-left ${selectedServices.includes(service)
-                                                    ? "bg-teal-100 border-teal-400"
-                                                    : ""
-                                                }`}
-                                        >
-                                            {service}
-                                        </button>
-                                    ))}
+                            <h2 className="text-xl font-semibold mb-6">
+                                Services Needed
+                            </h2>
 
-                                </div>
+                            <div className="grid grid-cols-2 gap-4">
 
-                                <button
-                                    onClick={() => setStep(4)}
-                                    className="mt-6 bg-teal-500 text-white px-6 py-3 rounded-lg"
-                                >
-                                    Continue
-                                </button>
+                                {services.map(service => (
+
+                                    <div
+                                        key={service}
+                                        onClick={() => toggleService(service)}
+                                        className={`border rounded-lg p-4 cursor-pointer transition
+                    ${selectedServices.includes(service)
+                                                ? "bg-purple-100 border-purple-500"
+                                                : ""
+                                            }`}
+                                    >
+                                        {service}
+                                    </div>
+
+                                ))}
 
                             </div>
-                        )}
 
-                        {/* STEP 4 REVIEW */}
-
-                        {step === 4 && (
-
-                            <div className="bg-white rounded-xl p-8 shadow space-y-6">
-
-                                <h3 className="font-semibold text-lg">
-                                    Review Referral
-                                </h3>
-
-                                <div className="border rounded-lg p-5">
-
-                                    <div className="font-semibold">
-                                        {formData.first_name} {formData.middle_name} {formData.last_name}
-                                    </div>
-
-                                    <div className="text-sm text-slate-500">
-                                        DOB: {formData.dob}
-                                    </div>
-
-                                </div>
+                            <div className="flex justify-between mt-8">
 
                                 <button
-                                    className="bg-teal-600 text-white px-8 py-4 rounded-lg flex items-center gap-2"
+                                    onClick={() => setStep(2)}
+                                    className="border px-6 py-3 rounded-lg"
+                                >
+                                    Back
+                                </button>
+
+                                <button
+                                    onClick={handleSubmit}
+                                    className="bg-[#7B1FA2] hover:bg-[#6A1B9A] text-white px-8 py-3 rounded-lg flex items-center gap-2"
                                 >
                                     <CheckCircle2 size={18} />
                                     Submit Referral
                                 </button>
 
                             </div>
-                        )}
 
-                    </div>
-
-                ) : (
-
-                    <div>
-
-                        <h2 className="text-3xl font-bold mb-8">
-                            Referral History
-                        </h2>
-
-                        <div className="bg-white rounded-xl p-8 shadow text-slate-500">
-                            No referrals submitted yet.
                         </div>
 
-                    </div>
+                    )}
 
-                )}
+                </div>
 
-            </main>
+            </div>
 
         </div>
-    );
-};
 
-export default ProviderDashboard;
+    );
+
+}
