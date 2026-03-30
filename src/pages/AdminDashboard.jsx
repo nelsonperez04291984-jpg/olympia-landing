@@ -26,46 +26,59 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import DiagnosisAssessment from '../components/DiagnosisAssessment';
 
-/* ── Design Tokens (mirrored from ProviderDashboard) ── */
-const PURPLE_DARK = '#1A0A2E';
-const PURPLE_MID = '#3B1F6A';
-const PURPLE_LIGHT = '#6B4FA0';
-const PURPLE_SOFT = '#9B72CF';
-const GOLD = '#F5C842';
-const GOLD_DARK = '#D4A017';
-const BG = '#F3EFF9';
+/* ── Design Tokens (Professional Clinical Palette) ── */
+const PURPLE_DARK = '#1A0A2E';      // Deep Midnight
+const PURPLE_MID = '#3B1F6A';       // Brand Primary
+const PURPLE_LIGHT = '#6B4FA0';     // Accents
+const PURPLE_SOFT = '#A98EDD';      // Interactive/Labels
+const PURPLE_GHOST = '#F8F6FF';     // Subtle Backgrounds
+const GOLD = '#F5C842';             // Premium Accent
+const GOLD_DARK = '#D4A017';        // Contrast Accent
+const BG = '#F3EFF9';               // App Background
+const WHITE = '#FFFFFF';
+const SHADOW_SM = '0 2px 12px rgba(26,10,46,0.08)';
+const SHADOW_MD = '0 8px 32px rgba(26,10,46,0.12)';
+const GLASS = 'blur(12px) saturate(180%)';
+const TRANSITION = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
 
 const styles = {
     /* Shell */
-    shell: { display: 'flex', minHeight: '100vh', background: BG, fontFamily: "'Segoe UI', system-ui, sans-serif" },
+    shell: { display: 'flex', minHeight: '100vh', background: BG, fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif" },
 
-    /* ── Sidebar ── */
+    /* ── Sidebar (Modern Floating Style) ── */
     sidebar: {
-        width: 264, flexShrink: 0, background: PURPLE_DARK,
-        display: 'flex', flexDirection: 'column', padding: '32px 20px',
+        width: 280, flexShrink: 0, background: PURPLE_DARK,
+        display: 'flex', flexDirection: 'column', padding: '36px 24px',
         position: 'fixed', height: '100vh', overflowY: 'auto',
-        boxShadow: '4px 0 24px rgba(26,10,46,0.35)', zIndex: 20
+        boxShadow: '12px 0 40px rgba(26,10,46,0.25)', zIndex: 20,
+        borderRight: '1px solid rgba(245,200,66,0.1)'
     },
-    sidebarBrand: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 36 },
+    sidebarBrand: { 
+        display: 'flex', alignItems: 'center', gap: 14, marginBottom: 44,
+        padding: '0 8px'
+    },
     brandIcon: {
-        width: 44, height: 44, borderRadius: 12, background: PURPLE_MID,
+        width: 48, height: 48, borderRadius: 16, background: 'rgba(59,31,106,0.8)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        border: `2px solid ${GOLD}`, boxShadow: `0 0 20px rgba(245,200,66,0.25)`, flexShrink: 0
+        border: `1.5px solid ${GOLD}`, boxShadow: `0 0 24px rgba(245,200,66,0.2)`,
+        flexShrink: 0, backdropFilter: GLASS
     },
-    brandTitle: { fontSize: 17, fontWeight: 900, color: '#fff', lineHeight: 1.1 },
-    brandSub: { fontSize: 9, fontWeight: 700, color: PURPLE_SOFT, letterSpacing: '0.14em', textTransform: 'uppercase' },
+    brandTextWrap: { display: 'flex', flexDirection: 'column', gap: 2 },
+    brandTitle: { fontSize: 19, fontWeight: 900, color: WHITE, lineHeight: 1, letterSpacing: '-0.01em' },
+    brandSub: { fontSize: 10, fontWeight: 800, color: PURPLE_SOFT, letterSpacing: '0.12em', textTransform: 'uppercase', opacity: 0.8 },
 
-    nav: { display: 'flex', flexDirection: 'column', gap: 4, flex: 1 },
-    navBtn: {
-        display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px',
-        borderRadius: 12, border: 'none', background: 'transparent', cursor: 'pointer',
-        color: PURPLE_SOFT, fontWeight: 700, fontSize: 11, letterSpacing: '0.06em',
-        textTransform: 'uppercase', textAlign: 'left', transition: 'all 0.15s', width: '100%'
-    },
-    navBtnActive: {
-        background: `linear-gradient(135deg, ${GOLD} 0%, ${GOLD_DARK} 100%)`,
-        color: PURPLE_DARK, boxShadow: `0 4px 16px rgba(245,200,66,0.35)`
-    },
+    nav: { display: 'flex', flexDirection: 'column', gap: 8, flex: 1 },
+    navBtn: (active) => ({
+        display: 'flex', alignItems: 'center', gap: 12, padding: '14px 20px',
+        borderRadius: 14, border: 'none', background: active ? `linear-gradient(135deg, ${GOLD} 0%, ${GOLD_DARK} 100%)` : 'transparent',
+        cursor: 'pointer', color: active ? PURPLE_DARK : PURPLE_SOFT, 
+        fontWeight: 800, fontSize: 11, letterSpacing: '0.06em',
+        textTransform: 'uppercase', textAlign: 'left', transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+        width: '100%',
+        boxShadow: active ? `0 8px 24px rgba(245,200,66,0.3)` : 'none',
+        transform: active ? 'translateX(4px)' : 'translateX(0)'
+    }),
+    navLabel: { flex: 1 },
     navBtnPlain: {
         display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px',
         borderRadius: 12, border: 'none', background: 'transparent', cursor: 'pointer',
@@ -74,100 +87,124 @@ const styles = {
     },
 
     staffCard: {
-        background: PURPLE_MID, borderRadius: 16, padding: '14px 16px', marginBottom: 12,
-        border: `1px solid rgba(245,200,66,0.15)`
+        background: 'linear-gradient(180deg, rgba(59,31,106,0.4) 0%, rgba(26,10,46,0.6) 100%)', 
+        borderRadius: 20, padding: '20px', marginBottom: 16,
+        border: `1px solid rgba(245,200,66,0.1)`, backdropFilter: GLASS,
+        display: 'flex', flexDirection: 'column', gap: 4
     },
-    staffSignedInLabel: { fontSize: 9, fontWeight: 800, color: GOLD, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 3 },
-    staffName: { fontSize: 12, fontWeight: 700, color: '#fff', marginBottom: 4 },
-    staffRoleRow: { display: 'flex', alignItems: 'center', gap: 6 },
+    staffSignedInLabel: { fontSize: 9, fontWeight: 900, color: PURPLE_SOFT, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 2 },
+    staffName: { fontSize: 14, fontWeight: 800, color: WHITE, marginBottom: 2 },
+    staffRoleRow: { display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(245,200,66,0.1)', padding: '4px 10px', borderRadius: 8, width: 'fit-content' },
     staffRoleDot: { width: 6, height: 6, borderRadius: '50%', background: GOLD },
-    staffRoleText: { fontSize: 9, fontWeight: 800, color: GOLD, letterSpacing: '0.14em', textTransform: 'uppercase' },
+    staffRoleText: { fontSize: 9, fontWeight: 900, color: GOLD, letterSpacing: '0.1em', textTransform: 'uppercase' },
 
     logoutBtn: {
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-        padding: '11px 16px', borderRadius: 12, border: '1px solid rgba(239,68,68,0.25)',
-        background: 'rgba(239,68,68,0.08)', color: '#F87171', cursor: 'pointer',
-        fontWeight: 700, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', width: '100%'
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+        padding: '14px 16px', borderRadius: 14, border: '1px solid rgba(239,68,68,0.3)',
+        background: 'rgba(239,68,68,0.06)', color: '#FCA5A5', cursor: 'pointer',
+        fontWeight: 800, fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', width: '100%',
+        transition: 'all 0.2s',
+        ':hover': { background: 'rgba(239,68,68,0.12)', borderColor: 'rgba(239,68,68,0.6)' }
     },
 
     /* ── Main ── */
-    main: { flex: 1, marginLeft: 264, padding: '40px 48px', overflowY: 'auto' },
+    main: { flex: 1, marginLeft: 280, padding: '48px 60px', overflowY: 'auto', background: BG },
 
     header: {
         display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-        marginBottom: 40, flexWrap: 'wrap', gap: 16
+        marginBottom: 48, flexWrap: 'wrap', gap: 24
     },
-    pageTitle: { fontSize: 32, fontWeight: 900, color: PURPLE_DARK, margin: 0, letterSpacing: '-0.02em' },
-    pageSubtitle: { fontSize: 14, color: PURPLE_LIGHT, marginTop: 6, fontWeight: 500, margin: '6px 0 0' },
+    pageTitle: { fontSize: 36, fontWeight: 900, color: PURPLE_DARK, margin: 0, letterSpacing: '-0.03em' },
+    pageSubtitle: { fontSize: 15, color: PURPLE_LIGHT, marginTop: 8, fontWeight: 500, margin: '8px 0 0', opacity: 0.8 },
     statusBadge: {
-        display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px',
-        background: '#fff', borderRadius: 16, border: '1px solid #E9D5FF',
-        boxShadow: '0 2px 12px rgba(107,79,160,0.08)', height: 'fit-content'
+        display: 'flex', alignItems: 'center', gap: 14, padding: '14px 24px',
+        background: WHITE, borderRadius: 20, border: '1px solid rgba(107,79,160,0.1)',
+        boxShadow: SHADOW_SM, height: 'fit-content'
     },
-    statusLabel: { fontSize: 9, fontWeight: 800, color: PURPLE_SOFT, letterSpacing: '0.12em', textTransform: 'uppercase' },
-    statusValue: { fontSize: 13, fontWeight: 700, color: PURPLE_DARK },
+    statusLabel: { fontSize: 9, fontWeight: 900, color: PURPLE_SOFT, letterSpacing: '0.12em', textTransform: 'uppercase' },
+    statusValue: { fontSize: 13, fontWeight: 800, color: PURPLE_DARK },
 
     /* ── Stats Grid ── */
-    statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 20, marginBottom: 40 },
+    statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 24, marginBottom: 48 },
     statCard: {
-        background: '#fff', padding: '28px 24px', borderRadius: 24,
-        border: '1px solid #E9D5FF', boxShadow: '0 4px 20px rgba(107,79,160,0.08)',
-        display: 'flex', alignItems: 'center', gap: 18, cursor: 'default',
-        transition: 'border-color 0.2s, box-shadow 0.2s'
+        background: WHITE, padding: '32px', borderRadius: 28,
+        border: '1px solid rgba(107,79,160,0.05)', boxShadow: SHADOW_MD,
+        display: 'flex', alignItems: 'center', gap: 20, cursor: 'default',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        ':hover': { transform: 'translateY(-4px)', boxShadow: '0 12px 40px rgba(26,10,46,0.15)' }
     },
     statIconWrap: (bg, border) => ({
-        width: 56, height: 56, borderRadius: 16, background: bg, border: `1px solid ${border}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+        width: 64, height: 64, borderRadius: 20, background: bg, border: `1px solid ${border}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
     }),
-    statLabel: { fontSize: 9, fontWeight: 800, color: PURPLE_SOFT, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 4 },
-    statValue: { fontSize: 36, fontWeight: 900, color: PURPLE_DARK, lineHeight: 1 },
+    statLabel: { fontSize: 10, fontWeight: 900, color: PURPLE_SOFT, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 6 },
+    statValue: { fontSize: 40, fontWeight: 950, color: PURPLE_DARK, lineHeight: 1, letterSpacing: '-0.02em' },
 
     /* ── Two-col grid ── */
     twoCol: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 },
 
     /* ── Panel card ── */
     panelCard: {
-        background: '#fff', borderRadius: 28, border: '1px solid #E9D5FF',
-        boxShadow: '0 4px 24px rgba(107,79,160,0.08)', overflow: 'hidden'
+        background: WHITE, borderRadius: 28, border: '1px solid rgba(107,79,160,0.05)',
+        boxShadow: SHADOW_MD, overflow: 'hidden', display: 'flex', flexDirection: 'column'
     },
     panelHeader: {
         padding: '24px 32px', borderBottom: '1px solid #F3EFF9',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        background: 'rgba(243,239,249,0.4)'
+        background: 'linear-gradient(90deg, rgba(243,239,249,0.4) 0%, rgba(255,255,255,0) 100%)'
     },
-    panelTitle: { fontSize: 16, fontWeight: 900, color: PURPLE_DARK, margin: 0 },
-    panelLink: { fontSize: 11, fontWeight: 800, color: PURPLE_LIGHT, background: 'none', border: 'none', cursor: 'pointer', letterSpacing: '0.06em', textTransform: 'uppercase' },
+    panelTitle: { fontSize: 18, fontWeight: 900, color: PURPLE_DARK, margin: 0, letterSpacing: '-0.01em' },
+    panelLink: { 
+        fontSize: 11, fontWeight: 800, color: PURPLE_LIGHT, background: 'rgba(107,79,160,0.05)', 
+        border: 'none', cursor: 'pointer', letterSpacing: '0.06em', textTransform: 'uppercase',
+        padding: '8px 16px', borderRadius: 10, transition: 'all 0.2s'
+    },
 
     /* ── Table ── */
-    table: { width: '100%', borderCollapse: 'collapse' },
-    thead: { background: 'rgba(243,239,249,0.6)' },
-    th: { padding: '12px 28px', textAlign: 'left', fontSize: 9, fontWeight: 900, color: PURPLE_SOFT, letterSpacing: '0.14em', textTransform: 'uppercase' },
-    td: { padding: '18px 28px', borderBottom: '1px solid #F3EFF9', verticalAlign: 'middle' },
-    tdName: { fontWeight: 800, color: PURPLE_DARK, fontSize: 14, marginBottom: 3 },
-    tdSub: { fontSize: 11, color: PURPLE_SOFT, fontWeight: 500 },
+    table: { width: '100%', borderCollapse: 'separate', borderSpacing: 0 },
+    thead: { background: 'rgba(243,239,249,0.3)' },
+    th: { 
+        padding: '16px 32px', textAlign: 'left', fontSize: 10, fontWeight: 900, 
+        color: PURPLE_SOFT, letterSpacing: '0.12em', textTransform: 'uppercase',
+        borderBottom: '1px solid #F3EFF9'
+    },
+    td: { padding: '20px 32px', borderBottom: '1px solid #F8F6FF', verticalAlign: 'middle' },
+    tdName: { fontWeight: 800, color: PURPLE_DARK, fontSize: 15, marginBottom: 4 },
+    tdSub: { fontSize: 12, color: PURPLE_SOFT, fontWeight: 500 },
 
     providerIdBadge: {
-        padding: '3px 10px', background: PURPLE_DARK, color: GOLD,
-        borderRadius: 6, fontSize: 10, fontWeight: 800, fontFamily: 'monospace'
+        padding: '4px 12px', background: PURPLE_DARK, color: GOLD,
+        borderRadius: 8, fontSize: 11, fontWeight: 900, fontFamily: 'monospace',
+        boxShadow: '0 2px 8px rgba(26,10,46,0.2)'
     },
 
-    deleteBtn: { background: 'none', border: 'none', cursor: 'pointer', color: PURPLE_SOFT, padding: '6px', borderRadius: 8, display: 'flex', alignItems: 'center' },
+    deleteBtn: { 
+        background: 'rgba(239,68,68,0.05)', border: 'none', cursor: 'pointer', 
+        color: '#EF4444', padding: '10px', borderRadius: 12, display: 'flex', 
+        alignItems: 'center', transition: 'all 0.2s'
+    },
 
     /* ── AI Logs ── */
-    logsList: { padding: '24px 28px', overflowY: 'auto', maxHeight: 480, display: 'flex', flexDirection: 'column', gap: 16 },
-    logItem: { background: 'rgba(243,239,249,0.6)', borderRadius: 18, padding: '20px', border: '1px solid #EDE9FE' },
-    logRow: { display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 },
+    logsList: { padding: '24px 32px', overflowY: 'auto', maxHeight: 520, display: 'flex', flexDirection: 'column', gap: 20 },
+    logItem: { 
+        background: PURPLE_GHOST, borderRadius: 24, padding: '24px', 
+        border: '1px solid #EDE9FE', transition: 'all 0.2s',
+        ':hover': { transform: 'scale(1.01)', boxShadow: SHADOW_SM }
+    },
+    logRow: { display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 16 },
     logAvatarUser: {
-        width: 30, height: 30, borderRadius: '50%', background: '#EDE9FE',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+        width: 36, height: 36, borderRadius: 12, background: WHITE,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        boxShadow: SHADOW_SM, border: '1px solid #EDE9FE'
     },
     logAvatarAI: {
-        width: 30, height: 30, borderRadius: '50%', background: PURPLE_MID,
+        width: 36, height: 36, borderRadius: 12, background: PURPLE_MID,
         display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        boxShadow: `0 2px 8px rgba(245,200,66,0.2)`
+        boxShadow: `0 4px 12px rgba(245,200,66,0.25)`, border: `1.5px solid ${GOLD}`
     },
-    logTypeLabel: (color) => ({ fontSize: 9, fontWeight: 900, color, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 3 }),
-    logText: { fontSize: 12, color: PURPLE_DARK, fontWeight: 600, lineHeight: 1.5, fontStyle: 'italic', margin: 0 },
+    logTypeLabel: (color) => ({ fontSize: 10, fontWeight: 900, color, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 4 }),
+    logText: { fontSize: 13, color: PURPLE_DARK, fontWeight: 600, lineHeight: 1.6, fontStyle: 'italic', margin: 0 },
 
     /* ── Modal ── */
     modalOverlay: {
@@ -199,145 +236,166 @@ const styles = {
 
     /* ── Referrals ── */
     referralsBigCard: {
-        background: '#fff', borderRadius: 28, border: '1px solid #E9D5FF',
-        boxShadow: '0 4px 24px rgba(107,79,160,0.08)', overflow: 'hidden'
+        background: WHITE, borderRadius: 32, border: '1px solid rgba(107,79,160,0.05)',
+        boxShadow: SHADOW_MD, overflow: 'hidden'
     },
     referralsHeader: {
-        padding: '24px 32px', borderBottom: '1px solid #F3EFF9',
-        background: 'rgba(243,239,249,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+        padding: '36px 40px', borderBottom: '1px solid #F3EFF9',
+        background: 'linear-gradient(135deg, rgba(243,239,249,0.5) 0%, rgba(255,255,255,0) 100%)', 
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between'
     },
     pendingBadge: {
-        padding: '6px 14px', background: '#fff', borderRadius: 10, border: '1px solid #EDE9FE',
-        fontSize: 10, fontWeight: 800, color: PURPLE_LIGHT, display: 'flex', alignItems: 'center', gap: 6
+        padding: '8px 18px', background: WHITE, borderRadius: 14, border: '1px solid #EDE9FE',
+        fontSize: 10, fontWeight: 900, color: PURPLE_MID, display: 'flex', alignItems: 'center', gap: 8,
+        boxShadow: SHADOW_SM
     },
-    pendingDot: { width: 7, height: 7, borderRadius: '50%', background: '#FBBF24' },
+    pendingDot: { width: 8, height: 8, borderRadius: '50%', background: GOLD, boxShadow: `0 0 10px ${GOLD}` },
 
     statusPill: (status) => {
         const map = {
-            Pending: { bg: '#FFFBEB', border: '#FDE68A', color: '#92400E' },
-            Processing: { bg: '#EFF6FF', border: '#BFDBFE', color: '#1D4ED8' },
-            Admitted: { bg: '#F0FDF4', border: '#BBF7D0', color: '#15803D' },
-            Rejected: { bg: '#FFF5F5', border: '#FECACA', color: '#DC2626' },
+            Pending: { bg: '#FFFBEB', border: 'rgba(245,200,66,0.2)', color: '#92400E' },
+            Processing: { bg: '#EFF6FF', border: 'rgba(59,130,246,0.2)', color: '#1D4ED8' },
+            Admitted: { bg: '#F0FDF4', border: 'rgba(22,163,74,0.2)', color: '#15803D' },
+            Rejected: { bg: '#FFF1F2', border: 'rgba(225,29,72,0.2)', color: '#BE123C' },
         };
         const s = map[status] || { bg: '#F3EFF9', border: '#EDE9FE', color: PURPLE_LIGHT };
         return {
-            display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px',
-            borderRadius: 20, fontSize: 9, fontWeight: 900, letterSpacing: '0.1em',
+            display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px',
+            borderRadius: 20, fontSize: 10, fontWeight: 900, letterSpacing: '0.08em',
             textTransform: 'uppercase', border: `1px solid ${s.border}`,
-            background: s.bg, color: s.color, whiteSpace: 'nowrap'
+            background: s.bg, color: s.color, whiteSpace: 'nowrap',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
         };
     },
 
     actionIconBtn: (bg, color) => ({
-        padding: 7, background: bg, borderRadius: 10, border: 'none',
-        cursor: 'pointer', color, display: 'flex', alignItems: 'center', justifyContent: 'center'
+        padding: 10, background: bg, borderRadius: 12, border: 'none',
+        cursor: 'pointer', color, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'all 0.2s',
+        ':hover': { transform: 'scale(1.1)', boxShadow: SHADOW_SM }
     }),
 
     icdsAssigned: {
-        display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 8px',
-        background: `rgba(245,200,66,0.08)`, border: `1px solid rgba(245,200,66,0.3)`,
-        borderRadius: 6, fontSize: 8, fontWeight: 900, color: GOLD_DARK,
-        letterSpacing: '0.1em', textTransform: 'uppercase', marginTop: 6
+        display: 'inline-flex', alignItems: 'center', gap: 4, padding: '4px 10px',
+        background: `rgba(245,200,66,0.1)`, border: `1.5px solid rgba(245,200,66,0.25)`,
+        borderRadius: 8, fontSize: 9, fontWeight: 900, color: GOLD_DARK,
+        letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 8
     },
 
     /* ── User Maintenance ── */
     tabBar: {
-        display: 'flex', gap: 4, background: 'rgba(243,239,249,0.6)',
-        padding: 6, borderRadius: 20, marginBottom: 28
+        display: 'flex', gap: 8, background: 'rgba(243,239,249,0.8)',
+        padding: '8px', borderRadius: 24, marginBottom: 32, border: '1px solid #EDE9FE',
+        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.03)'
     },
     tabBtn: (active, accent) => ({
-        flex: 1, padding: '12px 20px', borderRadius: 16,
-        border: active ? '1px solid #E9D5FF' : 'none',
-        background: active ? '#fff' : 'transparent',
+        flex: 1, padding: '14px 24px', borderRadius: 18,
+        border: active ? '1px solid rgba(107,79,160,0.1)' : 'none',
+        background: active ? WHITE : 'transparent',
         color: active ? accent : PURPLE_SOFT,
-        fontWeight: 900, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase',
-        cursor: 'pointer', boxShadow: active ? '0 2px 8px rgba(107,79,160,0.1)' : 'none',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
+        fontWeight: 900, fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase',
+        cursor: 'pointer', boxShadow: active ? SHADOW_SM : 'none',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+        transition: 'all 0.2s'
     }),
 
     createBtn: (accent) => ({
-        display: 'flex', alignItems: 'center', gap: 8, padding: '11px 22px',
+        display: 'flex', alignItems: 'center', gap: 10, padding: '14px 28px',
         background: accent === GOLD ? `linear-gradient(135deg, ${GOLD}, ${GOLD_DARK})` : `linear-gradient(135deg, ${PURPLE_MID}, ${PURPLE_DARK})`,
         color: accent === GOLD ? PURPLE_DARK : GOLD,
-        border: accent === GOLD ? 'none' : `1px solid ${GOLD}`,
-        borderRadius: 14, cursor: 'pointer', fontWeight: 900, fontSize: 10,
-        letterSpacing: '0.08em', textTransform: 'uppercase',
-        boxShadow: accent === GOLD ? `0 4px 20px rgba(245,200,66,0.35)` : `0 4px 20px rgba(245,200,66,0.2)`
+        border: accent === GOLD ? 'none' : `1.5px solid ${GOLD}`,
+        borderRadius: 16, cursor: 'pointer', fontWeight: 950, fontSize: 11,
+        letterSpacing: '0.1em', textTransform: 'uppercase',
+        boxShadow: accent === GOLD ? `0 8px 32px rgba(245,200,66,0.35)` : `0 8px 32px rgba(26,10,46,0.2)`,
+        transition: 'all 0.2s',
+        ':hover': { transform: 'translateY(-2px)' }
     }),
 
     /* Form */
     formGrid: {
-        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24,
-        background: 'rgba(243,239,249,0.5)', padding: '36px', borderRadius: 24, border: '1px solid #EDE9FE'
+        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32,
+        background: WHITE, padding: '48px', borderRadius: 32, 
+        border: '1px solid rgba(107,79,160,0.05)', boxShadow: SHADOW_MD
     },
     fieldLabel: {
-        display: 'block', fontSize: 9, fontWeight: 800, color: PURPLE_SOFT,
-        letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8
+        display: 'block', fontSize: 10, fontWeight: 900, color: PURPLE_SOFT,
+        letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12,
+        opacity: 0.9
     },
     inputWrap: { position: 'relative' },
-    inputIcon: { position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' },
+    inputIcon: { position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: PURPLE_SOFT },
     input: {
-        width: '100%', padding: '13px 16px 13px 44px', borderRadius: 12,
-        border: '2px solid #EDE9FE', background: '#fff',
-        fontSize: 13, fontWeight: 600, color: PURPLE_DARK,
-        outline: 'none', boxSizing: 'border-box'
+        width: '100%', padding: '16px 20px 16px 52px', borderRadius: 16,
+        border: '2.5px solid #F3EFF9', background: '#F9F7FD',
+        fontSize: 14, fontWeight: 700, color: PURPLE_DARK,
+        outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s',
+        ':focus': { borderColor: PURPLE_SOFT, background: WHITE, boxShadow: `0 0 0 4px rgba(169,142,221,0.15)` }
     },
     inputPlain: {
-        width: '100%', padding: '13px 16px', borderRadius: 12,
-        border: '2px solid #EDE9FE', background: '#fff',
-        fontSize: 13, fontWeight: 600, color: PURPLE_DARK,
-        outline: 'none', boxSizing: 'border-box'
+        width: '100%', padding: '16px 20px', borderRadius: 16,
+        border: '2.5px solid #F3EFF9', background: '#F9F7FD',
+        fontSize: 14, fontWeight: 700, color: PURPLE_DARK,
+        outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s',
+        ':focus': { borderColor: PURPLE_SOFT, background: WHITE, boxShadow: `0 0 0 4px rgba(169,142,221,0.15)` }
     },
     select: {
-        width: '100%', padding: '13px 16px', borderRadius: 12,
-        border: '2px solid #EDE9FE', background: '#fff',
-        fontSize: 13, fontWeight: 700, color: PURPLE_DARK,
-        outline: 'none', boxSizing: 'border-box', appearance: 'none'
+        width: '100%', padding: '16px 20px', borderRadius: 16,
+        border: '2.5px solid #F3EFF9', background: '#F9F7FD',
+        fontSize: 14, fontWeight: 800, color: PURPLE_DARK,
+        outline: 'none', boxSizing: 'border-box', appearance: 'none', transition: 'all 0.2s',
+        ':focus': { borderColor: PURPLE_SOFT, background: WHITE }
     },
     submitBtn: (accent) => ({
-        width: '100%', padding: '16px', borderRadius: 16, border: 'none', cursor: 'pointer',
+        width: '100%', padding: '18px', borderRadius: 20, border: 'none', cursor: 'pointer',
         background: accent === 'teal'
             ? `linear-gradient(135deg, ${GOLD}, ${GOLD_DARK})`
             : `linear-gradient(135deg, ${PURPLE_MID}, ${PURPLE_DARK})`,
         color: accent === 'teal' ? PURPLE_DARK : GOLD,
-        fontWeight: 900, fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase',
-        boxShadow: accent === 'teal' ? `0 6px 24px rgba(245,200,66,0.4)` : `0 6px 24px rgba(245,200,66,0.2)`
+        fontWeight: 950, fontSize: 13, letterSpacing: '0.12em', textTransform: 'uppercase',
+        boxShadow: accent === 'teal' ? `0 8px 32px rgba(245,200,66,0.4)` : `0 8px 32px rgba(26,10,46,0.25)`,
+        transition: 'all 0.2s',
+        ':hover': { transform: 'translateY(-2px)' }
     }),
 
     /* Status messages */
     statusMsg: (type) => ({
-        display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px',
-        borderRadius: 14, marginBottom: 16, fontSize: 12, fontWeight: 700,
-        border: '1px solid',
+        display: 'flex', alignItems: 'center', gap: 14, padding: '16px 24px',
+        borderRadius: 18, marginBottom: 20, fontSize: 13, fontWeight: 700,
+        border: '1.5px solid',
         ...(type === 'success' ? { background: '#F0FDF4', borderColor: '#BBF7D0', color: '#15803D' } :
-            type === 'error' ? { background: '#FFF5F5', borderColor: '#FECACA', color: '#DC2626' } :
+            type === 'error' ? { background: '#FFF1F2', borderColor: '#FECACA', color: '#BE123C' } :
                 { background: '#EFF6FF', borderColor: '#BFDBFE', color: '#1D4ED8' })
     }),
 
     /* Clinical empty state */
     clinicalEmpty: {
-        background: '#fff', borderRadius: 28, border: '1px solid #E9D5FF',
-        boxShadow: '0 4px 24px rgba(107,79,160,0.08)', padding: '80px 40px',
+        background: WHITE, borderRadius: 32, border: '1px solid rgba(107,79,160,0.05)',
+        boxShadow: SHADOW_MD, padding: '100px 40px',
         textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center'
     },
     clinicalEmptyIcon: {
-        width: 80, height: 80, borderRadius: '50%', background: `rgba(245,200,66,0.08)`,
-        border: `2px solid rgba(245,200,66,0.2)`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24
+        width: 100, height: 100, borderRadius: '50%', background: `rgba(245,200,66,0.06)`,
+        border: `1.5px solid rgba(245,200,66,0.15)`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 32,
+        boxShadow: '0 8px 24px rgba(245,200,66,0.1)'
     },
 
     searchBar: {
-        width: '100%', maxWidth: 420, margin: '0 auto 40px',
-        background: 'rgba(243,239,249,0.8)', border: '2px solid #EDE9FE', borderRadius: 24,
-        padding: '14px 20px 14px 48px', fontSize: 13, fontWeight: 700, color: PURPLE_DARK,
-        outline: 'none', boxSizing: 'border-box'
+        width: '100%', maxWidth: 480, margin: '0 auto 48px',
+        background: WHITE, border: '2.5px solid #F3EFF9', borderRadius: 24,
+        padding: '16px 24px 16px 56px', fontSize: 14, fontWeight: 700, color: PURPLE_DARK,
+        outline: 'none', boxSizing: 'border-box', boxShadow: SHADOW_SM,
+        transition: TRANSITION,
+        ':focus': { borderColor: PURPLE_SOFT, boxShadow: `0 8px 24px rgba(107,79,160,0.12)` }
     },
-    searchIconWrap: { position: 'relative', maxWidth: 420, margin: '0 auto 40px' },
+    searchIconWrap: { position: 'relative', maxWidth: 480, margin: '0 auto 48px' },
 
-    episodeGrid: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, textAlign: 'left' },
+    episodeGrid: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 20, textAlign: 'left' },
     episodeCard: {
-        padding: '20px', background: 'rgba(243,239,249,0.6)', border: '1px solid #EDE9FE',
-        borderRadius: 20, cursor: 'pointer', transition: 'all 0.2s', display: 'flex', flexDirection: 'column', gap: 4
+        padding: '24px', background: WHITE, border: '1px solid rgba(107,79,160,0.05)',
+        borderRadius: 24, cursor: 'pointer', transition: TRANSITION, display: 'flex', flexDirection: 'column', gap: 6,
+        boxShadow: SHADOW_SM,
+        ':hover': { transform: 'translateY(-4px)', boxShadow: SHADOW_MD, borderColor: PURPLE_SOFT }
     },
 
     /* Login */
@@ -346,49 +404,53 @@ const styles = {
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, position: 'relative', overflow: 'hidden'
     },
     loginGlow1: {
-        position: 'absolute', top: -60, right: -60, width: 300, height: 300,
-        background: `rgba(245,200,66,0.07)`, borderRadius: '50%', filter: 'blur(60px)'
+        position: 'absolute', top: -100, right: -100, width: 500, height: 500,
+        background: `radial-gradient(circle, rgba(245,200,66,0.12) 0%, rgba(245,200,66,0) 70%)`, filter: 'blur(80px)'
     },
     loginGlow2: {
-        position: 'absolute', bottom: -60, left: -60, width: 300, height: 300,
-        background: `rgba(107,79,160,0.15)`, borderRadius: '50%', filter: 'blur(60px)'
+        position: 'absolute', bottom: -100, left: -100, width: 500, height: 500,
+        background: `radial-gradient(circle, rgba(107,79,160,0.15) 0%, rgba(107,79,160,0) 70%)`, filter: 'blur(80px)'
     },
     loginCard: {
-        maxWidth: 420, width: '100%', position: 'relative', zIndex: 1,
-        background: `rgba(59,31,106,0.5)`, backdropFilter: 'blur(20px)',
-        border: `1px solid rgba(245,200,66,0.15)`, padding: '40px 36px', borderRadius: 28,
-        boxShadow: '0 24px 80px rgba(26,10,46,0.5)'
+        maxWidth: 440, width: '100%', position: 'relative', zIndex: 1,
+        background: `rgba(59,31,106,0.3)`, backdropFilter: 'blur(32px)',
+        border: `1px solid rgba(255,255,255,0.1)`, padding: '56px 48px', borderRadius: 40,
+        boxShadow: '0 32px 100px rgba(26,10,46,0.6)', textAlign: 'center'
     },
     loginIconWrap: {
-        width: 64, height: 64, borderRadius: 20, background: PURPLE_MID,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
-        border: `2px solid ${GOLD}`, boxShadow: `0 0 30px rgba(245,200,66,0.25)`
+        width: 72, height: 72, borderRadius: 24, background: 'rgba(59,31,106,0.6)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 28px',
+        border: `2px solid ${GOLD}`, boxShadow: `0 0 40px rgba(245,200,66,0.25)`,
+        backdropFilter: GLASS
     },
-    loginTitle: { fontSize: 28, fontWeight: 900, color: '#fff', textAlign: 'center', margin: '0 0 6px' },
-    loginSub: { fontSize: 12, color: PURPLE_SOFT, textAlign: 'center', margin: '0 0 28px' },
-    loginLabel: { display: 'block', fontSize: 9, fontWeight: 800, color: PURPLE_SOFT, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8 },
+    loginTitle: { fontSize: 32, fontWeight: 950, color: WHITE, textAlign: 'center', margin: '0 0 8px', letterSpacing: '-0.02em' },
+    loginSub: { fontSize: 13, color: PURPLE_SOFT, textAlign: 'center', margin: '0 0 44px', fontWeight: 600, letterSpacing: '0.04em' },
+    loginLabel: { display: 'block', fontSize: 10, fontWeight: 900, color: PURPLE_SOFT, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 12, textAlign: 'left' },
     loginInput: {
-        width: '100%', padding: '13px 16px', borderRadius: 12,
-        border: `2px solid rgba(155,114,207,0.25)`, background: 'rgba(255,255,255,0.06)',
-        fontSize: 13, fontWeight: 600, color: '#fff',
+        width: '100%', padding: '16px 20px', borderRadius: 16,
+        border: `2px solid rgba(155,114,207,0.2)`, background: 'rgba(255,255,255,0.04)',
+        fontSize: 14, fontWeight: 700, color: WHITE,
         outline: 'none', boxSizing: 'border-box',
-        transition: 'border-color 0.15s'
+        transition: 'all 0.2s',
+        ':focus': { borderColor: GOLD, background: 'rgba(255,255,255,0.08)', boxShadow: '0 0 0 4px rgba(245,200,66,0.1)' }
     },
     loginBtn: {
-        width: '100%', padding: '15px', marginTop: 8,
+        width: '100%', padding: '18px', marginTop: 12,
         background: `linear-gradient(135deg, ${GOLD}, ${GOLD_DARK})`,
-        color: PURPLE_DARK, border: 'none', borderRadius: 14, cursor: 'pointer',
-        fontWeight: 900, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase',
-        boxShadow: `0 6px 24px rgba(245,200,66,0.4)`, transition: 'opacity 0.15s'
+        color: PURPLE_DARK, border: 'none', borderRadius: 18, cursor: 'pointer',
+        fontWeight: 950, fontSize: 13, letterSpacing: '0.12em', textTransform: 'uppercase',
+        boxShadow: `0 12px 40px rgba(245,200,66,0.4)`, transition: 'all 0.2s',
+        ':hover': { transform: 'translateY(-2px)', boxShadow: `0 16px 48px rgba(245,200,66,0.5)` }
     },
     loginError: {
-        padding: '12px 16px', background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.3)',
-        borderRadius: 12, color: '#FCA5A5', fontSize: 12, fontWeight: 600, textAlign: 'center', marginBottom: 8
+        padding: '14px 20px', background: 'rgba(220,38,38,0.12)', border: '1px solid rgba(220,38,38,0.2)',
+        borderRadius: 16, color: '#FCA5A5', fontSize: 13, fontWeight: 600, textAlign: 'center', marginBottom: 16
     },
     loginCancelLink: {
-        display: 'block', textAlign: 'center', marginTop: 20, paddingTop: 20,
-        borderTop: `1px solid rgba(255,255,255,0.06)`, fontSize: 12,
-        color: PURPLE_SOFT, textDecoration: 'none', fontWeight: 600
+        display: 'inline-block', textAlign: 'center', marginTop: 32, paddingTop: 32,
+        borderTop: `1px solid rgba(255,255,255,0.08)`, fontSize: 13,
+        color: PURPLE_SOFT, textDecoration: 'none', fontWeight: 700, transition: 'color 0.2s',
+        ':hover': { color: WHITE }
     }
 };
 
@@ -556,8 +618,8 @@ const AdminDashboard = () => {
             {/* ── Sidebar ── */}
             <aside style={styles.sidebar}>
                 <div style={styles.sidebarBrand}>
-                    <div style={styles.brandIcon}><ShieldCheck size={22} color={GOLD} /></div>
-                    <div>
+                    <div style={styles.brandIcon}><ShieldCheck size={26} color={GOLD} strokeWidth={2.5} /></div>
+                    <div style={styles.brandTextWrap}>
                         <div style={styles.brandTitle}>Olympia</div>
                         <div style={styles.brandSub}>Admin Portal</div>
                     </div>
@@ -565,22 +627,20 @@ const AdminDashboard = () => {
 
                 <nav style={styles.nav}>
                     {[
-                        { id: 'overview', icon: <TrendingUp size={16} />, label: 'Dashboard Home' },
-                        { id: 'users', icon: <UserPlus size={16} />, label: 'User Maintenance' },
-                        { id: 'referrals', icon: <ClipboardCheck size={16} />, label: 'Referral Intake' },
-                        { id: 'clinical', icon: <Stethoscope size={16} />, label: 'Clinical Tools' },
+                        { id: 'overview', icon: <TrendingUp size={18} />, label: 'Dashboard Home' },
+                        { id: 'users', icon: <UserPlus size={18} />, label: 'User Maintenance' },
+                        { id: 'referrals', icon: <ClipboardCheck size={18} />, label: 'Referral Intake' },
+                        { id: 'clinical', icon: <Stethoscope size={18} />, label: 'Clinical Tools' },
                     ].map(item => (
                         <button
                             key={item.id}
                             onClick={() => { setActiveTab(item.id); if (item.id === 'users') setViewMode('list'); }}
-                            style={{ ...styles.navBtn, ...(activeTab === item.id ? styles.navBtnActive : {}) }}
+                            style={styles.navBtn(activeTab === item.id)}
                         >
-                            {item.icon} {item.label}
+                            {item.icon} <span style={styles.navLabel}>{item.label}</span>
+                            {activeTab === item.id && <ArrowRight size={14} opacity={0.6} />}
                         </button>
                     ))}
-                    {/*<button style={styles.navBtnPlain}>
-                        <MessageSquare size={16} /> AI Conversation Logs
-                    </button>*/}
                 </nav>
 
                 <div style={styles.staffCard}>
