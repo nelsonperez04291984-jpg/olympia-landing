@@ -77,6 +77,17 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
         return calculatePDGMData(primaryDiagnosis?.base_weight || 0);
     }, [primaryDiagnosis, admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment]);
 
+    const handleSave = () => {
+        if (onSave) {
+            onSave({
+                primary: primaryDiagnosis?.code,
+                secondary: secondaryDiagnoses.map(d => d.code),
+                weight: analytics.weight,
+                payment: analytics.amount,
+                context: { admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment }
+            });
+        }
+    };
 
     return (
         <div className="max-w-[1400px] mx-auto animate-fadeIn grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
