@@ -21,7 +21,9 @@ import {
     Package,
     CheckCircle,
     AlertCircle,
-    Stethoscope
+    Stethoscope,
+    Zap,
+    CheckCircle2
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import DiagnosisAssessment from '../components/DiagnosisAssessment';
