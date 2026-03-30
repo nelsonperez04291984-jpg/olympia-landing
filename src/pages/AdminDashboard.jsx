@@ -470,6 +470,21 @@ const AdminDashboard = () => {
     const [directorySearch, setDirectorySearch] = useState('');
     const navigate = useNavigate();
 
+    const handleFixSchema = async () => {
+        setClinicalStatus({ show: true, message: 'Patching Database Schema...', type: 'loading' });
+        try {
+            const res = await fetch('/api/admin/fix-schema');
+            if (res.ok) {
+                setClinicalStatus({ show: true, message: 'System Schema Repaired Successfully', type: 'success' });
+                setTimeout(() => setClinicalStatus({ show: false, message: '', type: 'success' }), 4000);
+            } else {
+                setClinicalStatus({ show: true, message: 'Schema Patch Failed', type: 'error' });
+            }
+        } catch {
+            setClinicalStatus({ show: true, message: 'Connection Error', type: 'error' });
+        }
+    };
+
     const handleAssessAndCode = (referral) => { setActiveEpisode(referral); setActiveTab('clinical'); };
     const handleSaveDiagnosis = async (referralId, diagnosisData) => {
         setClinicalStatus({ show: true, message: 'Syncing Clinical Data...', type: 'loading' });
@@ -708,11 +723,21 @@ const AdminDashboard = () => {
                             {{ overview: 'Real-time platform metrics and audit logs.', users: 'Manage partner providers and internal staff accounts.', referrals: 'Review and approve incoming patient referrals.', clinical: 'AI-powered clinical coding and PDGM intelligence.' }[activeTab]}
                         </p>
                     </div>
-                    <div style={styles.statusBadge}>
-                        <Activity size={18} color={GOLD} />
-                        <div>
-                            <div style={styles.statusLabel}>System Live</div>
-                            <div style={styles.statusValue}>{new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                    <div style={{ display: 'flex', gap: 12 }}>
+                        <button onClick={handleFixSchema} style={{
+                            display: 'flex', alignItems: 'center', gap: 8, padding: '12px 20px',
+                            background: WHITE, borderRadius: 16, border: '1px solid #FEE2E2',
+                            boxShadow: SHADOW_SM, cursor: 'pointer', height: 'fit-content',
+                            fontSize: 10, fontWeight: 900, color: '#EF4444', letterSpacing: '0.05em', textTransform: 'uppercase'
+                        }}>
+                            <Zap size={14} /> Repair System
+                        </button>
+                        <div style={styles.statusBadge}>
+                            <Activity size={18} color={GOLD} />
+                            <div>
+                                <div style={styles.statusLabel}>System Live</div>
+                                <div style={styles.statusValue}>{new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                            </div>
                         </div>
                     </div>
                 </header>
