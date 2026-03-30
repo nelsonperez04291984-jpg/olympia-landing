@@ -465,18 +465,40 @@ const AdminDashboard = () => {
     const [referrals, setReferrals] = useState([]);
     const [activeEpisode, setActiveEpisode] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [clinicalStatus, setClinicalStatus] = useState({ show: false, message: '', type: 'success' });
     const [error, setError] = useState('');
     const [directorySearch, setDirectorySearch] = useState('');
     const navigate = useNavigate();
 
     const handleAssessAndCode = (referral) => { setActiveEpisode(referral); setActiveTab('clinical'); };
-    const handleSaveDiagnosis = (referralId, diagnosisData) => {
-        setReferrals(prev => prev.map(r =>
-            r.id === referralId
-                ? { ...r, status: 'Processing', icd_primary: diagnosisData.primary, icd_secondary: diagnosisData.secondary, pdgm_weight: diagnosisData.weight }
-                : r
-        ));
-        setActiveEpisode(null);
+    const handleSaveDiagnosis = async (referralId, diagnosisData) => {
+        setClinicalStatus({ show: true, message: 'Syncing Clinical Data...', type: 'loading' });
+        try {
+            const res = await fetch(`/api/admin/referrals/${referralId}`, {
+                method: 'PATCH',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('olympia_admin_token')}`
+                },
+                body: JSON.stringify({
+                    status: 'Processing',
+                    icd_primary: diagnosisData.primary,
+                    icd_secondary: JSON.stringify(diagnosisData.secondary),
+                    pdgm_weight: diagnosisData.weight
+                })
+            });
+            
+            if (res.ok) {
+                setClinicalStatus({ show: true, message: 'Diagnoses Saved to Patient Record', type: 'success' });
+                setTimeout(() => setClinicalStatus({ show: false, message: '', type: 'success' }), 3000);
+                setActiveEpisode(null);
+                fetchDashboardData(localStorage.getItem('olympia_admin_token'));
+            } else {
+                setClinicalStatus({ show: true, message: 'Failed to Sync Data', type: 'error' });
+            }
+        } catch (err) {
+            setClinicalStatus({ show: true, message: 'Connection Error', type: 'error' });
+        }
     };
 
     const [username, setUsername] = useState('');
@@ -596,6 +618,22 @@ const AdminDashboard = () => {
     /* ────────────── MAIN DASHBOARD ────────────── */
     return (
         <div style={styles.shell}>
+
+            {/* Global Success Toast */}
+            {clinicalStatus.show && (
+                <div style={{
+                    position: 'fixed', bottom: 32, right: 32, zIndex: 1000,
+                    background: clinicalStatus.type === 'error' ? '#EF4444' : clinicalStatus.type === 'loading' ? PURPLE_MID : '#10B981',
+                    color: WHITE, padding: '16px 28px', borderRadius: 20, boxShadow: SHADOW_MD,
+                    display: 'flex', alignItems: 'center', gap: 12, fontWeight: 900, fontSize: 13,
+                    textTransform: 'uppercase', letterSpacing: '0.05em',
+                    animation: 'fadeInUp 0.3s ease-out'
+                }}>
+                    {clinicalStatus.type === 'loading' ? <Activity size={18} className="animate-spin" /> : 
+                     clinicalStatus.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+                    {clinicalStatus.message}
+                </div>
+            )}
 
             {/* Delete Confirmation Modal */}
             {confirmDelete.show && (

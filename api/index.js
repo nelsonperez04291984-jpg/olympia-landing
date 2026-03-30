@@ -225,14 +225,19 @@ app.get('/api/admin/referrals', async (req, res) => {
   }
 });
 
-// Update Referral Status
+// Update Referral (Status & Clinical Data)
 app.patch('/api/admin/referrals/:id', async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body;
+  const { status, icd_primary, icd_secondary, pdgm_weight } = req.body;
   try {
     const result = await pool.query(
-      'UPDATE referrals SET status = $1 WHERE id = $2 RETURNING *',
-      [status, id]
+      `UPDATE referrals 
+       SET status = COALESCE($1, status), 
+           icd_primary = COALESCE($2, icd_primary), 
+           icd_secondary = COALESCE($3, icd_secondary), 
+           pdgm_weight = COALESCE($4, pdgm_weight) 
+       WHERE id = $5 RETURNING *`,
+      [status, icd_primary, icd_secondary, pdgm_weight, id]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Referral not found' });
     res.json(result.rows[0]);
@@ -286,6 +291,9 @@ app.get('/api/admin/fix-schema', async (req, res) => {
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS patient_phone VARCHAR(20)");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS diagnosis TEXT");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS services_needed TEXT");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS icd_primary VARCHAR(20)");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS icd_secondary TEXT");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS pdgm_weight VARCHAR(20)");
     
     // Check if the foreign key is correct. 
     // If it was created pointing to admins(id) by mistake, we fix it here.
