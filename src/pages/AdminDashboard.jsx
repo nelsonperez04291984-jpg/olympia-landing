@@ -55,7 +55,7 @@ const styles = {
         boxShadow: '12px 0 40px rgba(26,10,46,0.25)', zIndex: 20,
         borderRight: '1px solid rgba(245,200,66,0.1)'
     },
-    sidebarBrand: { 
+    sidebarBrand: {
         display: 'flex', alignItems: 'center', gap: 14, marginBottom: 44,
         padding: '0 8px'
     },
@@ -73,7 +73,7 @@ const styles = {
     navBtn: (active) => ({
         display: 'flex', alignItems: 'center', gap: 12, padding: '14px 20px',
         borderRadius: 14, border: 'none', background: active ? `linear-gradient(135deg, ${GOLD} 0%, ${GOLD_DARK} 100%)` : 'transparent',
-        cursor: 'pointer', color: active ? PURPLE_DARK : PURPLE_SOFT, 
+        cursor: 'pointer', color: active ? PURPLE_DARK : PURPLE_SOFT,
         fontWeight: 800, fontSize: 11, letterSpacing: '0.06em',
         textTransform: 'uppercase', textAlign: 'left', transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
         width: '100%',
@@ -89,7 +89,7 @@ const styles = {
     },
 
     staffCard: {
-        background: 'linear-gradient(180deg, rgba(59,31,106,0.4) 0%, rgba(26,10,46,0.6) 100%)', 
+        background: 'linear-gradient(180deg, rgba(59,31,106,0.4) 0%, rgba(26,10,46,0.6) 100%)',
         borderRadius: 20, padding: '20px', marginBottom: 16,
         border: `1px solid rgba(245,200,66,0.1)`, backdropFilter: GLASS,
         display: 'flex', flexDirection: 'column', gap: 4
@@ -157,8 +157,8 @@ const styles = {
         background: 'linear-gradient(90deg, rgba(243,239,249,0.4) 0%, rgba(255,255,255,0) 100%)'
     },
     panelTitle: { fontSize: 18, fontWeight: 900, color: PURPLE_DARK, margin: 0, letterSpacing: '-0.01em' },
-    panelLink: { 
-        fontSize: 11, fontWeight: 800, color: PURPLE_LIGHT, background: 'rgba(107,79,160,0.05)', 
+    panelLink: {
+        fontSize: 11, fontWeight: 800, color: PURPLE_LIGHT, background: 'rgba(107,79,160,0.05)',
         border: 'none', cursor: 'pointer', letterSpacing: '0.06em', textTransform: 'uppercase',
         padding: '8px 16px', borderRadius: 10, transition: 'all 0.2s'
     },
@@ -166,8 +166,8 @@ const styles = {
     /* ── Table ── */
     table: { width: '100%', borderCollapse: 'separate', borderSpacing: 0 },
     thead: { background: 'rgba(243,239,249,0.3)' },
-    th: { 
-        padding: '16px 32px', textAlign: 'left', fontSize: 10, fontWeight: 900, 
+    th: {
+        padding: '16px 32px', textAlign: 'left', fontSize: 10, fontWeight: 900,
         color: PURPLE_SOFT, letterSpacing: '0.12em', textTransform: 'uppercase',
         borderBottom: '1px solid #F3EFF9'
     },
@@ -181,16 +181,16 @@ const styles = {
         boxShadow: '0 2px 8px rgba(26,10,46,0.2)'
     },
 
-    deleteBtn: { 
-        background: 'rgba(239,68,68,0.05)', border: 'none', cursor: 'pointer', 
-        color: '#EF4444', padding: '10px', borderRadius: 12, display: 'flex', 
+    deleteBtn: {
+        background: 'rgba(239,68,68,0.05)', border: 'none', cursor: 'pointer',
+        color: '#EF4444', padding: '10px', borderRadius: 12, display: 'flex',
         alignItems: 'center', transition: 'all 0.2s'
     },
 
     /* ── AI Logs ── */
     logsList: { padding: '24px 32px', overflowY: 'auto', maxHeight: 520, display: 'flex', flexDirection: 'column', gap: 20 },
-    logItem: { 
-        background: PURPLE_GHOST, borderRadius: 24, padding: '24px', 
+    logItem: {
+        background: PURPLE_GHOST, borderRadius: 24, padding: '24px',
         border: '1px solid #EDE9FE', transition: 'all 0.2s',
         ':hover': { transform: 'scale(1.01)', boxShadow: SHADOW_SM }
     },
@@ -243,7 +243,7 @@ const styles = {
     },
     referralsHeader: {
         padding: '36px 40px', borderBottom: '1px solid #F3EFF9',
-        background: 'linear-gradient(135deg, rgba(243,239,249,0.5) 0%, rgba(255,255,255,0) 100%)', 
+        background: 'linear-gradient(135deg, rgba(243,239,249,0.5) 0%, rgba(255,255,255,0) 100%)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between'
     },
     pendingBadge: {
@@ -316,7 +316,7 @@ const styles = {
     /* Form */
     formGrid: {
         display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32,
-        background: WHITE, padding: '48px', borderRadius: 32, 
+        background: WHITE, padding: '48px', borderRadius: 32,
         border: '1px solid rgba(107,79,160,0.05)', boxShadow: SHADOW_MD
     },
     fieldLabel: {
@@ -493,7 +493,7 @@ const AdminDashboard = () => {
         try {
             const res = await fetch(`/api/admin/referrals/${referralId}`, {
                 method: 'PATCH',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('olympia_admin_token')}`
                 },
@@ -504,7 +504,7 @@ const AdminDashboard = () => {
                     pdgm_weight: diagnosisData.weight
                 })
             });
-            
+
             if (res.ok) {
                 setClinicalStatus({ show: true, message: 'Diagnoses Saved to Patient Record', type: 'success' });
                 setTimeout(() => setClinicalStatus({ show: false, message: '', type: 'success' }), 3000);
@@ -646,8 +646,8 @@ const AdminDashboard = () => {
                     textTransform: 'uppercase', letterSpacing: '0.05em',
                     animation: 'fadeInUp 0.3s ease-out'
                 }}>
-                    {clinicalStatus.type === 'loading' ? <Activity size={18} className="animate-spin" /> : 
-                     clinicalStatus.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+                    {clinicalStatus.type === 'loading' ? <Activity size={18} className="animate-spin" /> :
+                        clinicalStatus.type === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
                     {clinicalStatus.message}
                 </div>
             )}
@@ -799,34 +799,6 @@ const AdminDashboard = () => {
                                     </tbody>
                                 </table>
                             </div>
-
-                            {/* AI Logs */}
-                            <div style={{ ...styles.panelCard, display: 'flex', flexDirection: 'column' }}>
-                                <div style={styles.panelHeader}>
-                                    <h3 style={styles.panelTitle}>Recent AI Interactions</h3>
-                                    <button style={styles.panelLink}>Full Log</button>
-                                </div>
-                                <div style={styles.logsList}>
-                                    {stats.recent_ai_logs.map((log, i) => (
-                                        <div key={i} style={styles.logItem}>
-                                            <div style={styles.logRow}>
-                                                <div style={styles.logAvatarUser}><Users size={13} color={PURPLE_LIGHT} /></div>
-                                                <div>
-                                                    <div style={styles.logTypeLabel(PURPLE_SOFT)}>User Query</div>
-                                                    <p style={{ ...styles.logText, color: PURPLE_DARK }}>"{log.user_query}"</p>
-                                                </div>
-                                            </div>
-                                            <div style={{ ...styles.logRow, marginBottom: 0 }}>
-                                                <div style={styles.logAvatarAI}><Activity size={13} color={GOLD} /></div>
-                                                <div>
-                                                    <div style={styles.logTypeLabel(GOLD_DARK)}>Assistant Response</div>
-                                                    <p style={{ ...styles.logText, color: PURPLE_DARK, fontStyle: 'normal' }}>{log.ai_response}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
                         </div>
                     </>
                 )}
@@ -879,7 +851,7 @@ const AdminDashboard = () => {
                                             <td style={styles.td}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                                                     <span style={styles.statusPill(r.status)}>{r.status}</span>
-                                                    
+
                                                     {r.icd_primary && (
                                                         <div style={{
                                                             marginTop: 4, padding: '8px 12px', background: 'rgba(245,200,66,0.05)',
