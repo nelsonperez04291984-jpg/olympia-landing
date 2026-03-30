@@ -877,9 +877,22 @@ const AdminDashboard = () => {
                                                 <div style={{ fontSize: 9, fontWeight: 800, color: GOLD_DARK, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 3 }}>Verified Partner</div>
                                             </td>
                                             <td style={styles.td}>
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                                                     <span style={styles.statusPill(r.status)}>{r.status}</span>
-                                                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                                                    
+                                                    {r.icd_primary && (
+                                                        <div style={{
+                                                            marginTop: 4, padding: '8px 12px', background: 'rgba(245,200,66,0.05)',
+                                                            border: `1px solid rgba(245,200,66,0.2)`, borderRadius: 12,
+                                                            display: 'flex', flexDirection: 'column', gap: 2
+                                                        }}>
+                                                            <div style={{ fontSize: 8, fontWeight: 900, color: GOLD_DARK, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Clinical Record</div>
+                                                            <div style={{ fontSize: 11, fontWeight: 950, color: PURPLE_DARK }}>ICD: {r.icd_primary}</div>
+                                                            <div style={{ fontSize: 10, fontWeight: 700, color: GOLD_DARK }}>Weight: {r.pdgm_weight}</div>
+                                                        </div>
+                                                    )}
+
+                                                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
                                                         {r.status === 'Pending' && (
                                                             <button onClick={() => handleUpdateReferralStatus(r.id, 'Processing')} style={styles.actionIconBtn('rgba(59,130,246,0.08)', '#3B82F6')} title="Mark as Processing">
                                                                 <Activity size={15} />
@@ -962,6 +975,11 @@ const AdminDashboard = () => {
                                                 <div>
                                                     <div style={{ fontWeight: 900, fontSize: 11, color: PURPLE_DARK, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{r.patient_name}</div>
                                                     <div style={{ fontSize: 10, color: PURPLE_SOFT, fontWeight: 600 }}>DOB: {r.patient_dob}</div>
+                                                    {r.icd_primary && (
+                                                        <div style={{ fontSize: 9, fontWeight: 900, color: GOLD_DARK, marginTop: 4, letterSpacing: '0.05em' }}>
+                                                            ASSIGNED: {r.icd_primary}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid #EDE9FE' }}>
