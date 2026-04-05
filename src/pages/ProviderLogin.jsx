@@ -6,6 +6,31 @@ const ProviderLogin = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [providerName, setProviderName] = useState('');
+  const [stats, setStats] = useState({ total: 0, active: 0, pending: 0 });
+  const [isStatsLoading, setIsStatsLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (success) {
+      const fetchStats = async () => {
+        setIsStatsLoading(true);
+        const token = localStorage.getItem('olympia_token');
+        try {
+          const res = await fetch('/api/referrals/stats', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setStats(data);
+          }
+        } catch (err) {
+          console.error('Error fetching stats:', err);
+        } finally {
+          setIsStatsLoading(false);
+        }
+      };
+      fetchStats();
+    }
+  }, [success]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -66,15 +91,21 @@ const ProviderLogin = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="p-6 bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl border border-indigo-100/50 shadow-sm">
                     <h3 className="text-lg font-bold text-indigo-900 mb-1">Total Referrals</h3>
-                    <p className="text-3xl font-black text-indigo-600">0</p>
+                    <p className="text-3xl font-black text-indigo-600">
+                        {isStatsLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : stats.total}
+                    </p>
                 </div>
                 <div className="p-6 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-xl border border-teal-100/50 shadow-sm">
                     <h3 className="text-lg font-bold text-teal-900 mb-1">Active Patients</h3>
-                    <p className="text-3xl font-black text-teal-600">0</p>
+                    <p className="text-3xl font-black text-teal-600">
+                        {isStatsLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : stats.active}
+                    </p>
                 </div>
                 <div className="p-6 bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl border border-orange-100/50 shadow-sm">
                     <h3 className="text-lg font-bold text-orange-900 mb-1">Pending Orders</h3>
-                    <p className="text-3xl font-black text-orange-600">0</p>
+                    <p className="text-3xl font-black text-orange-600">
+                        {isStatsLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : stats.pending}
+                    </p>
                 </div>
             </div>
 

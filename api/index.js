@@ -261,6 +261,32 @@ app.get('/api/referrals/my', async (req, res) => {
   }
 });
 
+// Get Provider Referral Stats
+app.get('/api/referrals/stats', async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: 'No token provided' });
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const providerId = decoded.id;
+
+    const stats = await pool.query(`
+      SELECT 
+        COUNT(*)::int as total,
+        COUNT(*) FILTER (WHERE status ILIKE 'Admitted' OR status ILIKE 'Processing')::int as active,
+        COUNT(*) FILTER (WHERE status ILIKE 'Pending')::int as pending
+      FROM referrals 
+      WHERE provider_id = $1
+    `, [providerId]);
+    
+    res.json(stats.rows[0]);
+  } catch (err) {
+    console.error('Stats fetch error:', err);
+    res.status(500).json({ error: 'Failed to fetch referral statistics' });
+  }
+});
+
 // --- Public (Hospital Link) Referrals ---
 
 // Validate Referral Link Token
