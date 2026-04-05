@@ -393,32 +393,45 @@ const About = () => {
                                         </div>
                                     ))}
                                 </div>
-                                <div className="mt-8 p-4 bg-white/10 backdrop-blur-sm rounded-xl">
-                                    <p className="text-purple-100 text-sm">
-                                        <strong className="text-white">Need Confirmation?</strong> If your area isn't listed, please contact us Monday–Friday, 9AM–5PM at <a href="tel:6573770776" className="text-emerald-300 hover:text-emerald-200 transition-colors font-semibold">(657) 377-0776</a> to confirm availability.
+                                </div>
+                            </div>
+
+                            {/* Right: Map & Confirmation */}
+                            <div className="space-y-6">
+                                <div className="p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10">
+                                    <p className="text-purple-100 text-sm leading-relaxed">
+                                        <strong className="text-white text-base block mb-2 font-bold uppercase tracking-wider">Need Confirmation?</strong> 
+                                        If your specific city or zip code isn't listed, please reach out to us directly. 
+                                        We often expand our reach for specialized care cases.
                                     </p>
-                                    {/* Right: Interactive Map */}
-                                    <div className="relative">
-                                        <div className="bg-white rounded-2xl p-4 shadow-2xl">
-                                            <iframe
-                                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3322.123!2d-117.9530!3d33.6846!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80dd268e46639c73%3A0x5fa279993a2740d6!2s20422%20Beach%20Blvd%20%23320%2C%20Huntington%20Beach%2C%20CA%2092648!5e0!3m2!1sen!2sus!4v1234567890"
-                                                width="100%"
-                                                height="400"
-                                                style={{ border: 0, borderRadius: '12px' }}
-                                                allowFullScreen=""
-                                                loading="lazy"
-                                                referrerPolicy="no-referrer-when-downgrade"
-                                                title="Olympia Home Health Location"
-                                            ></iframe>
-                                            <div className="mt-4 text-center">
-                                                <p className="text-gray-900 font-semibold">Our Office</p>
-                                                <p className="text-gray-600 text-sm">20422 Beach Blvd, Suite 320, Huntington Beach, CA 92648</p>
-                                            </div>
+                                    <div className="mt-4 flex items-center gap-3 text-emerald-300 font-bold text-lg">
+                                        <Phone size={18} />
+                                        <a href="tel:6573770776" className="hover:text-emerald-200 transition-colors">(657) 377-0776</a>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-3xl p-5 shadow-2xl transform hover:scale-[1.02] transition-transform duration-500">
+                                    <div className="relative overflow-hidden rounded-2xl">
+                                        <iframe
+                                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3322.123!2d-117.9530!3d33.6846!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80dd268e46639c73%3A0x5fa279993a2740d6!2s20422%20Beach%20Blvd%20%23320%2C%20Huntington%20Beach%2C%20CA%2092648!5e0!3m2!1sen!2sus!4v1234567890"
+                                            width="100%"
+                                            height="350"
+                                            style={{ border: 0 }}
+                                            allowFullScreen=""
+                                            loading="lazy"
+                                            referrerPolicy="no-referrer-when-downgrade"
+                                            title="Olympia Home Health Location"
+                                        ></iframe>
+                                    </div>
+                                    <div className="mt-5 text-center px-2">
+                                        <div className="flex items-center justify-center gap-2 mb-1">
+                                            <MapPin size={16} className="text-purple-600" />
+                                            <p className="text-gray-900 font-black text-lg">Our Office</p>
                                         </div>
+                                        <p className="text-gray-500 text-sm font-medium">20422 Beach Blvd, Suite 320, Huntington Beach, CA 92648</p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
                     </div>
                 </div>
 
