@@ -278,9 +278,12 @@ app.get('/api/public/provider-info/:token', async (req, res) => {
 app.post('/api/public/referrals', async (req, res) => {
   const { 
     token, patient_name, patient_dob, patient_phone, 
+    patient_address, emergency_contact, preferred_language,
     diagnosis, services_needed, 
     insurance_provider, insurance_policy, 
-    referral_priority, documents_provided,
+    referral_priority, soc_request, 
+    physician_name, physician_npi,
+    documents_provided,
     primary_diagnosis, secondary_diagnoses
   } = req.body;
   
@@ -297,18 +300,24 @@ app.post('/api/public/referrals', async (req, res) => {
     const result = await pool.query(
       `INSERT INTO referrals (
         provider_id, patient_name, patient_dob, patient_phone, 
+        patient_address, emergency_contact, preferred_language,
         diagnosis, services_needed, status, source,
-        insurance_provider, insurance_policy, referral_priority, documents_provided,
+        insurance_provider, insurance_policy, referral_priority, soc_request,
+        physician_name, physician_npi,
+        documents_provided,
         status_token, primary_diagnosis, secondary_diagnoses
       ) 
-       VALUES ($1, $2, $3, $4, $5, $6, 'Pending', 'Manual_FastLink', $7, $8, $9, $10, $11, $12, $13) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'Pending', 'Manual_FastLink', $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) 
        RETURNING *`,
       [
         providerId, patient_name, patient_dob, patient_phone, 
+        patient_address, emergency_contact, preferred_language,
         diagnosis || (primary_diagnosis ? primary_diagnosis.description : ''), 
         services_needed, 
         insurance_provider, insurance_policy, 
-        referral_priority || 'Routine', documents_provided || false,
+        referral_priority || 'Routine', soc_request || 'Routine',
+        physician_name, physician_npi,
+        documents_provided || false,
         status_token,
         primary_diagnosis ? JSON.stringify(primary_diagnosis) : null,
         secondary_diagnoses ? JSON.stringify(secondary_diagnoses) : '[]'
@@ -463,6 +472,14 @@ app.get('/api/admin/fix-schema', async (req, res) => {
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS status_token VARCHAR(36)");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS primary_diagnosis JSONB");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS secondary_diagnoses JSONB DEFAULT '[]'");
+    
+    // Hospital-Grade Demographic Expansion
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS patient_address TEXT");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS emergency_contact VARCHAR(255)");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS preferred_language VARCHAR(50) DEFAULT 'English'");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS soc_request VARCHAR(50) DEFAULT 'Routine'");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS physician_name VARCHAR(255)");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS physician_npi VARCHAR(20)");
     
     // Check if the foreign key is correct. 
     // If it was created pointing to admins(id) by mistake, we fix it here.

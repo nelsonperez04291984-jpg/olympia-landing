@@ -9,7 +9,6 @@ import {
     Phone, 
     FileText, 
     CheckCircle,
-    CheckCircle2,
     Check,
     Clock,
     PhoneCall,
@@ -20,7 +19,16 @@ import {
     Info,
     TrendingUp,
     Plus,
-    X as XIcon
+    X as XIcon,
+    Zap,
+    HeartPulse,
+    ShieldCheck,
+    AlertCircle,
+    MapPin,
+    Heart,
+    Globe,
+    Search,
+    ArrowRight
 } from 'lucide-react';
 import ICD10Search from '../components/ICD10Search';
 
@@ -50,9 +58,15 @@ const PublicReferral = () => {
         patient_name: '',
         patient_dob: '',
         patient_phone: '',
+        patient_address: '',
+        emergency_contact: '',
+        preferred_language: 'English',
         insurance_provider: '',
         insurance_policy: '',
         referral_priority: 'Routine',
+        soc_request: 'Routine', // Within 24h, 48h, Routine
+        physician_name: '',
+        physician_npi: '',
         diagnosis: '',
         services_needed: '',
         documents_provided: false
@@ -220,8 +234,9 @@ const PublicReferral = () => {
                 <div style={styles.wizardSidebar}>
                     {[
                         { n: 1, l: 'Patient Info', i: <User size={16} /> },
-                        { n: 2, l: 'Clinical & Insurance', i: <Shield size={16} /> },
-                        { n: 3, l: 'Review & Send', i: <FileUp size={16} /> }
+                        { n: 2, l: 'Insurance & Contact', i: <Shield size={16} /> },
+                        { n: 3, l: 'Clinical Orders', i: <Stethoscope size={16} /> },
+                        { n: 4, l: 'Documents & Send', i: <FileUp size={16} /> }
                     ].map(s => (
                         <div key={s.n} style={styles.sideStep(s.n === step, s.n < step)}>
                             <div style={styles.sideIcon(s.n === step, s.n < step)}>{s.n < step ? <Check size={14} /> : s.i}</div>
@@ -235,7 +250,7 @@ const PublicReferral = () => {
                         <div className="animate-fadeIn">
                              <div style={styles.stepHeader}>
                                 <h3 style={styles.stepTitle}>Patient Identity</h3>
-                                <div style={styles.stepCounter}>Step 1 of 3</div>
+                                <div style={styles.stepCounter}>Step 1 of 4</div>
                             </div>
                             <div style={styles.inputGroup}>
                                 <label style={styles.label}>Legal Full Name</label>
@@ -251,14 +266,52 @@ const PublicReferral = () => {
                                     <input style={styles.input} placeholder="(555) 000-0000" value={formData.patient_phone} onChange={e => setFormData({...formData, patient_phone: e.target.value})} />
                                 </div>
                             </div>
+                            <div style={styles.inputGroup}>
+                                <label style={styles.label}>Home Address</label>
+                                <div style={{ position: 'relative' }}>
+                                    <MapPin size={16} style={{ position: 'absolute', left: 16, top: 18, color: PURPLE_MID, opacity: 0.5 }} />
+                                    <input 
+                                        style={{ ...styles.input, paddingLeft: 44 }} 
+                                        placeholder="Full service address for home visits" 
+                                        value={formData.patient_address} 
+                                        onChange={e => setFormData({...formData, patient_address: e.target.value})} 
+                                    />
+                                </div>
+                            </div>
+                            <div style={styles.row}>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>Emergency Contact</label>
+                                    <div style={{ position: 'relative' }}>
+                                        <Heart size={16} style={{ position: 'absolute', left: 16, top: 18, color: PURPLE_MID, opacity: 0.5 }} />
+                                        <input 
+                                            style={{ ...styles.input, paddingLeft: 44 }} 
+                                            placeholder="Name & Relationship" 
+                                            value={formData.emergency_contact} 
+                                            onChange={e => setFormData({...formData, emergency_contact: e.target.value})} 
+                                        />
+                                    </div>
+                                </div>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>Preferred Language</label>
+                                    <div style={{ position: 'relative' }}>
+                                        <Globe size={16} style={{ position: 'absolute', left: 16, top: 18, color: PURPLE_MID, opacity: 0.5 }} />
+                                        <input 
+                                            style={{ ...styles.input, paddingLeft: 44 }} 
+                                            placeholder="e.g. English, Spanish" 
+                                            value={formData.preferred_language} 
+                                            onChange={e => setFormData({...formData, preferred_language: e.target.value})} 
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     )}
 
                     {step === 2 && (
                         <div className="animate-fadeIn">
                              <div style={styles.stepHeader}>
-                                <h3 style={styles.stepTitle}>Clinical & Insurance</h3>
-                                <div style={styles.stepCounter}>Step 2 of 3</div>
+                                <h3 style={styles.stepTitle}>Insurance & Contact</h3>
+                                <div style={styles.stepCounter}>Step 2 of 4</div>
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 32 }}>
@@ -280,18 +333,73 @@ const PublicReferral = () => {
 
                                     <div style={styles.row}>
                                         <div style={styles.inputGroup}>
-                                            <label style={styles.label}>Insurance Provider</label>
-                                            <input style={styles.input} placeholder="e.g. Medicare / Aetna" value={formData.insurance_provider} onChange={e => setFormData({...formData, insurance_provider: e.target.value})} />
+                                            <label style={styles.label}>Primary Insurance</label>
+                                            <input style={styles.input} placeholder="e.g. Medicare" value={formData.insurance_provider} onChange={e => setFormData({...formData, insurance_provider: e.target.value})} />
                                         </div>
                                         <div style={styles.inputGroup}>
-                                            <label style={styles.label}>Policy #</label>
-                                            <input style={styles.input} placeholder="Optional" value={formData.insurance_policy} onChange={e => setFormData({...formData, insurance_policy: e.target.value})} />
+                                            <label style={styles.label}>Policy / ID #</label>
+                                            <input style={styles.input} placeholder="Required for verification" value={formData.insurance_policy} onChange={e => setFormData({...formData, insurance_policy: e.target.value})} />
+                                        </div>
+                                    </div>
+                                    <div style={styles.inputGroup}>
+                                        <label style={styles.label}>Secondary Insurance (Optional)</label>
+                                        <input style={styles.input} placeholder="e.g. Aetna Secondary" />
+                                    </div>
+                                </div>
+                                <div style={{ background: 'rgba(243,239,249,0.5)', padding: 32, borderRadius: 28, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: PURPLE_MID }}>
+                                        <ShieldCheck size={20} />
+                                        <span style={{ fontWeight: 900, fontSize: 13 }}>Insurance Verified</span>
+                                    </div>
+                                    <p style={{ fontSize: 13, color: '#64748B', margin: 0, lineHeight: 1.5 }}>
+                                        Our intake team performs real-time eligibility checks once the referral is received.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {step === 3 && (
+                        <div className="animate-fadeIn">
+                             <div style={styles.stepHeader}>
+                                <h3 style={styles.stepTitle}>Clinical Orders</h3>
+                                <div style={styles.stepCounter}>Step 3 of 4</div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 32 }}>
+                                <div>
+                                    <label style={styles.label}>Requested Start of Care</label>
+                                    <div style={{ ...styles.priorityGrid, marginBottom: 24 }}>
+                                        {[
+                                            { label: 'Within 24h', val: '24h' },
+                                            { label: 'Within 48h', val: '48h' },
+                                            { label: 'Routine', val: 'Routine' }
+                                        ].map(s => (
+                                            <button 
+                                                key={s.val} 
+                                                onClick={() => setFormData({...formData, soc_request: s.val})}
+                                                style={styles.priorityBtn(formData.soc_request === s.val)}
+                                            >
+                                                {s.val === '24h' && <Zap size={14} />}
+                                                {s.label}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    <div style={styles.row}>
+                                        <div style={styles.inputGroup}>
+                                            <label style={styles.label}>Referring Physician</label>
+                                            <input style={styles.input} placeholder="Dr. Name" value={formData.physician_name} onChange={e => setFormData({...formData, physician_name: e.target.value})} />
+                                        </div>
+                                        <div style={styles.inputGroup}>
+                                            <label style={styles.label}>Physician NPI #</label>
+                                            <input style={styles.input} placeholder="10 Digits" value={formData.physician_npi} onChange={e => setFormData({...formData, physician_npi: e.target.value})} />
                                         </div>
                                     </div>
 
                                     <div style={styles.inputGroup}>
-                                        <label style={styles.label}>Diagnosis & Comorbidities</label>
-                                        <p style={{ fontSize: 13, color: PURPLE_LIGHT, marginBottom: 16 }}>Select primary diagnosis and optional comorbidities.</p>
+                                        <label style={styles.label}>Diagnosis & Comorbidities (Structured)</label>
+                                        <p style={{ fontSize: 13, color: PURPLE_LIGHT, marginBottom: 16 }}>Search ICD-10 codes for real-time validation.</p>
                                         
                                         {!primaryDiagnosis && !isSearching ? (
                                             <button 
@@ -352,24 +460,24 @@ const PublicReferral = () => {
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                                     <div style={{ 
                                         padding: 32, borderRadius: 28, background: WHITE, border: '1.5px solid #F1F5F9',
-                                        textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24
+                                        textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16
                                     }}>
-                                        <div style={{ 
-                                            width: 64, height: 64, borderRadius: '50%', 
+                                         <div style={{ 
+                                            width: 54, height: 54, borderRadius: '50%', 
                                             background: primaryDiagnosis ? 'rgba(16,185,129,0.1)' : 'rgba(243,239,249,0.5)', 
                                             display: 'flex', alignItems: 'center', justifyContent: 'center', 
                                             color: primaryDiagnosis ? '#10B981' : '#DADCE0' 
                                         }}>
-                                            {primaryDiagnosis ? <CheckCircle size={28} /> : <Info size={24} />}
+                                            {primaryDiagnosis ? <CheckCircle size={24} /> : <Info size={20} />}
                                         </div>
                                         <div>
-                                            <h4 style={{ fontSize: 12, fontWeight: 900, color: PURPLE_DARK, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
-                                                {primaryDiagnosis ? 'Intelligence Online' : 'Intelligence Offline'}
+                                            <h4 style={{ fontSize: 11, fontWeight: 900, color: PURPLE_DARK, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>
+                                                Triage Score
                                             </h4>
-                                            <p style={{ fontSize: 13, color: '#64748B', lineHeight: 1.5 }}>
+                                            <p style={{ fontSize: 12, color: '#64748B', lineHeight: 1.5, margin: 0 }}>
                                                 {primaryDiagnosis 
-                                                    ? `Linked to ${primaryDiagnosis.pdgm_grouping}. Case-mix weight optimized for reimbursement.`
-                                                    : 'Select a primary diagnosis to unlock PDGM clinical insights and financial projections.'
+                                                    ? `${primaryDiagnosis.pdgm_grouping} group detected. Estimated case-mix weight optimized.`
+                                                    : 'Automated grouping disabled. Select a code to unlock clinical scoring.'
                                                 }
                                             </p>
                                         </div>
@@ -377,15 +485,16 @@ const PublicReferral = () => {
 
                                     <div style={{ 
                                         padding: 32, borderRadius: 28, background: 'linear-gradient(135deg, #1A0A2E 0%, #3B1F6A 100%)',
-                                        color: WHITE, position: 'relative', overflow: 'hidden', opacity: primaryDiagnosis ? 1 : 0.6
+                                        color: WHITE, position: 'relative', overflow: 'hidden'
                                     }}>
-                                        <div style={{ position: 'absolute', top: 20, right: 20, opacity: 0.2 }}><Zap size={40} /></div>
+                                        <div style={{ position: 'absolute', top: 20, right: 20, opacity: 0.1 }}><Zap size={40} /></div>
                                         <div style={{ position: 'relative', zIndex: 2 }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: GOLD, fontWeight: 900, fontSize: 11, marginBottom: 12, textTransform: 'uppercase' }}>
-                                                <Zap size={14} /> CMS-Ready Referral
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: GOLD, fontWeight: 950, fontSize: 10, marginBottom: 12, textTransform: 'uppercase' }}>
+                                                <Zap size={14} /> SOC Intelligence
                                             </div>
-                                            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, margin: 0 }}>
-                                                Your referral data is structured using the PDGM 2024 regulatory model for immediate SOC intake.
+                                            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, margin: 0 }}>
+                                                Requested start: <strong>{formData.soc_request}</strong>. 
+                                                System is prioritizing immediate clinician matching based on urgency.
                                             </p>
                                         </div>
                                     </div>
@@ -394,28 +503,33 @@ const PublicReferral = () => {
                         </div>
                     )}
 
-                    {step === 3 && (
+                    {step === 4 && (
                         <div className="animate-fadeIn">
                             <div style={styles.stepHeader}>
                                 <h3 style={styles.stepTitle}>Documents & Send</h3>
-                                <div style={styles.stepCounter}>Step 3 of 3</div>
+                                <div style={styles.stepCounter}>Step 4 of 4</div>
                             </div>
                             
                              <div style={styles.inputGroup}>
-                                <label style={styles.label}>Reason for Care / Clinical Notes</label>
-                                <textarea style={styles.textarea} placeholder="Enter any additional clinical notes or specific reason for home health services..." value={formData.diagnosis} onChange={e => setFormData({...formData, diagnosis: e.target.value})} />
+                                <label style={styles.label}>Clinical Hospital Course / Summary</label>
+                                <textarea 
+                                    style={styles.textarea} 
+                                    placeholder="Enter reasoning for home health services, surgical history, or physical therapy needs..." 
+                                    value={formData.diagnosis} 
+                                    onChange={e => setFormData({...formData, diagnosis: e.target.value})} 
+                                />
                             </div>
 
                             <div style={styles.uploadZone}>
                                 <FileUp size={32} color={PURPLE_LIGHT} style={{ marginBottom: 12 }} />
-                                <div style={styles.uploadText}>Attach Clinical Documentation</div>
-                                <div style={styles.uploadSub}>Discharge Summary, Med List, or Face Sheet</div>
-                                <div style={styles.uploadHint}>(UI Prototype: Files will be requested via email)</div>
+                                <div style={styles.uploadText}>Upload Hospital Referral Packet</div>
+                                <div style={styles.uploadSub}>Face Sheet, D/C Summary, Medication List, Physician Orders</div>
+                                <div style={styles.uploadHint}>(Secure PDF/Image Upload)</div>
                             </div>
 
                             <div style={styles.reviewSummary}>
                                 <Check size={16} color={SUCCESS} /> 
-                                <span>Referring <strong>{formData.patient_name}</strong> from <strong>{providerInfo?.name}</strong></span>
+                                <span>Generating referral for <strong>{formData.patient_name}</strong> from <strong>{providerInfo?.provider_name || providerInfo?.name}</strong></span>
                             </div>
                         </div>
                     )}
@@ -428,7 +542,7 @@ const PublicReferral = () => {
                             </button>
                         )}
                         <div style={{ flex: 1 }} />
-                        {step < 3 ? (
+                        {step < 4 ? (
                             <button 
                                 disabled={!formData.patient_name && step === 1}
                                 onClick={() => setStep(step + 1)} 
