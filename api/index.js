@@ -4,6 +4,7 @@ import pg from 'pg';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { mapFhirBundleToReferral } from './utils/fhirMapper.js';
 
 dotenv.config();
 dotenv.config({ path: '.env.local' });
@@ -190,6 +191,46 @@ app.post('/api/referrals', async (req, res) => {
   }
 });
 
+// FHIR-Compatible Referral Ingestion (Automated EHR Integration)
+app.post('/api/fhir/ingest', async (req, res) => {
+  const bundle = req.body;
+  
+  try {
+    // 1. Map FHIR Bundle to Internal Model
+    const referralData = mapFhirBundleToReferral(bundle);
+    
+    // 2. Extract Data
+    const { 
+        patient_name, patient_dob, patient_phone, diagnosis, 
+        services_needed, external_id, source, raw_fhir, icd_primary 
+    } = referralData;
+
+    // 3. Insert with Conflict Handling (prevent duplicate FHIR ingests)
+    const result = await pool.query(
+      `INSERT INTO referrals (
+        patient_name, patient_dob, patient_phone, diagnosis, 
+        services_needed, status, source, external_id, raw_fhir, icd_primary
+      ) 
+       VALUES ($1, $2, $3, $4, $5, 'Pending', $6, $7, $8, $9)
+       ON CONFLICT (external_id) DO UPDATE SET 
+         patient_name = EXCLUDED.patient_name,
+         diagnosis = EXCLUDED.diagnosis,
+         status = 'Pending'
+       RETURNING *`,
+      [patient_name, patient_dob, patient_phone, diagnosis, services_needed, source, external_id, JSON.stringify(raw_fhir), icd_primary]
+    );
+
+    res.json({ 
+        message: 'FHIR Referral Ingested Successfully', 
+        referral_id: result.rows[0].id,
+        status: 'Pending Intake'
+    });
+  } catch (err) {
+    console.error('FHIR Ingestion error:', err);
+    res.status(400).json({ error: 'FHIR Ingestion Failed', details: err.message });
+  }
+});
+
 // Get My Referrals
 app.get('/api/referrals/my', async (req, res) => {
   const authHeader = req.headers.authorization;
@@ -294,6 +335,12 @@ app.get('/api/admin/fix-schema', async (req, res) => {
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS icd_primary VARCHAR(20)");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS icd_secondary TEXT");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS pdgm_weight VARCHAR(20)");
+    
+    // FHIR Integration Columns (Automated EHR Ingestion)
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS source VARCHAR(50) DEFAULT 'Portal'");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS external_id VARCHAR(255) UNIQUE");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS raw_fhir JSONB");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS pdgm_group_predicted VARCHAR(100)");
     
     // Check if the foreign key is correct. 
     // If it was created pointing to admins(id) by mistake, we fix it here.

@@ -1,0 +1,69 @@
+{
+  "resourceType": "Bundle",
+  "type": "collection",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "pat-001",
+        "name": [
+          {
+            "family": "Hamilton",
+            "given": ["Alexander"]
+          }
+        ],
+        "birthDate": "1945-01-11",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "212-555-1776"
+          }
+        ]
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "sr-2024-001",
+        "status": "active",
+        "intent": "order",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "3457005",
+                "display": "Patient referral"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "text": "Skilled Nursing / Home Health SOC"
+        },
+        "subject": {
+          "reference": "Patient/pat-001"
+        }
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "Condition",
+        "id": "cond-001",
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10-cm",
+              "code": "I63.9",
+              "display": "Cerebral infarction, unspecified"
+            }
+          ],
+          "text": "Acute Ischemic Stroke (CVA)"
+        },
+        "subject": {
+          "reference": "Patient/pat-001"
+        }
+      }
+    }
+  ]
+}

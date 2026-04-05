@@ -283,6 +283,12 @@ const styles = {
         borderRadius: 8, fontSize: 9, fontWeight: 900, color: GOLD_DARK,
         letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 8
     },
+    sourceBadge: (isFhir) => ({
+        display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px',
+        background: isFhir ? '#EDE9FE' : '#F3EFF9', border: `1px solid ${isFhir ? '#C4B5FD' : '#E9D5FF'}`,
+        borderRadius: 8, fontSize: 8, fontWeight: 900, color: isFhir ? PURPLE_MID : PURPLE_SOFT,
+        letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6
+    }),
 
     /* ── User Maintenance ── */
     tabBar: {
@@ -830,6 +836,10 @@ const AdminDashboard = () => {
                                     {referrals.map((r, i) => (
                                         <tr key={i}>
                                             <td style={styles.td}>
+                                                <div style={styles.sourceBadge(r.source && r.source.includes('FHIR'))}>
+                                                    {r.source && r.source.includes('FHIR') ? <Zap size={10} /> : <User size={10} />}
+                                                    {r.source || 'Manual Portal'}
+                                                </div>
                                                 <div style={styles.tdName}>{r.patient_name}</div>
                                                 <div style={{ ...styles.tdSub, display: 'flex', alignItems: 'center', gap: 5, marginTop: 4 }}>
                                                     <Clock size={11} /> {r.patient_dob}
@@ -845,8 +855,10 @@ const AdminDashboard = () => {
                                                 <div style={{ fontSize: 11, color: PURPLE_LIGHT, background: 'rgba(243,239,249,0.8)', padding: '6px 10px', borderRadius: 8, fontWeight: 600 }}>{r.services_needed}</div>
                                             </td>
                                             <td style={styles.td}>
-                                                <div style={styles.tdName}>{r.provider_name}</div>
-                                                <div style={{ fontSize: 9, fontWeight: 800, color: GOLD_DARK, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 3 }}>Verified Partner</div>
+                                                <div style={styles.tdName}>{r.provider_name || (r.source && r.source.includes('FHIR') ? 'Integrated Hospital EHR' : 'System Import')}</div>
+                                                <div style={{ fontSize: 9, fontWeight: 800, color: r.source && r.source.includes('FHIR') ? PURPLE_MID : GOLD_DARK, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 3 }}>
+                                                    {r.source && r.source.includes('FHIR') ? 'Interoperability Pipeline' : 'Verified Partner'}
+                                                </div>
                                             </td>
                                             <td style={styles.td}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
