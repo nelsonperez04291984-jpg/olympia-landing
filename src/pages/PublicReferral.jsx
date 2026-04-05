@@ -17,6 +17,7 @@ import {
 /* ── Design Tokens ── */
 const PURPLE_DARK = '#1A0A2E';
 const PURPLE_MID = '#3B1F6A';
+const PURPLE_LIGHT = '#6B4FA0';
 const GOLD = '#F5C842';
 const WHITE = '#FFFFFF';
 
