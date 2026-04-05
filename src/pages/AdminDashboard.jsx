@@ -701,7 +701,7 @@ const AdminDashboard = () => {
                 <nav style={styles.nav}>
                     {[
                         { id: 'overview', icon: <TrendingUp size={18} />, label: 'Dashboard Home' },
-                        { id: 'users', icon: <UserPlus size={18} />, label: 'User Maintenance' },
+                        { id: 'users', icon: <UserPlus size={18} />, label: 'Partner & Staff' },
                         { id: 'referrals', icon: <ClipboardCheck size={18} />, label: 'Referral Intake' },
                         { id: 'clinical', icon: <Stethoscope size={18} />, label: 'Clinical Tools' },
                     ].map(item => (
@@ -794,6 +794,7 @@ const AdminDashboard = () => {
                                         <tr>
                                             <th style={styles.th}>Name</th>
                                             <th style={styles.th}>Provider ID</th>
+                                            <th style={styles.th}>Fast-Link</th>
                                             <th style={styles.th}>Action</th>
                                         </tr>
                                     </thead>
@@ -806,6 +807,22 @@ const AdminDashboard = () => {
                                                 </td>
                                                 <td style={styles.td}>
                                                     <span style={styles.providerIdBadge}>{p.provider_id}</span>
+                                                </td>
+                                                <td style={styles.td}>
+                                                    <button 
+                                                        onClick={() => handleCopyLink(p.referral_token)}
+                                                        style={{
+                                                            display: 'flex', alignItems: 'center', gap: 6, background: copiedToken === p.referral_token ? '#F0FDF4' : 'rgba(107,79,160,0.05)',
+                                                            border: `1px solid ${copiedToken === p.referral_token ? '#16A34A' : '#EDE9FE'}`,
+                                                            borderRadius: 10, padding: '6px 12px', cursor: 'pointer',
+                                                            color: copiedToken === p.referral_token ? '#16A34A' : PURPLE_LIGHT,
+                                                            fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                    >
+                                                        {copiedToken === p.referral_token ? <Check size={12} /> : <LinkIcon size={12} />}
+                                                        {copiedToken === p.referral_token ? 'Copied' : 'Fast-Link'}
+                                                    </button>
                                                 </td>
                                                 <td style={styles.td}>
                                                     <button onClick={() => setConfirmDelete({ show: true, type: 'provider', id: p.id, name: p.name })} style={styles.deleteBtn}>
