@@ -257,6 +257,50 @@ app.get('/api/referrals/my', async (req, res) => {
   }
 });
 
+// --- Public (Hospital Link) Referrals ---
+
+// Validate Referral Link Token
+app.get('/api/public/provider-info/:token', async (req, res) => {
+  const { token } = req.params;
+  try {
+    const result = await pool.query(
+      'SELECT id, name FROM providers WHERE referral_token = $1',
+      [token]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Invalid referral token' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to access referral link' });
+  }
+});
+
+// Submit Referral via Fast-Link (Public)
+app.post('/api/public/referrals', async (req, res) => {
+  const { token, patient_name, patient_dob, patient_phone, diagnosis, services_needed } = req.body;
+  try {
+    // 1. Verify Token and get Provider ID
+    const providerRes = await pool.query('SELECT id FROM providers WHERE referral_token = $1', [token]);
+    if (providerRes.rows.length === 0) return res.status(403).json({ error: 'Prohibited: Link and token no longer active' });
+    
+    const providerId = providerRes.rows[0].id;
+
+    // 2. Ingest Referral with "Manual Link" source
+    const result = await pool.query(
+      `INSERT INTO referrals (
+        provider_id, patient_name, patient_dob, patient_phone, 
+        diagnosis, services_needed, status, source
+      ) 
+       VALUES ($1, $2, $3, $4, $5, $6, 'Pending', 'Manual_FastLink') 
+       RETURNING *`,
+      [providerId, patient_name, patient_dob, patient_phone, diagnosis, services_needed]
+    );
+    
+    res.json({ message: 'Referral captured via Fast-Link', id: result.rows[0].id });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to submit via link', details: err.message });
+  }
+});
+
 // --- Admin Referral Management ---
 
 // Get All Referrals (for Intake)
@@ -302,7 +346,7 @@ app.get('/api/admin/stats', async (req, res) => {
     const referralCount = await pool.query('SELECT COUNT(*) FROM referrals');
     const staffCount = await pool.query('SELECT COUNT(*) FROM admins');
     const recentLogs = await pool.query('SELECT * FROM ai_logs ORDER BY created_at DESC LIMIT 10');
-    const providers = await pool.query('SELECT id, name, provider_id, email FROM providers');
+    const providers = await pool.query('SELECT id, name, provider_id, email, referral_token FROM providers');
 
     res.json({
       provider_count: parseInt(providerCount.rows[0].count),
@@ -322,6 +366,16 @@ app.get('/api/admin/fix-schema', async (req, res) => {
     // Admin table updates
     await pool.query("ALTER TABLE admins ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'admin'");
     await pool.query("ALTER TABLE admins ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+    
+    // Providers table updates (Referral Link Tokens)
+    await pool.query("ALTER TABLE providers ADD COLUMN IF NOT EXISTS referral_token VARCHAR(255) UNIQUE");
+    
+    // Initialize tokens for existing providers if they are null
+    await pool.query(`
+      UPDATE providers 
+      SET referral_token = LOWER(REPLACE(name, ' ', '-')) || '-' || SUBSTRING(MD5(id::text), 1, 6)
+      WHERE referral_token IS NULL
+    `);
     
     // Referrals table updates/repairs
     // Ensure table exists with correct base

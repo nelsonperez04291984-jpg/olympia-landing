@@ -24,7 +24,10 @@ import {
     AlertCircle,
     Stethoscope,
     Zap,
-    CheckCircle2
+    CheckCircle2,
+    LinkIcon,
+    Copy,
+    Check
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import DiagnosisAssessment from '../components/DiagnosisAssessment';
@@ -532,6 +535,7 @@ const AdminDashboard = () => {
     const [formData, setFormData] = useState({ provider_id: '', name: '', email: '', password: '', username: '', role: 'admin' });
     const [mgmtStatus, setMgmtStatus] = useState({ type: '', message: '' });
     const [confirmDelete, setConfirmDelete] = useState({ show: false, type: '', id: null, name: '' });
+    const [copiedToken, setCopiedToken] = useState(null);
 
     useEffect(() => {
         const token = localStorage.getItem('olympia_admin_token');
@@ -587,6 +591,13 @@ const AdminDashboard = () => {
             if (res.ok) { setMgmtStatus({ type: 'success', message: data.message }); setFormData({ provider_id: '', name: '', email: '', password: '', username: '', role: 'admin' }); fetchDashboardData(localStorage.getItem('olympia_admin_token')); setViewMode('list'); }
             else setMgmtStatus({ type: 'error', message: data.error || 'Creation failed' });
         } catch { setMgmtStatus({ type: 'error', message: 'Connection error' }); }
+    };
+
+    const handleCopyLink = (token) => {
+        const link = `${window.location.origin}/referral/${token}`;
+        navigator.clipboard.writeText(link);
+        setCopiedToken(token);
+        setTimeout(() => setCopiedToken(null), 2000);
     };
 
     const executeDelete = async () => {
@@ -1028,6 +1039,7 @@ const AdminDashboard = () => {
                                             <th style={styles.th}>{mgmtTab === 'provider' ? 'Entity Name' : 'Username'}</th>
                                             <th style={styles.th}>{mgmtTab === 'provider' ? 'Direct ID' : 'Tier'}</th>
                                             <th style={styles.th}>Created</th>
+                                            {mgmtTab === 'provider' && <th style={styles.th}>Fast-Link</th>}
                                             <th style={styles.th}>Action</th>
                                         </tr>
                                     </thead>
@@ -1054,6 +1066,24 @@ const AdminDashboard = () => {
                                                 <td style={{ ...styles.td, fontSize: 12, color: PURPLE_SOFT, fontWeight: 600 }}>
                                                     {new Date(item.created_at || Date.now()).toLocaleDateString()}
                                                 </td>
+                                                {mgmtTab === 'provider' && (
+                                                    <td style={styles.td}>
+                                                        <button 
+                                                            onClick={() => handleCopyLink(item.referral_token)}
+                                                            style={{
+                                                                display: 'flex', alignItems: 'center', gap: 6, background: copiedToken === item.referral_token ? '#F0FDF4' : 'rgba(107,79,160,0.05)',
+                                                                border: `1px solid ${copiedToken === item.referral_token ? '#16A34A' : '#EDE9FE'}`,
+                                                                borderRadius: 10, padding: '6px 12px', cursor: 'pointer',
+                                                                color: copiedToken === item.referral_token ? '#16A34A' : PURPLE_LIGHT,
+                                                                fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em',
+                                                                transition: 'all 0.2s'
+                                                            }}
+                                                        >
+                                                            {copiedToken === item.referral_token ? <Check size={12} /> : <LinkIcon size={12} />}
+                                                            {copiedToken === item.referral_token ? 'Copied' : 'Copy Link'}
+                                                        </button>
+                                                    </td>
+                                                )}
                                                 <td style={styles.td}>
                                                     <button
                                                         onClick={() => setConfirmDelete({ show: true, type: mgmtTab, id: item.id, name: mgmtTab === 'provider' ? item.name : item.username })}
