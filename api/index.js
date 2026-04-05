@@ -194,6 +194,14 @@ app.post('/api/referrals', async (req, res) => {
 // FHIR-Compatible Referral Ingestion (Automated EHR Integration)
 app.post('/api/fhir/ingest', async (req, res) => {
   const bundle = req.body;
+  const apiKey = req.headers['x-api-key'];
+  const VALID_API_KEY = process.env.FHIR_API_KEY || 'olympia_fhir_test_667788';
+
+  // 0. Security Audit (API Key Verification)
+  if (apiKey !== VALID_API_KEY) {
+      console.error('Unauthorized FHIR Ingestion Attempt - Invalid API Key');
+      return res.status(401).json({ error: 'Unauthorized: Invalid or Missing API Key' });
+  }
   
   try {
     // 1. Map FHIR Bundle to Internal Model
