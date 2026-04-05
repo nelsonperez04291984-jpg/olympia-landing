@@ -54,6 +54,8 @@ const PublicReferral = () => {
     const [primaryDiagnosis, setPrimaryDiagnosis] = useState(null);
     const [secondaryDiagnoses, setSecondaryDiagnoses] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
+    const [uploadedFiles, setUploadedFiles] = useState([]);
+    const [isDragging, setIsDragging] = useState(false);
 
     const [formData, setFormData] = useState({
         patient_name: '',
@@ -521,12 +523,59 @@ const PublicReferral = () => {
                                 />
                             </div>
 
-                            <div style={styles.uploadZone}>
-                                <FileUp size={32} color={PURPLE_LIGHT} style={{ marginBottom: 12 }} />
-                                <div style={styles.uploadText}>Upload Hospital Referral Packet</div>
+                            <div 
+                                onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+                                onDragLeave={() => setIsDragging(false)}
+                                onDrop={e => {
+                                    e.preventDefault();
+                                    setIsDragging(false);
+                                    const files = Array.from(e.dataTransfer.files);
+                                    setUploadedFiles(prev => [...prev, ...files]);
+                                }}
+                                onClick={() => document.getElementById('doc-upload-input').click()}
+                                style={{
+                                    ...styles.uploadZone,
+                                    borderColor: isDragging ? PURPLE_MID : '#F1F0FF',
+                                    background: isDragging ? 'rgba(59,31,106,0.04)' : '#FAF9FF',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <input
+                                    id="doc-upload-input"
+                                    type="file"
+                                    multiple
+                                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                                    style={{ display: 'none' }}
+                                    onChange={e => {
+                                        const files = Array.from(e.target.files);
+                                        setUploadedFiles(prev => [...prev, ...files]);
+                                    }}
+                                />
+                                <FileUp size={32} color={isDragging ? PURPLE_MID : PURPLE_LIGHT} style={{ marginBottom: 12 }} />
+                                <div style={styles.uploadText}>
+                                    {uploadedFiles.length > 0 ? `${uploadedFiles.length} file(s) selected` : 'Upload Hospital Referral Packet'}
+                                </div>
                                 <div style={styles.uploadSub}>Face Sheet, D/C Summary, Medication List, Physician Orders</div>
-                                <div style={styles.uploadHint}>(Secure PDF/Image Upload)</div>
+                                <div style={styles.uploadHint}>Click to browse or drag & drop PDF / Images</div>
                             </div>
+
+                            {uploadedFiles.length > 0 && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+                                    {uploadedFiles.map((file, i) => (
+                                        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', background: 'rgba(59,31,106,0.03)', borderRadius: 12, border: '1.5px solid #F1F0FF' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                                <FileText size={16} color={PURPLE_MID} />
+                                                <span style={{ fontSize: 13, fontWeight: 700, color: PURPLE_DARK }}>{file.name}</span>
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                <span style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600 }}>{(file.size / 1024).toFixed(0)} KB</span>
+                                                <button onClick={e => { e.stopPropagation(); setUploadedFiles(prev => prev.filter((_, idx) => idx !== i)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', display: 'flex', alignItems: 'center' }}><XIcon size={14} /></button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
 
                             <div style={styles.reviewSummary}>
                                 <Check size={16} color={SUCCESS} />
@@ -602,10 +651,10 @@ const styles = {
 
     /* Wizard Box */
     wizardBox: {
-        maxWidth: 900, margin: '-60px auto 48px', background: WHITE, borderRadius: 32,
+        maxWidth: 1100, margin: '-60px auto 48px', background: WHITE, borderRadius: 32,
         boxShadow: '0 20px 40px -10px rgba(26,10,46,0.15)', overflow: 'hidden', display: 'flex'
     },
-    wizardSidebar: { width: 300, background: '#FAF9FF', padding: '48px 32px', borderRight: '1px solid #F1F0FF', display: 'flex', flexDirection: 'column', gap: 24 },
+    wizardSidebar: { width: 260, background: '#FAF9FF', padding: '56px 32px', borderRight: '1px solid #F1F0FF', display: 'flex', flexDirection: 'column', gap: 28 },
     sideStep: (active, done) => ({ display: 'flex', alignItems: 'center', gap: 16, opacity: active || done ? 1 : 0.4 }),
     sideIcon: (active, done) => ({
         width: 36, height: 36, borderRadius: 12, border: '2.5px solid',
@@ -617,8 +666,8 @@ const styles = {
     sideLabel: { fontSize: 14, fontWeight: 800, color: PURPLE_MID },
 
     /* Wizard Content */
-    wizardContent: { flex: 1, padding: '48px 60px', display: 'flex', flexDirection: 'column' },
-    stepHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32, borderBottom: '1px solid #F8FAFC', paddingBottom: 16 },
+    wizardContent: { flex: 1, padding: '56px 72px', display: 'flex', flexDirection: 'column' },
+    stepHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 36, borderBottom: '1px solid #F8FAFC', paddingBottom: 20 },
     stepTitle: { fontSize: 24, fontWeight: 950, color: PURPLE_DARK, margin: 0, letterSpacing: '-0.01em' },
     stepCounter: { fontSize: 12, fontWeight: 900, color: PURPLE_LIGHT, textTransform: 'uppercase', letterSpacing: '0.08em' },
 
@@ -637,7 +686,7 @@ const styles = {
     inputGroup: { marginBottom: 20 },
     label: { display: 'block', fontSize: 11, fontWeight: 900, color: '#64748B', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' },
     input: { width: '100%', padding: '16px 20px', borderRadius: 14, border: '2.5px solid #F1F5F9', fontSize: 15, fontWeight: 700, color: PURPLE_DARK, outline: 'none', transition: 'border-color 0.2s', ':focus': { borderColor: GOLD } },
-    textarea: { width: '100%', padding: '16px 20px', borderRadius: 14, border: '2.5px solid #F1F5F9', fontSize: 15, fontWeight: 700, color: PURPLE_DARK, minHeight: 100, outline: 'none' },
+    textarea: { width: '100%', padding: '16px 20px', borderRadius: 14, border: '2.5px solid #F1F5F9', fontSize: 15, fontWeight: 700, color: PURPLE_DARK, minHeight: 140, outline: 'none', resize: 'vertical' },
     row: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
     uploadZone: { padding: '40px', border: '3px dashed #F1F0FF', borderRadius: 24, background: '#FAF9FF', textAlign: 'center', marginBottom: 24 },
     uploadText: { fontSize: 15, fontWeight: 800, color: PURPLE_DARK, marginBottom: 4 },
@@ -671,7 +720,7 @@ const styles = {
     newRefBtn: { padding: '16px 40px', background: PURPLE_MID, color: WHITE, borderRadius: 18, border: 'none', fontWeight: 800, fontSize: 15, cursor: 'pointer' },
 
     /* Trust Footer */
-    trustFooter: { maxWidth: 900, margin: '48px auto', textAlign: 'center', borderTop: '1px solid #E2E8F0', paddingTop: 48, paddingBottom: 60 },
+    trustFooter: { maxWidth: 1100, margin: '48px auto', textAlign: 'center', borderTop: '1px solid #E2E8F0', paddingTop: 48, paddingBottom: 60 },
     footerGrid: { display: 'flex', justifyContent: 'center', gap: 60, marginBottom: 40 },
     footerItem: { display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left' },
     footerLabel: { fontSize: 10, fontWeight: 900, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 2 },
