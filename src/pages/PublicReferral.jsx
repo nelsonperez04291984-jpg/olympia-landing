@@ -56,6 +56,7 @@ const PublicReferral = () => {
     const [isSearching, setIsSearching] = useState(false);
     const [uploadedFiles, setUploadedFiles] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
 
     const [formData, setFormData] = useState({
         patient_name: '',
@@ -92,6 +93,30 @@ const PublicReferral = () => {
         }
     };
 
+    const handleFileUpload = async (files) => {
+        if (!files || files.length === 0) return;
+        setIsUploading(true);
+        const dataForUpload = new FormData();
+        Array.from(files).forEach(f => dataForUpload.append('files', f));
+
+        try {
+            const res = await fetch('/api/public/upload', {
+                method: 'POST',
+                body: dataForUpload
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Upload failed');
+            
+            // Append new files to state (each is {name, url, size, type})
+            setUploadedFiles(prev => [...prev, ...data.files]);
+        } catch (err) {
+            console.error('Upload error:', err);
+            alert('Clinical Document Upload Failed: ' + err.message);
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     const handleSumbit = async () => {
         setLoading(true);
         try {
@@ -102,7 +127,9 @@ const PublicReferral = () => {
                     ...formData,
                     token,
                     primary_diagnosis: primaryDiagnosis,
-                    secondary_diagnoses: secondaryDiagnoses
+                    secondary_diagnoses: secondaryDiagnoses,
+                    document_urls: uploadedFiles,
+                    documents_provided: uploadedFiles.length > 0
                 })
             });
             const data = await res.json();
@@ -529,16 +556,16 @@ const PublicReferral = () => {
                                 onDrop={e => {
                                     e.preventDefault();
                                     setIsDragging(false);
-                                    const files = Array.from(e.dataTransfer.files);
-                                    setUploadedFiles(prev => [...prev, ...files]);
+                                    handleFileUpload(e.dataTransfer.files);
                                 }}
-                                onClick={() => document.getElementById('doc-upload-input').click()}
+                                onClick={() => !isUploading && document.getElementById('doc-upload-input').click()}
                                 style={{
                                     ...styles.uploadZone,
-                                    borderColor: isDragging ? PURPLE_MID : '#F1F0FF',
-                                    background: isDragging ? 'rgba(59,31,106,0.04)' : '#FAF9FF',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s'
+                                    borderColor: isDragging ? PURPLE_MID : isUploading ? GOLD : '#F1F0FF',
+                                    background: isDragging ? 'rgba(59,31,106,0.04)' : isUploading ? 'rgba(245,200,66,0.02)' : '#FAF9FF',
+                                    cursor: isUploading ? 'wait' : 'pointer',
+                                    transition: 'all 0.2s',
+                                    opacity: isUploading ? 0.7 : 1
                                 }}
                             >
                                 <input
@@ -547,17 +574,20 @@ const PublicReferral = () => {
                                     multiple
                                     accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                                     style={{ display: 'none' }}
-                                    onChange={e => {
-                                        const files = Array.from(e.target.files);
-                                        setUploadedFiles(prev => [...prev, ...files]);
-                                    }}
+                                    onChange={e => handleFileUpload(e.target.files)}
                                 />
-                                <FileUp size={32} color={isDragging ? PURPLE_MID : PURPLE_LIGHT} style={{ marginBottom: 12 }} />
+                                {isUploading ? (
+                                    <Activity size={32} color={GOLD} className="animate-spin" style={{ marginBottom: 12 }} />
+                                ) : (
+                                    <FileUp size={32} color={isDragging ? PURPLE_MID : PURPLE_LIGHT} style={{ marginBottom: 12 }} />
+                                )}
                                 <div style={styles.uploadText}>
-                                    {uploadedFiles.length > 0 ? `${uploadedFiles.length} file(s) selected` : 'Upload Hospital Referral Packet'}
+                                    {isUploading ? 'Securing Documents...' : uploadedFiles.length > 0 ? `${uploadedFiles.length} file(s) selected` : 'Upload Hospital Referral Packet'}
                                 </div>
                                 <div style={styles.uploadSub}>Face Sheet, D/C Summary, Medication List, Physician Orders</div>
-                                <div style={styles.uploadHint}>Click to browse or drag & drop PDF / Images</div>
+                                <div style={styles.uploadHint}>
+                                    {isUploading ? 'Encrypting and streaming to secure storage...' : 'Click to browse or drag & drop PDF / Images'}
+                                </div>
                             </div>
 
                             {uploadedFiles.length > 0 && (
@@ -566,10 +596,13 @@ const PublicReferral = () => {
                                         <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', background: 'rgba(59,31,106,0.03)', borderRadius: 12, border: '1.5px solid #F1F0FF' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                                                 <FileText size={16} color={PURPLE_MID} />
-                                                <span style={{ fontSize: 13, fontWeight: 700, color: PURPLE_DARK }}>{file.name}</span>
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <span style={{ fontSize: 13, fontWeight: 700, color: PURPLE_DARK }}>{file.name}</span>
+                                                    <a href={file.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 10, color: PURPLE_LIGHT, fontWeight: 600, textDecoration: 'none' }}>View Secure Doc</a>
+                                                </div>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                                <span style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600 }}>{(file.size / 1024).toFixed(0)} KB</span>
+                                                {file.size && <span style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600 }}>{(file.size / 1024).toFixed(0)} KB</span>}
                                                 <button onClick={e => { e.stopPropagation(); setUploadedFiles(prev => prev.filter((_, idx) => idx !== i)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', display: 'flex', alignItems: 'center' }}><XIcon size={14} /></button>
                                             </div>
                                         </div>
@@ -578,8 +611,13 @@ const PublicReferral = () => {
                             )}
 
                             <div style={styles.reviewSummary}>
-                                <Check size={16} color={SUCCESS} />
-                                <span>Generating referral for <strong>{formData.patient_name}</strong> from <strong>{providerInfo?.provider_name || providerInfo?.name}</strong></span>
+                                {isUploading ? <Activity size={16} className="animate-spin" color={GOLD} /> : <Check size={16} color={SUCCESS} />}
+                                <span>
+                                    {isUploading 
+                                        ? 'Securing clinical assets...' 
+                                        : `Generating referral for ${formData.patient_name || 'Patient'} from ${providerInfo?.provider_name || providerInfo?.name || 'Provider'}`
+                                    }
+                                </span>
                             </div>
                         </div>
                     )}

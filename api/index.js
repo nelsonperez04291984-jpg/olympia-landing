@@ -4,7 +4,11 @@ import pg from 'pg';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import multer from 'multer';
+import { put } from '@vercel/blob';
 import { mapFhirBundleToReferral } from './utils/fhirMapper.js';
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 dotenv.config();
 dotenv.config({ path: '.env.local' });
@@ -283,7 +287,7 @@ app.post('/api/public/referrals', async (req, res) => {
     insurance_provider, insurance_policy, 
     referral_priority, soc_request, 
     physician_name, physician_npi,
-    documents_provided,
+    documents_provided, document_urls,
     primary_diagnosis, secondary_diagnoses
   } = req.body;
   
@@ -304,10 +308,10 @@ app.post('/api/public/referrals', async (req, res) => {
         diagnosis, services_needed, status, source,
         insurance_provider, insurance_policy, referral_priority, soc_request,
         physician_name, physician_npi,
-        documents_provided,
+        documents_provided, document_urls,
         status_token, primary_diagnosis, secondary_diagnoses
       ) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'Pending', 'Manual_FastLink', $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'Pending', 'Manual_FastLink', $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20) 
        RETURNING *`,
       [
         providerId, patient_name, patient_dob, patient_phone, 
@@ -317,7 +321,8 @@ app.post('/api/public/referrals', async (req, res) => {
         insurance_provider, insurance_policy, 
         referral_priority || 'Routine', soc_request || 'Routine',
         physician_name, physician_npi,
-        documents_provided || false,
+        documents_provided || false, 
+        document_urls ? JSON.stringify(document_urls) : '[]',
         status_token,
         primary_diagnosis ? JSON.stringify(primary_diagnosis) : null,
         secondary_diagnoses ? JSON.stringify(secondary_diagnoses) : '[]'
@@ -327,6 +332,30 @@ app.post('/api/public/referrals', async (req, res) => {
     res.json({ message: 'Referral captured via Fast-Link', id: result.rows[0].id, status_token: result.rows[0].status_token });
   } catch (err) {
     res.status(500).json({ error: 'Failed to submit via link', details: err.message });
+  }
+});
+
+// --- File Upload (Public - Vercel Blob) ---
+app.post('/api/public/upload', upload.array('files', 10), async (req, res) => {
+  try {
+    const uploadResults = [];
+    for (const file of req.files) {
+      const blob = await put(
+        `referrals/${Date.now()}-${file.originalname}`,
+        file.buffer,
+        { access: 'public', contentType: file.mimetype }
+      );
+      uploadResults.push({
+        name: file.originalname,
+        url: blob.url,
+        size: file.size,
+        type: file.mimetype
+      });
+    }
+    res.json({ files: uploadResults });
+  } catch (err) {
+    console.error('Upload error:', err);
+    res.status(500).json({ error: 'Upload failed', details: err.message });
   }
 });
 
@@ -480,6 +509,7 @@ app.get('/api/admin/fix-schema', async (req, res) => {
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS soc_request VARCHAR(50) DEFAULT 'Routine'");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS physician_name VARCHAR(255)");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS physician_npi VARCHAR(20)");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS document_urls JSONB DEFAULT '[]'");
     
     // Check if the foreign key is correct. 
     // If it was created pointing to admins(id) by mistake, we fix it here.

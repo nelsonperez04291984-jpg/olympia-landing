@@ -24,6 +24,7 @@ async function initDB() {
         name VARCHAR(100) NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
+        referral_token VARCHAR(255) UNIQUE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -38,7 +39,7 @@ async function initDB() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
-    
+
     // Check for role column (if table exists)
     try {
       await pool.query("ALTER TABLE admins ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'admin'");
@@ -48,9 +49,34 @@ async function initDB() {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS referrals (
         id SERIAL PRIMARY KEY,
-        patient_name VARCHAR(100),
-        provider_id VARCHAR(50) REFERENCES providers(provider_id),
-        status VARCHAR(20) DEFAULT 'pending',
+        provider_id INTEGER REFERENCES providers(id),
+        patient_name VARCHAR(255),
+        patient_dob VARCHAR(20),
+        patient_phone VARCHAR(20),
+        patient_address TEXT,
+        emergency_contact VARCHAR(255),
+        preferred_language VARCHAR(50) DEFAULT 'English',
+        insurance_provider VARCHAR(255),
+        insurance_policy VARCHAR(100),
+        referral_priority VARCHAR(20) DEFAULT 'Routine',
+        soc_request VARCHAR(50) DEFAULT 'Routine',
+        diagnosis TEXT,
+        services_needed TEXT,
+        physician_name VARCHAR(255),
+        physician_npi VARCHAR(20),
+        primary_diagnosis JSONB,
+        secondary_diagnoses JSONB DEFAULT '[]',
+        icd_primary VARCHAR(20),
+        icd_secondary TEXT,
+        document_urls JSONB DEFAULT '[]',
+        documents_provided BOOLEAN DEFAULT FALSE,
+        status VARCHAR(50) DEFAULT 'Pending',
+        status_token VARCHAR(36),
+        source VARCHAR(50) DEFAULT 'Portal',
+        external_id VARCHAR(255) UNIQUE,
+        raw_fhir JSONB,
+        pdgm_group_predicted VARCHAR(100),
+        pdgm_weight VARCHAR(20),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -75,11 +101,12 @@ async function initDB() {
       console.log("Seed provider not found. Creating...");
       const salt = await bcrypt.genSalt(10);
       const hash = await bcrypt.hash("password123", salt);
+      const referral_token = "dr-jane-smith-667788"; // Seed token
       await pool.query(
-        "INSERT INTO providers (provider_id, name, email, password_hash) VALUES ($1, $2, $3, $4)",
-        ["provider123", "Dr. Jane Smith", "jane.smith@example.com", hash]
+        "INSERT INTO providers (provider_id, name, email, password_hash, referral_token) VALUES ($1, $2, $3, $4, $5)",
+        ["provider123", "Dr. Jane Smith", "jane.smith@example.com", hash, referral_token]
       );
-      console.log("Seed provider created!");
+      console.log("Seed provider created with token: " + referral_token);
     }
 
     // Check if seed admin exists
