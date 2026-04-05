@@ -283,6 +283,8 @@ app.post('/api/public/referrals', async (req, res) => {
     referral_priority, documents_provided 
   } = req.body;
   
+  const status_token = Math.random().toString(36).substring(2, 15);
+  
   try {
     // 1. Verify Token and get Provider ID
     const providerRes = await pool.query('SELECT id FROM providers WHERE referral_token = $1', [token]);
@@ -295,21 +297,54 @@ app.post('/api/public/referrals', async (req, res) => {
       `INSERT INTO referrals (
         provider_id, patient_name, patient_dob, patient_phone, 
         diagnosis, services_needed, status, source,
-        insurance_provider, insurance_policy, referral_priority, documents_provided
+        insurance_provider, insurance_policy, referral_priority, documents_provided,
+        status_token
       ) 
-       VALUES ($1, $2, $3, $4, $5, $6, 'Pending', 'Manual_FastLink', $7, $8, $9, $10) 
+       VALUES ($1, $2, $3, $4, $5, $6, 'Pending', 'Manual_FastLink', $7, $8, $9, $10, $11) 
        RETURNING *`,
       [
         providerId, patient_name, patient_dob, patient_phone, 
         diagnosis, services_needed, 
         insurance_provider, insurance_policy, 
-        referral_priority || 'Routine', documents_provided || false
+        referral_priority || 'Routine', documents_provided || false,
+        status_token
       ]
     );
     
-    res.json({ message: 'Referral captured via Fast-Link', id: result.rows[0].id });
+    res.json({ message: 'Referral captured via Fast-Link', id: result.rows[0].id, status_token: result.rows[0].status_token });
   } catch (err) {
     res.status(500).json({ error: 'Failed to submit via link', details: err.message });
+  }
+});
+
+// Get Referral Status (Public)
+app.get('/api/public/referral-status/:token', async (req, res) => {
+  const { token } = req.params;
+  try {
+    const result = await pool.query(
+      `SELECT status, referral_priority, created_at, patient_name 
+       FROM referrals 
+       WHERE status_token = $1`, 
+      [token]
+    );
+    
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Referral tracking link not found' });
+    
+    // Obfuscate patient name for public security
+    const r = result.rows[0];
+    const nameParts = r.patient_name.split(' ');
+    const obfuscatedName = nameParts.length > 1 
+      ? `${nameParts[0]} ${nameParts[nameParts.length - 1][0]}.`
+      : r.patient_name;
+
+    res.json({
+        status: r.status,
+        priority: r.referral_priority,
+        received_at: r.created_at,
+        patient: obfuscatedName
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch status' });
   }
 });
 
@@ -421,6 +456,7 @@ app.get('/api/admin/fix-schema', async (req, res) => {
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS insurance_policy VARCHAR(100)");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS referral_priority VARCHAR(20) DEFAULT 'Routine'");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS documents_provided BOOLEAN DEFAULT FALSE");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS status_token VARCHAR(36)");
     
     // Check if the foreign key is correct. 
     // If it was created pointing to admins(id) by mistake, we fix it here.

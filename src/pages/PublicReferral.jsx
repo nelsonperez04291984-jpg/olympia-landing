@@ -51,8 +51,10 @@ const PublicReferral = () => {
         documents_provided: false
     });
 
+    const [statusToken, setStatusToken] = useState(null);
+
     useEffect(() => {
-        fetchProvider();
+        if (token) fetchProvider();
     }, [token]);
 
     const fetchProvider = async () => {
@@ -76,7 +78,10 @@ const PublicReferral = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...formData, token })
             });
-            if (!res.ok) throw new Error('Submission failed.');
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Submission failed.');
+            
+            setStatusToken(data.status_token);
             setSubmitted(true);
         } catch (err) {
             alert(err.message);
@@ -107,24 +112,55 @@ const PublicReferral = () => {
 
             {/* Pipeline Visualization */}
             <div style={styles.pipeline}>
-                <div style={styles.pipelineStep(true)}>
-                    <div style={styles.pipelineIcon(true)}><Check size={14} /></div>
-                    <div style={styles.pipelineLabel}>Submitted</div>
+                {[
+                    { label: 'Submitted', icon: <Check size={14} />, active: true, current: false },
+                    { label: 'Intake Review', icon: <Clock size={14} />, active: true, current: true },
+                    { label: 'Accepted', icon: <Zap size={14} />, active: false, current: false },
+                    { label: 'Start Care', icon: <HeartPulse size={14} />, active: false, current: false }
+                ].map((s, i, arr) => (
+                    <React.Fragment key={i}>
+                        <div style={styles.pipelineStep(s.active, s.current)}>
+                            <div style={styles.pipelineIcon(s.active, s.current)}>{s.icon}</div>
+                            <div style={styles.pipelineLabel}>{s.label}</div>
+                        </div>
+                        {i < arr.length - 1 && <div style={styles.pipelineLine(arr[i+1].active)} />}
+                    </React.Fragment>
+                ))}
+            </div>
+
+            {/* Status Link Card */}
+            <div style={{ 
+                background: '#F8FAFC', padding: '24px 32px', borderRadius: 24, 
+                border: '1.5px solid #F1F5F9', marginBottom: 40, position: 'relative',
+                maxWidth: 500, width: '100%', textAlign: 'left'
+            }}>
+                <div style={{ position: 'absolute', top: -12, left: 24, background: WHITE, padding: '2px 12px', borderRadius: 8, fontSize: 10, fontWeight: 900, color: PURPLE_MID, border: '1.5px solid #F1F5F9' }}>
+                    SECURE TRACKING
                 </div>
-                <div style={styles.pipelineLine(true)} />
-                <div style={styles.pipelineStep(true, true)}>
-                    <div style={styles.pipelineIcon(true, true)}><Clock size={14} /></div>
-                    <div style={styles.pipelineLabel}>Intake Review</div>
-                </div>
-                <div style={styles.pipelineLine(false)} />
-                <div style={styles.pipelineStep(false)}>
-                    <div style={styles.pipelineIcon(false)}><Zap size={14} /></div>
-                    <div style={styles.pipelineLabel}>Accepted</div>
-                </div>
-                <div style={styles.pipelineLine(false)} />
-                <div style={styles.pipelineStep(false)}>
-                    <div style={styles.pipelineIcon(false)}><HeartPulse size={14} /></div>
-                    <div style={styles.pipelineLabel}>Start Care</div>
+                <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.5 }}>
+                    Copy this unique secure link to monitor your patient's real-time discharge status.
+                </p>
+                <div style={{ display: 'flex', gap: 8 }}>
+                    <input 
+                        readOnly 
+                        value={`${window.location.origin}/referral-status/${statusToken}`}
+                        style={{ flex: 1, padding: '12px 16px', borderRadius: 12, border: '1.5px solid #E2E8F0', fontSize: 12, color: PURPLE_DARK, fontWeight: 600, background: WHITE }}
+                    />
+                    <button 
+                        onClick={() => {
+                            navigator.clipboard.writeText(`${window.location.origin}/referral-status/${statusToken}`);
+                            alert('Link copied to clipboard');
+                        }}
+                        style={{ padding: '0 16px', borderRadius: 12, background: PURPLE_MID, color: WHITE, fontSize: 11, fontWeight: 900, cursor: 'pointer', border: 'none' }}
+                    >
+                        COPY
+                    </button>
+                    <Link 
+                        to={`/referral-status/${statusToken}`}
+                        style={{ display: 'flex', alignItems: 'center', padding: '0 16px', borderRadius: 12, border: `1.5px solid ${PURPLE_MID}`, color: PURPLE_MID, fontSize: 11, fontWeight: 900, cursor: 'pointer', textDecoration: 'none' }}
+                    >
+                        VIEW
+                    </Link>
                 </div>
             </div>
 
@@ -136,7 +172,7 @@ const PublicReferral = () => {
             <button onClick={() => window.location.reload()} style={styles.newRefBtn}>Submit Another Patient</button>
         </div>
     );
-
+ Riverside
     return (
         <div style={styles.container}>
             {/* Value Header */}

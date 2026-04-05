@@ -13,6 +13,7 @@ import ProviderLogin from './pages/ProviderLogin'
 import AdminDashboard from './pages/AdminDashboard'
 import ProviderDashboard from './pages/ProviderDashboard'
 import PublicReferral from './pages/PublicReferral'
+import StatusPortal from './pages/StatusPortal'
 import QRCodePage from './pages/QRCodePage'
 import { Routes, Route } from 'react-router-dom'
 
@@ -41,6 +42,7 @@ export default function App() {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/referral/:token" element={<PublicReferral />} />
+        <Route path="/referral-status/:token" element={<StatusPortal />} />
         <Route path="/qr" element={<QRCodePage />} />
       </Routes>
       <Footer />

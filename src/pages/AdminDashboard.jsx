@@ -543,6 +543,32 @@ const AdminDashboard = () => {
     const [mgmtStatus, setMgmtStatus] = useState({ type: '', message: '' });
     const [confirmDelete, setConfirmDelete] = useState({ show: false, type: '', id: null, name: '' });
     const [copiedToken, setCopiedToken] = useState(null);
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    // SLA Timer Ticker
+    useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 60000); // Update every minute
+        return () => clearInterval(timer);
+    }, []);
+
+    const formatElapsed = (createdAt) => {
+        const start = new Date(createdAt);
+        const diffMs = currentTime - start;
+        const diffMins = Math.floor(diffMs / 60000);
+        if (diffMins < 0) return 'Just now';
+        if (diffMins < 60) return `${diffMins}m ago`;
+        const diffHours = Math.floor(diffMins / 60);
+        return `${diffHours}h ago`;
+    };
+
+    const getSLAPriority = (createdAt, status) => {
+        if (status !== 'Pending') return 'Resolved';
+        const start = new Date(createdAt);
+        const diffMins = Math.floor((currentTime - start) / 60000);
+        if (diffMins >= 15) return 'Overdue';
+        if (diffMins >= 10) return 'Warning';
+        return 'Healthy';
+    };
 
     useEffect(() => {
         const token = localStorage.getItem('olympia_admin_token');
@@ -886,6 +912,7 @@ const AdminDashboard = () => {
                                         <th style={styles.th}>Patient Details</th>
                                         <th style={styles.th}>Clinical Info</th>
                                         <th style={styles.th}>Referring Provider</th>
+                                        <th style={styles.th}>Response SLA</th>
                                         <th style={styles.th}>Status & Action</th>
                                     </tr>
                                 </thead>
@@ -937,6 +964,22 @@ const AdminDashboard = () => {
                                                 <div style={styles.tdName}>{r.provider_name || (r.source && r.source.includes('FHIR') ? 'Integrated Hospital EHR' : 'System Import')}</div>
                                                 <div style={{ fontSize: 9, fontWeight: 800, color: r.source && r.source.includes('FHIR') ? PURPLE_MID : GOLD_DARK, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 3 }}>
                                                     {r.source && r.source.includes('FHIR') ? 'Interoperability Pipeline' : 'Verified Partner'}
+                                                </div>
+                                            </td>
+                                            <td style={styles.td}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                                    <div style={{ fontSize: 13, fontWeight: 900, color: getSLAPriority(r.created_at, r.status) === 'Overdue' ? '#DC2626' : PURPLE_DARK }}>
+                                                        {formatElapsed(r.created_at)}
+                                                    </div>
+                                                    <div style={{
+                                                        fontSize: 9, fontWeight: 950, textTransform: 'uppercase', letterSpacing: '0.05em',
+                                                        color: getSLAPriority(r.created_at, r.status) === 'Overdue' ? '#DC2626' :
+                                                               getSLAPriority(r.created_at, r.status) === 'Warning' ? '#B45309' :
+                                                               getSLAPriority(r.created_at, r.status) === 'Resolved' ? '#16A34A' : PURPLE_SOFT
+                                                    }}>
+                                                        {getSLAPriority(r.created_at, r.status) === 'Overdue' ? 'Action Required' : 
+                                                         getSLAPriority(r.created_at, r.status) === 'Resolved' ? 'SLA Met' : 'Within SLA'}
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td style={styles.td}>
