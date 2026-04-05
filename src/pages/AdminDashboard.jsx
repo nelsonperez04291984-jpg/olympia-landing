@@ -28,7 +28,8 @@ import {
     LinkIcon,
     Copy,
     Check,
-    MessageCircle
+    MessageCircle,
+    Shield
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import DiagnosisAssessment from '../components/DiagnosisAssessment';
