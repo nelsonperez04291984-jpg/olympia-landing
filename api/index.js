@@ -280,7 +280,8 @@ app.post('/api/public/referrals', async (req, res) => {
     token, patient_name, patient_dob, patient_phone, 
     diagnosis, services_needed, 
     insurance_provider, insurance_policy, 
-    referral_priority, documents_provided 
+    referral_priority, documents_provided,
+    primary_diagnosis, secondary_diagnoses
   } = req.body;
   
   const status_token = Math.random().toString(36).substring(2, 15);
@@ -298,16 +299,19 @@ app.post('/api/public/referrals', async (req, res) => {
         provider_id, patient_name, patient_dob, patient_phone, 
         diagnosis, services_needed, status, source,
         insurance_provider, insurance_policy, referral_priority, documents_provided,
-        status_token
+        status_token, primary_diagnosis, secondary_diagnoses
       ) 
-       VALUES ($1, $2, $3, $4, $5, $6, 'Pending', 'Manual_FastLink', $7, $8, $9, $10, $11) 
+       VALUES ($1, $2, $3, $4, $5, $6, 'Pending', 'Manual_FastLink', $7, $8, $9, $10, $11, $12, $13) 
        RETURNING *`,
       [
         providerId, patient_name, patient_dob, patient_phone, 
-        diagnosis, services_needed, 
+        diagnosis || (primary_diagnosis ? primary_diagnosis.description : ''), 
+        services_needed, 
         insurance_provider, insurance_policy, 
         referral_priority || 'Routine', documents_provided || false,
-        status_token
+        status_token,
+        primary_diagnosis ? JSON.stringify(primary_diagnosis) : null,
+        secondary_diagnoses ? JSON.stringify(secondary_diagnoses) : '[]'
       ]
     );
     
@@ -457,6 +461,8 @@ app.get('/api/admin/fix-schema', async (req, res) => {
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS referral_priority VARCHAR(20) DEFAULT 'Routine'");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS documents_provided BOOLEAN DEFAULT FALSE");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS status_token VARCHAR(36)");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS primary_diagnosis JSONB");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS secondary_diagnoses JSONB DEFAULT '[]'");
     
     // Check if the foreign key is correct. 
     // If it was created pointing to admins(id) by mistake, we fix it here.

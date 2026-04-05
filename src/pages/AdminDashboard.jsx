@@ -29,7 +29,8 @@ import {
     Copy,
     Check,
     MessageCircle,
-    Shield
+    Shield,
+    Plus
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import DiagnosisAssessment from '../components/DiagnosisAssessment';
@@ -956,8 +957,33 @@ const AdminDashboard = () => {
                                                         {r.referral_priority}
                                                     </div>
                                                 )}
-                                                <div style={{ fontSize: 9, fontWeight: 900, color: PURPLE_SOFT, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>Diagnosis</div>
-                                                <div style={{ fontSize: 12, color: PURPLE_DARK, fontWeight: 700, marginBottom: 8 }}>{r.diagnosis}</div>
+                                                
+                                                {r.primary_diagnosis ? (
+                                                    <div style={{ marginBottom: 12 }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                                                            <div style={{ fontSize: 9, fontWeight: 900, color: '#10B981', letterSpacing: '0.1em', textTransform: 'uppercase' }}>CMS-Ready Primary</div>
+                                                            <div style={{ padding: '2px 6px', background: '#DCFCE7', color: '#16A34A', borderRadius: 4, fontSize: 8, fontWeight: 900 }}>{r.primary_diagnosis.code}</div>
+                                                        </div>
+                                                        <div style={{ fontSize: 13, color: PURPLE_DARK, fontWeight: 800, lineHeight: 1.3 }}>{r.primary_diagnosis.description}</div>
+                                                        <div style={{ fontSize: 10, color: PURPLE_LIGHT, fontWeight: 600, marginTop: 4 }}>Group: {r.primary_diagnosis.pdgm_grouping}</div>
+                                                        
+                                                        {r.secondary_diagnoses && r.secondary_diagnoses.length > 0 && (
+                                                            <div style={{ 
+                                                                marginTop: 8, fontSize: 10, fontWeight: 800, color: PURPLE_MID, 
+                                                                background: '#F8F6FF', padding: '4px 10px', borderRadius: 8, width: 'fit-content',
+                                                                border: '1px solid #EDE9FE', display: 'flex', alignItems: 'center', gap: 4
+                                                            }}>
+                                                                <Plus size={10} /> {r.secondary_diagnoses.length} Comorbidities
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ marginBottom: 12 }}>
+                                                        <div style={{ fontSize: 9, fontWeight: 900, color: PURPLE_SOFT, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>Diagnosis</div>
+                                                        <div style={{ fontSize: 12, color: PURPLE_DARK, fontWeight: 700 }}>{r.diagnosis}</div>
+                                                    </div>
+                                                )}
+
                                                 <div style={{ fontSize: 9, fontWeight: 900, color: PURPLE_SOFT, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>Services Needed</div>
                                                 <div style={{ fontSize: 11, color: PURPLE_LIGHT, background: 'rgba(243,239,249,0.8)', padding: '6px 10px', borderRadius: 8, fontWeight: 600 }}>{r.services_needed}</div>
                                             </td>

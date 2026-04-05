@@ -8,18 +8,21 @@ import {
     User, 
     Phone, 
     FileText, 
-    ShieldCheck,
-    AlertCircle,
-    ArrowRight,
-    Zap,
-    HeartPulse,
-    Shield,
-    FileUp,
+    CheckCircle,
+    CheckCircle2,
     Check,
     Clock,
     PhoneCall,
-    Printer
+    Printer,
+    Activity,
+    Shield,
+    FileUp,
+    Info,
+    TrendingUp,
+    Plus,
+    X as XIcon
 } from 'lucide-react';
+import ICD10Search from '../components/ICD10Search';
 
 /* ── Design Tokens ── */
 const PURPLE_DARK = '#1A0A2E';
@@ -38,6 +41,10 @@ const PublicReferral = () => {
     const [error, setError] = useState(null);
     const [step, setStep] = useState(1);
     const [submitted, setSubmitted] = useState(false);
+    const [statusToken, setStatusToken] = useState(null);
+    const [primaryDiagnosis, setPrimaryDiagnosis] = useState(null);
+    const [secondaryDiagnoses, setSecondaryDiagnoses] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
 
     const [formData, setFormData] = useState({
         patient_name: '',
@@ -50,8 +57,6 @@ const PublicReferral = () => {
         services_needed: '',
         documents_provided: false
     });
-
-    const [statusToken, setStatusToken] = useState(null);
 
     useEffect(() => {
         if (token) fetchProvider();
@@ -76,11 +81,15 @@ const PublicReferral = () => {
             const res = await fetch('/api/public/referrals', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...formData, token })
+                body: JSON.stringify({ 
+                    ...formData, 
+                    token,
+                    primary_diagnosis: primaryDiagnosis,
+                    secondary_diagnoses: secondaryDiagnoses
+                })
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Submission failed.');
-            
             setStatusToken(data.status_token);
             setSubmitted(true);
         } catch (err) {
@@ -88,6 +97,21 @@ const PublicReferral = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSelectDiagnosis = (item, type) => {
+        if (type === 'primary') {
+            setPrimaryDiagnosis(item);
+        } else {
+            if (!secondaryDiagnoses.find(d => d.code === item.code)) {
+                setSecondaryDiagnoses([...secondaryDiagnoses, item]);
+            }
+        }
+        setIsSearching(false);
+    };
+
+    const removeSecondary = (code) => {
+        setSecondaryDiagnoses(secondaryDiagnoses.filter(d => d.code !== code));
     };
 
     if (loading && !providerInfo) return <div style={styles.loader}>Secure Connection Initializing...</div>;
@@ -232,34 +256,139 @@ const PublicReferral = () => {
 
                     {step === 2 && (
                         <div className="animate-fadeIn">
-                            <div style={styles.stepHeader}>
-                                <h3 style={styles.stepTitle}>Clinical Priority</h3>
+                             <div style={styles.stepHeader}>
+                                <h3 style={styles.stepTitle}>Clinical & Insurance</h3>
                                 <div style={styles.stepCounter}>Step 2 of 3</div>
                             </div>
-                            
-                            <label style={styles.label}>Referral Urgency</label>
-                            <div style={styles.priorityGrid}>
-                                {['Routine', 'Urgent', 'Same-Day'].map(p => (
-                                    <button 
-                                        key={p} 
-                                        onClick={() => setFormData({...formData, referral_priority: p})}
-                                        style={styles.priorityBtn(formData.referral_priority === p)}
-                                    >
-                                        {p === 'Urgent' && <Zap size={14} />}
-                                        {p === 'Same-Day' && <Clock size={14} />}
-                                        {p}
-                                    </button>
-                                ))}
-                            </div>
 
-                            <div style={{ ...styles.row, marginTop: 20 }}>
-                                <div style={styles.inputGroup}>
-                                    <label style={styles.label}>Insurance Provider</label>
-                                    <input style={styles.input} placeholder="e.g. Medicare / Aetna" value={formData.insurance_provider} onChange={e => setFormData({...formData, insurance_provider: e.target.value})} />
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: 32 }}>
+                                <div>
+                                    <label style={styles.label}>Referral Urgency</label>
+                                    <div style={{ ...styles.priorityGrid, marginBottom: 24 }}>
+                                        {['Routine', 'Urgent', 'Same-Day'].map(p => (
+                                            <button 
+                                                key={p} 
+                                                onClick={() => setFormData({...formData, referral_priority: p})}
+                                                style={styles.priorityBtn(formData.referral_priority === p)}
+                                            >
+                                                {p === 'Urgent' && <Zap size={14} />}
+                                                {p === 'Same-Day' && <Clock size={14} />}
+                                                {p}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    <div style={styles.row}>
+                                        <div style={styles.inputGroup}>
+                                            <label style={styles.label}>Insurance Provider</label>
+                                            <input style={styles.input} placeholder="e.g. Medicare / Aetna" value={formData.insurance_provider} onChange={e => setFormData({...formData, insurance_provider: e.target.value})} />
+                                        </div>
+                                        <div style={styles.inputGroup}>
+                                            <label style={styles.label}>Policy #</label>
+                                            <input style={styles.input} placeholder="Optional" value={formData.insurance_policy} onChange={e => setFormData({...formData, insurance_policy: e.target.value})} />
+                                        </div>
+                                    </div>
+
+                                    <div style={styles.inputGroup}>
+                                        <label style={styles.label}>Diagnosis & Comorbidities</label>
+                                        <p style={{ fontSize: 13, color: PURPLE_LIGHT, marginBottom: 16 }}>Select primary diagnosis and optional comorbidities.</p>
+                                        
+                                        {!primaryDiagnosis && !isSearching ? (
+                                            <button 
+                                                onClick={() => setIsSearching(true)}
+                                                style={{ 
+                                                    width: '100%', padding: '24px', border: '2px dashed #E2E8F0', 
+                                                    borderRadius: 16, background: 'rgba(243,239,249,0.3)', color: PURPLE_MID, 
+                                                    fontWeight: 800, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10
+                                                }}
+                                            >
+                                                <Search size={24} />
+                                                SEARCH ICD-10 OR CONDITION
+                                            </button>
+                                        ) : isSearching ? (
+                                            <div style={{ background: WHITE, borderRadius: 16, border: '1px solid #E2E8F0', padding: 20 }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                                                    <span style={{ fontSize: 10, fontWeight: 900, color: PURPLE_SOFT, textTransform: 'uppercase' }}>Clinical Search Engine</span>
+                                                    <button onClick={() => setIsSearching(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><XIcon size={16} /></button>
+                                                </div>
+                                                <ICD10Search isEmbedded onSelect={handleSelectDiagnosis} />
+                                            </div>
+                                        ) : (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                                 {/* Primary Code */}
+                                                 <div style={{ padding: '20px', borderRadius: 20, background: 'rgba(59,31,106,0.03)', border: `1.5px solid ${PURPLE_MID}`, position: 'relative' }}>
+                                                    <div style={{ position: 'absolute', top: -10, left: 20, background: PURPLE_MID, color: WHITE, padding: '2px 10px', borderRadius: 8, fontSize: 10, fontWeight: 900 }}>PRIMARY</div>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                        <div>
+                                                            <div style={{ fontSize: 12, fontWeight: 900, color: PURPLE_MID, marginBottom: 4 }}>{primaryDiagnosis.code}</div>
+                                                            <div style={{ fontSize: 15, fontWeight: 800, color: PURPLE_DARK }}>{primaryDiagnosis.description}</div>
+                                                        </div>
+                                                        <button onClick={() => setPrimaryDiagnosis(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', opacity: 0.5 }}><XIcon size={16} /></button>
+                                                    </div>
+                                                </div>
+
+                                                {/* Secondary Codes */}
+                                                {secondaryDiagnoses.map(d => (
+                                                    <div key={d.code} style={{ padding: '16px 20px', borderRadius: 16, background: WHITE, border: '1.5px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <div>
+                                                            <div style={{ fontSize: 11, fontWeight: 900, color: PURPLE_SOFT }}>{d.code}</div>
+                                                            <div style={{ fontSize: 13, fontWeight: 700, color: PURPLE_DARK }}>{d.description}</div>
+                                                        </div>
+                                                        <button onClick={() => removeSecondary(d.code)} style={{ background: 'none', border: 'none', cursor: 'pointer', opacity: 0.3 }}><XIcon size={14} /></button>
+                                                    </div>
+                                                ))}
+
+                                                <button 
+                                                    onClick={() => setIsSearching(true)}
+                                                    style={{ alignSelf: 'flex-start', padding: '8px 16px', background: 'none', border: `1.5px dashed ${PURPLE_SOFT}`, borderRadius: 10, color: PURPLE_MID, fontSize: 11, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                                                >
+                                                    <Plus size={14} /> ADD COMORBIDITY
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                <div style={styles.inputGroup}>
-                                    <label style={styles.label}>Policy #</label>
-                                    <input style={styles.input} placeholder="Optional for speed" value={formData.insurance_policy} onChange={e => setFormData({...formData, insurance_policy: e.target.value})} />
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                                    <div style={{ 
+                                        padding: 32, borderRadius: 28, background: WHITE, border: '1.5px solid #F1F5F9',
+                                        textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24
+                                    }}>
+                                        <div style={{ 
+                                            width: 64, height: 64, borderRadius: '50%', 
+                                            background: primaryDiagnosis ? 'rgba(16,185,129,0.1)' : 'rgba(243,239,249,0.5)', 
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                                            color: primaryDiagnosis ? '#10B981' : '#DADCE0' 
+                                        }}>
+                                            {primaryDiagnosis ? <CheckCircle size={28} /> : <Info size={24} />}
+                                        </div>
+                                        <div>
+                                            <h4 style={{ fontSize: 12, fontWeight: 900, color: PURPLE_DARK, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
+                                                {primaryDiagnosis ? 'Intelligence Online' : 'Intelligence Offline'}
+                                            </h4>
+                                            <p style={{ fontSize: 13, color: '#64748B', lineHeight: 1.5 }}>
+                                                {primaryDiagnosis 
+                                                    ? `Linked to ${primaryDiagnosis.pdgm_grouping}. Case-mix weight optimized for reimbursement.`
+                                                    : 'Select a primary diagnosis to unlock PDGM clinical insights and financial projections.'
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div style={{ 
+                                        padding: 32, borderRadius: 28, background: 'linear-gradient(135deg, #1A0A2E 0%, #3B1F6A 100%)',
+                                        color: WHITE, position: 'relative', overflow: 'hidden', opacity: primaryDiagnosis ? 1 : 0.6
+                                    }}>
+                                        <div style={{ position: 'absolute', top: 20, right: 20, opacity: 0.2 }}><Zap size={40} /></div>
+                                        <div style={{ position: 'relative', zIndex: 2 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: GOLD, fontWeight: 900, fontSize: 11, marginBottom: 12, textTransform: 'uppercase' }}>
+                                                <Zap size={14} /> CMS-Ready Referral
+                                            </div>
+                                            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, margin: 0 }}>
+                                                Your referral data is structured using the PDGM 2024 regulatory model for immediate SOC intake.
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -272,9 +401,9 @@ const PublicReferral = () => {
                                 <div style={styles.stepCounter}>Step 3 of 3</div>
                             </div>
                             
-                            <div style={styles.inputGroup}>
-                                <label style={styles.label}>Referral Reason / Diagnosis</label>
-                                <textarea style={styles.textarea} placeholder="Clinical summary..." value={formData.diagnosis} onChange={e => setFormData({...formData, diagnosis: e.target.value})} />
+                             <div style={styles.inputGroup}>
+                                <label style={styles.label}>Reason for Care / Clinical Notes</label>
+                                <textarea style={styles.textarea} placeholder="Enter any additional clinical notes or specific reason for home health services..." value={formData.diagnosis} onChange={e => setFormData({...formData, diagnosis: e.target.value})} />
                             </div>
 
                             <div style={styles.uploadZone}>
