@@ -27,7 +27,8 @@ import {
     CheckCircle2,
     LinkIcon,
     Copy,
-    Check
+    Check,
+    MessageCircle
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import DiagnosisAssessment from '../components/DiagnosisAssessment';
@@ -189,6 +190,12 @@ const styles = {
         background: 'rgba(239,68,68,0.05)', border: 'none', cursor: 'pointer',
         color: '#EF4444', padding: '10px', borderRadius: 12, display: 'flex',
         alignItems: 'center', transition: 'all 0.2s'
+    },
+    shareIconBtn: {
+        background: 'rgba(59,31,106,0.05)', border: 'none', cursor: 'pointer',
+        color: PURPLE_MID, padding: '10px', borderRadius: 12, display: 'flex',
+        alignItems: 'center', transition: 'all 0.2s',
+        ':hover': { background: 'rgba(59,31,106,0.1)' }
     },
 
     /* ── AI Logs ── */
@@ -600,6 +607,19 @@ const AdminDashboard = () => {
         setTimeout(() => setCopiedToken(null), 2000);
     };
 
+    const handleShareEmail = (name, token) => {
+        const link = `${window.location.origin}/referral/${token}`;
+        const subject = encodeURIComponent(`Patient Referral - FastLink for ${name}`);
+        const body = encodeURIComponent(`Hi ${name},\n\nPlease use this secure link to send us your patient referrals directly: ${link}\n\nThank you,\nOlympia Homehealth Intake Team`);
+        window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    };
+
+    const handleShareChat = (name, token) => {
+        const link = `${window.location.origin}/referral/${token}`;
+        const text = encodeURIComponent(`Hi ${name}, here is your secure link for the Olympia Referral Portal: ${link}`);
+        window.open(`https://wa.me/?text=${text}`, '_blank');
+    };
+
     const executeDelete = async () => {
         const { type, id } = confirmDelete;
         try {
@@ -809,20 +829,28 @@ const AdminDashboard = () => {
                                                     <span style={styles.providerIdBadge}>{p.provider_id}</span>
                                                 </td>
                                                 <td style={styles.td}>
-                                                    <button 
-                                                        onClick={() => handleCopyLink(p.referral_token)}
-                                                        style={{
-                                                            display: 'flex', alignItems: 'center', gap: 6, background: copiedToken === p.referral_token ? '#F0FDF4' : 'rgba(107,79,160,0.05)',
-                                                            border: `1px solid ${copiedToken === p.referral_token ? '#16A34A' : '#EDE9FE'}`,
-                                                            borderRadius: 10, padding: '6px 12px', cursor: 'pointer',
-                                                            color: copiedToken === p.referral_token ? '#16A34A' : PURPLE_LIGHT,
-                                                            fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em',
-                                                            transition: 'all 0.2s'
-                                                        }}
-                                                    >
-                                                        {copiedToken === p.referral_token ? <Check size={12} /> : <LinkIcon size={12} />}
-                                                        {copiedToken === p.referral_token ? 'Copied' : 'Fast-Link'}
-                                                    </button>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                        <button 
+                                                            onClick={() => handleCopyLink(p.referral_token)}
+                                                            style={{
+                                                                display: 'flex', alignItems: 'center', gap: 6, background: copiedToken === p.referral_token ? '#F0FDF4' : 'rgba(107,79,160,0.05)',
+                                                                border: `1px solid ${copiedToken === p.referral_token ? '#16A34A' : '#EDE9FE'}`,
+                                                                borderRadius: 10, padding: '6px 12px', cursor: 'pointer',
+                                                                color: copiedToken === p.referral_token ? '#16A34A' : PURPLE_LIGHT,
+                                                                fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em',
+                                                                transition: 'all 0.2s'
+                                                            }}
+                                                        >
+                                                            {copiedToken === p.referral_token ? <Check size={12} /> : <LinkIcon size={12} />}
+                                                            {copiedToken === p.referral_token ? 'Copied' : 'Fast-Link'}
+                                                        </button>
+                                                        <button onClick={() => handleShareEmail(p.name, p.referral_token)} style={styles.shareIconBtn} title="Share via Email">
+                                                            <Mail size={14} />
+                                                        </button>
+                                                        <button onClick={() => handleShareChat(p.name, p.referral_token)} style={styles.shareIconBtn} title="Share via WhatsApp/SMS">
+                                                            <MessageCircle size={14} />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                                 <td style={styles.td}>
                                                     <button onClick={() => setConfirmDelete({ show: true, type: 'provider', id: p.id, name: p.name })} style={styles.deleteBtn}>
@@ -1085,20 +1113,28 @@ const AdminDashboard = () => {
                                                 </td>
                                                 {mgmtTab === 'provider' && (
                                                     <td style={styles.td}>
-                                                        <button 
-                                                            onClick={() => handleCopyLink(item.referral_token)}
-                                                            style={{
-                                                                display: 'flex', alignItems: 'center', gap: 6, background: copiedToken === item.referral_token ? '#F0FDF4' : 'rgba(107,79,160,0.05)',
-                                                                border: `1px solid ${copiedToken === item.referral_token ? '#16A34A' : '#EDE9FE'}`,
-                                                                borderRadius: 10, padding: '6px 12px', cursor: 'pointer',
-                                                                color: copiedToken === item.referral_token ? '#16A34A' : PURPLE_LIGHT,
-                                                                fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em',
-                                                                transition: 'all 0.2s'
-                                                            }}
-                                                        >
-                                                            {copiedToken === item.referral_token ? <Check size={12} /> : <LinkIcon size={12} />}
-                                                            {copiedToken === item.referral_token ? 'Copied' : 'Copy Link'}
-                                                        </button>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                            <button 
+                                                                onClick={() => handleCopyLink(item.referral_token)}
+                                                                style={{
+                                                                    display: 'flex', alignItems: 'center', gap: 6, background: copiedToken === item.referral_token ? '#F0FDF4' : 'rgba(107,79,160,0.05)',
+                                                                    border: `1px solid ${copiedToken === item.referral_token ? '#16A34A' : '#EDE9FE'}`,
+                                                                    borderRadius: 10, padding: '6px 12px', cursor: 'pointer',
+                                                                    color: copiedToken === item.referral_token ? '#16A34A' : PURPLE_LIGHT,
+                                                                    fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em',
+                                                                    transition: 'all 0.2s'
+                                                                }}
+                                                            >
+                                                                {copiedToken === item.referral_token ? <Check size={12} /> : <LinkIcon size={12} />}
+                                                                {copiedToken === item.referral_token ? 'Copied' : 'Copy Link'}
+                                                            </button>
+                                                            <button onClick={() => handleShareEmail(item.name, item.referral_token)} style={styles.shareIconBtn} title="Share via Email">
+                                                                <Mail size={14} />
+                                                            </button>
+                                                            <button onClick={() => handleShareChat(item.name, item.referral_token)} style={styles.shareIconBtn} title="Share via WhatsApp/SMS">
+                                                                <MessageCircle size={14} />
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 )}
                                                 <td style={styles.td}>
