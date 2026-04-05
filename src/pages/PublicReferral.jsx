@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { 
-    ChevronRight, 
-    ChevronLeft, 
-    CheckCircle2, 
-    Stethoscope, 
-    User, 
-    Phone, 
-    FileText, 
+import {
+    ChevronRight,
+    ChevronLeft,
+    CheckCircle2,
+    Stethoscope,
+    User,
+    Phone,
+    FileText,
     CheckCircle,
     Check,
     Clock,
@@ -36,6 +36,7 @@ import ICD10Search from '../components/ICD10Search';
 const PURPLE_DARK = '#1A0A2E';
 const PURPLE_MID = '#3B1F6A';
 const PURPLE_LIGHT = '#6B4FA0';
+const PURPLE_SOFT = '#8E70C2';
 const GOLD = '#F5C842';
 const WHITE = '#FFFFFF';
 const SUCCESS = '#10B981';
@@ -43,7 +44,7 @@ const SUCCESS = '#10B981';
 const PublicReferral = () => {
     const { token } = useParams();
     const navigate = useNavigate();
-    
+
     const [providerInfo, setProviderInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -95,8 +96,8 @@ const PublicReferral = () => {
             const res = await fetch('/api/public/referrals', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    ...formData, 
+                body: JSON.stringify({
+                    ...formData,
                     token,
                     primary_diagnosis: primaryDiagnosis,
                     secondary_diagnoses: secondaryDiagnoses
@@ -129,7 +130,7 @@ const PublicReferral = () => {
     };
 
     if (loading && !providerInfo) return <div style={styles.loader}>Secure Connection Initializing...</div>;
-    
+
     if (error) return (
         <div style={styles.errorContainer}>
             <AlertCircle size={48} color="#EF4444" />
@@ -144,7 +145,7 @@ const PublicReferral = () => {
             <div style={styles.successIcon}><CheckCircle2 size={64} color={SUCCESS} /></div>
             <h2 style={styles.successTitle}>Referral Confirmed</h2>
             <p style={styles.successText}>
-                The transition of care for <strong>{formData.patient_name}</strong> is now in process. 
+                The transition of care for <strong>{formData.patient_name}</strong> is now in process.
                 Our team is reviewing the clinical data.
             </p>
 
@@ -161,14 +162,14 @@ const PublicReferral = () => {
                             <div style={styles.pipelineIcon(s.active, s.current)}>{s.icon}</div>
                             <div style={styles.pipelineLabel}>{s.label}</div>
                         </div>
-                        {i < arr.length - 1 && <div style={styles.pipelineLine(arr[i+1].active)} />}
+                        {i < arr.length - 1 && <div style={styles.pipelineLine(arr[i + 1].active)} />}
                     </React.Fragment>
                 ))}
             </div>
 
             {/* Status Link Card */}
-            <div style={{ 
-                background: '#F8FAFC', padding: '24px 32px', borderRadius: 24, 
+            <div style={{
+                background: '#F8FAFC', padding: '24px 32px', borderRadius: 24,
                 border: '1.5px solid #F1F5F9', marginBottom: 40, position: 'relative',
                 maxWidth: 500, width: '100%', textAlign: 'left'
             }}>
@@ -179,12 +180,12 @@ const PublicReferral = () => {
                     Copy this unique secure link to monitor your patient's real-time discharge status.
                 </p>
                 <div style={{ display: 'flex', gap: 8 }}>
-                    <input 
-                        readOnly 
+                    <input
+                        readOnly
                         value={`${window.location.origin}/referral-status/${statusToken}`}
                         style={{ flex: 1, padding: '12px 16px', borderRadius: 12, border: '1.5px solid #E2E8F0', fontSize: 12, color: PURPLE_DARK, fontWeight: 600, background: WHITE }}
                     />
-                    <button 
+                    <button
                         onClick={() => {
                             navigator.clipboard.writeText(`${window.location.origin}/referral-status/${statusToken}`);
                             alert('Link copied to clipboard');
@@ -193,7 +194,7 @@ const PublicReferral = () => {
                     >
                         COPY
                     </button>
-                    <Link 
+                    <Link
                         to={`/referral-status/${statusToken}`}
                         style={{ display: 'flex', alignItems: 'center', padding: '0 16px', borderRadius: 12, border: `1.5px solid ${PURPLE_MID}`, color: PURPLE_MID, fontSize: 11, fontWeight: 900, cursor: 'pointer', textDecoration: 'none' }}
                     >
@@ -221,7 +222,7 @@ const PublicReferral = () => {
                 </div>
                 <h1 style={styles.promoTitle}>Secure Home Health Referral</h1>
                 <p style={styles.promoSub}>
-                    Fast-Track Intake: Submit in under 60 seconds. <br/>
+                    Fast-Track Intake: Submit in under 60 seconds. <br />
                     <strong>No Faxing Required.</strong>
                 </p>
                 <div style={styles.hospitalPill}>
@@ -248,33 +249,33 @@ const PublicReferral = () => {
                 <div style={styles.wizardContent}>
                     {step === 1 && (
                         <div className="animate-fadeIn">
-                             <div style={styles.stepHeader}>
+                            <div style={styles.stepHeader}>
                                 <h3 style={styles.stepTitle}>Patient Identity</h3>
                                 <div style={styles.stepCounter}>Step 1 of 4</div>
                             </div>
                             <div style={styles.inputGroup}>
                                 <label style={styles.label}>Legal Full Name</label>
-                                <input style={styles.input} placeholder="Last, First Middle" value={formData.patient_name} onChange={e => setFormData({...formData, patient_name: e.target.value})} />
+                                <input style={styles.input} placeholder="Last, First Middle" value={formData.patient_name} onChange={e => setFormData({ ...formData, patient_name: e.target.value })} />
                             </div>
                             <div style={styles.row}>
                                 <div style={styles.inputGroup}>
                                     <label style={styles.label}>Date of Birth</label>
-                                    <input style={styles.input} placeholder="MM/DD/YYYY" value={formData.patient_dob} onChange={e => setFormData({...formData, patient_dob: e.target.value})} />
+                                    <input style={styles.input} placeholder="MM/DD/YYYY" value={formData.patient_dob} onChange={e => setFormData({ ...formData, patient_dob: e.target.value })} />
                                 </div>
                                 <div style={styles.inputGroup}>
                                     <label style={styles.label}>Phone Number</label>
-                                    <input style={styles.input} placeholder="(555) 000-0000" value={formData.patient_phone} onChange={e => setFormData({...formData, patient_phone: e.target.value})} />
+                                    <input style={styles.input} placeholder="(555) 000-0000" value={formData.patient_phone} onChange={e => setFormData({ ...formData, patient_phone: e.target.value })} />
                                 </div>
                             </div>
                             <div style={styles.inputGroup}>
                                 <label style={styles.label}>Home Address</label>
                                 <div style={{ position: 'relative' }}>
                                     <MapPin size={16} style={{ position: 'absolute', left: 16, top: 18, color: PURPLE_MID, opacity: 0.5 }} />
-                                    <input 
-                                        style={{ ...styles.input, paddingLeft: 44 }} 
-                                        placeholder="Full service address for home visits" 
-                                        value={formData.patient_address} 
-                                        onChange={e => setFormData({...formData, patient_address: e.target.value})} 
+                                    <input
+                                        style={{ ...styles.input, paddingLeft: 44 }}
+                                        placeholder="Full service address for home visits"
+                                        value={formData.patient_address}
+                                        onChange={e => setFormData({ ...formData, patient_address: e.target.value })}
                                     />
                                 </div>
                             </div>
@@ -283,11 +284,11 @@ const PublicReferral = () => {
                                     <label style={styles.label}>Emergency Contact</label>
                                     <div style={{ position: 'relative' }}>
                                         <Heart size={16} style={{ position: 'absolute', left: 16, top: 18, color: PURPLE_MID, opacity: 0.5 }} />
-                                        <input 
-                                            style={{ ...styles.input, paddingLeft: 44 }} 
-                                            placeholder="Name & Relationship" 
-                                            value={formData.emergency_contact} 
-                                            onChange={e => setFormData({...formData, emergency_contact: e.target.value})} 
+                                        <input
+                                            style={{ ...styles.input, paddingLeft: 44 }}
+                                            placeholder="Name & Relationship"
+                                            value={formData.emergency_contact}
+                                            onChange={e => setFormData({ ...formData, emergency_contact: e.target.value })}
                                         />
                                     </div>
                                 </div>
@@ -295,11 +296,11 @@ const PublicReferral = () => {
                                     <label style={styles.label}>Preferred Language</label>
                                     <div style={{ position: 'relative' }}>
                                         <Globe size={16} style={{ position: 'absolute', left: 16, top: 18, color: PURPLE_MID, opacity: 0.5 }} />
-                                        <input 
-                                            style={{ ...styles.input, paddingLeft: 44 }} 
-                                            placeholder="e.g. English, Spanish" 
-                                            value={formData.preferred_language} 
-                                            onChange={e => setFormData({...formData, preferred_language: e.target.value})} 
+                                        <input
+                                            style={{ ...styles.input, paddingLeft: 44 }}
+                                            placeholder="e.g. English, Spanish"
+                                            value={formData.preferred_language}
+                                            onChange={e => setFormData({ ...formData, preferred_language: e.target.value })}
                                         />
                                     </div>
                                 </div>
@@ -309,7 +310,7 @@ const PublicReferral = () => {
 
                     {step === 2 && (
                         <div className="animate-fadeIn">
-                             <div style={styles.stepHeader}>
+                            <div style={styles.stepHeader}>
                                 <h3 style={styles.stepTitle}>Insurance & Contact</h3>
                                 <div style={styles.stepCounter}>Step 2 of 4</div>
                             </div>
@@ -319,9 +320,9 @@ const PublicReferral = () => {
                                     <label style={styles.label}>Referral Urgency</label>
                                     <div style={{ ...styles.priorityGrid, marginBottom: 24 }}>
                                         {['Routine', 'Urgent', 'Same-Day'].map(p => (
-                                            <button 
-                                                key={p} 
-                                                onClick={() => setFormData({...formData, referral_priority: p})}
+                                            <button
+                                                key={p}
+                                                onClick={() => setFormData({ ...formData, referral_priority: p })}
                                                 style={styles.priorityBtn(formData.referral_priority === p)}
                                             >
                                                 {p === 'Urgent' && <Zap size={14} />}
@@ -334,11 +335,11 @@ const PublicReferral = () => {
                                     <div style={styles.row}>
                                         <div style={styles.inputGroup}>
                                             <label style={styles.label}>Primary Insurance</label>
-                                            <input style={styles.input} placeholder="e.g. Medicare" value={formData.insurance_provider} onChange={e => setFormData({...formData, insurance_provider: e.target.value})} />
+                                            <input style={styles.input} placeholder="e.g. Medicare" value={formData.insurance_provider} onChange={e => setFormData({ ...formData, insurance_provider: e.target.value })} />
                                         </div>
                                         <div style={styles.inputGroup}>
                                             <label style={styles.label}>Policy / ID #</label>
-                                            <input style={styles.input} placeholder="Required for verification" value={formData.insurance_policy} onChange={e => setFormData({...formData, insurance_policy: e.target.value})} />
+                                            <input style={styles.input} placeholder="Required for verification" value={formData.insurance_policy} onChange={e => setFormData({ ...formData, insurance_policy: e.target.value })} />
                                         </div>
                                     </div>
                                     <div style={styles.inputGroup}>
@@ -361,7 +362,7 @@ const PublicReferral = () => {
 
                     {step === 3 && (
                         <div className="animate-fadeIn">
-                             <div style={styles.stepHeader}>
+                            <div style={styles.stepHeader}>
                                 <h3 style={styles.stepTitle}>Clinical Orders</h3>
                                 <div style={styles.stepCounter}>Step 3 of 4</div>
                             </div>
@@ -375,9 +376,9 @@ const PublicReferral = () => {
                                             { label: 'Within 48h', val: '48h' },
                                             { label: 'Routine', val: 'Routine' }
                                         ].map(s => (
-                                            <button 
-                                                key={s.val} 
-                                                onClick={() => setFormData({...formData, soc_request: s.val})}
+                                            <button
+                                                key={s.val}
+                                                onClick={() => setFormData({ ...formData, soc_request: s.val })}
                                                 style={styles.priorityBtn(formData.soc_request === s.val)}
                                             >
                                                 {s.val === '24h' && <Zap size={14} />}
@@ -389,24 +390,24 @@ const PublicReferral = () => {
                                     <div style={styles.row}>
                                         <div style={styles.inputGroup}>
                                             <label style={styles.label}>Referring Physician</label>
-                                            <input style={styles.input} placeholder="Dr. Name" value={formData.physician_name} onChange={e => setFormData({...formData, physician_name: e.target.value})} />
+                                            <input style={styles.input} placeholder="Dr. Name" value={formData.physician_name} onChange={e => setFormData({ ...formData, physician_name: e.target.value })} />
                                         </div>
                                         <div style={styles.inputGroup}>
                                             <label style={styles.label}>Physician NPI #</label>
-                                            <input style={styles.input} placeholder="10 Digits" value={formData.physician_npi} onChange={e => setFormData({...formData, physician_npi: e.target.value})} />
+                                            <input style={styles.input} placeholder="10 Digits" value={formData.physician_npi} onChange={e => setFormData({ ...formData, physician_npi: e.target.value })} />
                                         </div>
                                     </div>
 
                                     <div style={styles.inputGroup}>
                                         <label style={styles.label}>Diagnosis & Comorbidities (Structured)</label>
                                         <p style={{ fontSize: 13, color: PURPLE_LIGHT, marginBottom: 16 }}>Search ICD-10 codes for real-time validation.</p>
-                                        
+
                                         {!primaryDiagnosis && !isSearching ? (
-                                            <button 
+                                            <button
                                                 onClick={() => setIsSearching(true)}
-                                                style={{ 
-                                                    width: '100%', padding: '24px', border: '2px dashed #E2E8F0', 
-                                                    borderRadius: 16, background: 'rgba(243,239,249,0.3)', color: PURPLE_MID, 
+                                                style={{
+                                                    width: '100%', padding: '24px', border: '2px dashed #E2E8F0',
+                                                    borderRadius: 16, background: 'rgba(243,239,249,0.3)', color: PURPLE_MID,
                                                     fontWeight: 800, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10
                                                 }}
                                             >
@@ -423,8 +424,8 @@ const PublicReferral = () => {
                                             </div>
                                         ) : (
                                             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                                 {/* Primary Code */}
-                                                 <div style={{ padding: '20px', borderRadius: 20, background: 'rgba(59,31,106,0.03)', border: `1.5px solid ${PURPLE_MID}`, position: 'relative' }}>
+                                                {/* Primary Code */}
+                                                <div style={{ padding: '20px', borderRadius: 20, background: 'rgba(59,31,106,0.03)', border: `1.5px solid ${PURPLE_MID}`, position: 'relative' }}>
                                                     <div style={{ position: 'absolute', top: -10, left: 20, background: PURPLE_MID, color: WHITE, padding: '2px 10px', borderRadius: 8, fontSize: 10, fontWeight: 900 }}>PRIMARY</div>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                                         <div>
@@ -446,7 +447,7 @@ const PublicReferral = () => {
                                                     </div>
                                                 ))}
 
-                                                <button 
+                                                <button
                                                     onClick={() => setIsSearching(true)}
                                                     style={{ alignSelf: 'flex-start', padding: '8px 16px', background: 'none', border: `1.5px dashed ${PURPLE_SOFT}`, borderRadius: 10, color: PURPLE_MID, fontSize: 11, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
                                                 >
@@ -458,15 +459,15 @@ const PublicReferral = () => {
                                 </div>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                                    <div style={{ 
+                                    <div style={{
                                         padding: 32, borderRadius: 28, background: WHITE, border: '1.5px solid #F1F5F9',
                                         textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16
                                     }}>
-                                         <div style={{ 
-                                            width: 54, height: 54, borderRadius: '50%', 
-                                            background: primaryDiagnosis ? 'rgba(16,185,129,0.1)' : 'rgba(243,239,249,0.5)', 
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                                            color: primaryDiagnosis ? '#10B981' : '#DADCE0' 
+                                        <div style={{
+                                            width: 54, height: 54, borderRadius: '50%',
+                                            background: primaryDiagnosis ? 'rgba(16,185,129,0.1)' : 'rgba(243,239,249,0.5)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            color: primaryDiagnosis ? '#10B981' : '#DADCE0'
                                         }}>
                                             {primaryDiagnosis ? <CheckCircle size={24} /> : <Info size={20} />}
                                         </div>
@@ -475,7 +476,7 @@ const PublicReferral = () => {
                                                 Triage Score
                                             </h4>
                                             <p style={{ fontSize: 12, color: '#64748B', lineHeight: 1.5, margin: 0 }}>
-                                                {primaryDiagnosis 
+                                                {primaryDiagnosis
                                                     ? `${primaryDiagnosis.pdgm_grouping} group detected. Estimated case-mix weight optimized.`
                                                     : 'Automated grouping disabled. Select a code to unlock clinical scoring.'
                                                 }
@@ -483,7 +484,7 @@ const PublicReferral = () => {
                                         </div>
                                     </div>
 
-                                    <div style={{ 
+                                    <div style={{
                                         padding: 32, borderRadius: 28, background: 'linear-gradient(135deg, #1A0A2E 0%, #3B1F6A 100%)',
                                         color: WHITE, position: 'relative', overflow: 'hidden'
                                     }}>
@@ -493,7 +494,7 @@ const PublicReferral = () => {
                                                 <Zap size={14} /> SOC Intelligence
                                             </div>
                                             <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', lineHeight: 1.5, margin: 0 }}>
-                                                Requested start: <strong>{formData.soc_request}</strong>. 
+                                                Requested start: <strong>{formData.soc_request}</strong>.
                                                 System is prioritizing immediate clinician matching based on urgency.
                                             </p>
                                         </div>
@@ -509,14 +510,14 @@ const PublicReferral = () => {
                                 <h3 style={styles.stepTitle}>Documents & Send</h3>
                                 <div style={styles.stepCounter}>Step 4 of 4</div>
                             </div>
-                            
-                             <div style={styles.inputGroup}>
+
+                            <div style={styles.inputGroup}>
                                 <label style={styles.label}>Clinical Hospital Course / Summary</label>
-                                <textarea 
-                                    style={styles.textarea} 
-                                    placeholder="Enter reasoning for home health services, surgical history, or physical therapy needs..." 
-                                    value={formData.diagnosis} 
-                                    onChange={e => setFormData({...formData, diagnosis: e.target.value})} 
+                                <textarea
+                                    style={styles.textarea}
+                                    placeholder="Enter reasoning for home health services, surgical history, or physical therapy needs..."
+                                    value={formData.diagnosis}
+                                    onChange={e => setFormData({ ...formData, diagnosis: e.target.value })}
                                 />
                             </div>
 
@@ -528,7 +529,7 @@ const PublicReferral = () => {
                             </div>
 
                             <div style={styles.reviewSummary}>
-                                <Check size={16} color={SUCCESS} /> 
+                                <Check size={16} color={SUCCESS} />
                                 <span>Generating referral for <strong>{formData.patient_name}</strong> from <strong>{providerInfo?.provider_name || providerInfo?.name}</strong></span>
                             </div>
                         </div>
@@ -543,9 +544,9 @@ const PublicReferral = () => {
                         )}
                         <div style={{ flex: 1 }} />
                         {step < 4 ? (
-                            <button 
+                            <button
                                 disabled={!formData.patient_name && step === 1}
-                                onClick={() => setStep(step + 1)} 
+                                onClick={() => setStep(step + 1)}
                                 style={styles.nextBtn}
                             >
                                 Next Step <ChevronRight size={18} />
@@ -573,7 +574,7 @@ const PublicReferral = () => {
                         <Printer size={18} color={GOLD} />
                         <div>
                             <div style={styles.footerLabel}>Secure Fax</div>
-                            <div style={styles.footerValue}>(555) 765-4321</div>
+                            <div style={styles.footerValue}>(714) 465-2233</div>
                         </div>
                     </div>
                 </div>
@@ -587,10 +588,10 @@ const PublicReferral = () => {
 
 const styles = {
     container: { minHeight: '100vh', background: '#F4F7FB', color: PURPLE_DARK, fontFamily: 'inter, system-ui, sans-serif' },
-    
+
     /* Header Branding */
-    promoHeader: { 
-        textAlign: 'center', padding: '60px 24px 100px', 
+    promoHeader: {
+        textAlign: 'center', padding: '60px 24px 100px',
         background: 'linear-gradient(135deg, #1A0A2E 0%, #3B1F6A 100%)',
         color: WHITE
     },
@@ -600,15 +601,15 @@ const styles = {
     hospitalPill: { display: 'inline-block', marginTop: 24, padding: '8px 20px', borderRadius: 40, border: '1px solid rgba(245,200,66,0.3)', background: 'rgba(245,200,66,0.1)', fontSize: 13, color: GOLD },
 
     /* Wizard Box */
-    wizardBox: { 
-        maxWidth: 900, margin: '-60px auto 48px', background: WHITE, borderRadius: 32, 
-        boxShadow: '0 20px 40px -10px rgba(26,10,46,0.15)', overflow: 'hidden', display: 'flex' 
+    wizardBox: {
+        maxWidth: 900, margin: '-60px auto 48px', background: WHITE, borderRadius: 32,
+        boxShadow: '0 20px 40px -10px rgba(26,10,46,0.15)', overflow: 'hidden', display: 'flex'
     },
     wizardSidebar: { width: 300, background: '#FAF9FF', padding: '48px 32px', borderRight: '1px solid #F1F0FF', display: 'flex', flexDirection: 'column', gap: 24 },
     sideStep: (active, done) => ({ display: 'flex', alignItems: 'center', gap: 16, opacity: active || done ? 1 : 0.4 }),
-    sideIcon: (active, done) => ({ 
-        width: 36, height: 36, borderRadius: 12, border: '2.5px solid', 
-        display: 'flex', alignItems: 'center', justifyContent: 'center', 
+    sideIcon: (active, done) => ({
+        width: 36, height: 36, borderRadius: 12, border: '2.5px solid',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: done ? SUCCESS : active ? WHITE : 'transparent',
         borderColor: done ? SUCCESS : active ? GOLD : '#DDD',
         color: done ? WHITE : active ? PURPLE_MID : '#DDD'
@@ -623,7 +624,7 @@ const styles = {
 
     /* Priority Switcher */
     priorityGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 },
-    priorityBtn: (active) => ({ 
+    priorityBtn: (active) => ({
         padding: '16px', borderRadius: 14, border: '2px solid', cursor: 'pointer',
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
         fontSize: 13, fontWeight: 900, transition: 'all 0.2s',
@@ -657,8 +658,8 @@ const styles = {
     successText: { fontSize: 16, color: '#64748B', maxWidth: 500, lineHeight: 1.7, marginBottom: 48 },
     pipeline: { display: 'flex', alignItems: 'center', gap: 16, marginBottom: 48, flexWrap: 'wrap', justifyContent: 'center' },
     pipelineStep: (active, current) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, opacity: active ? 1 : 0.3 }),
-    pipelineIcon: (active, current) => ({ 
-        width: 44, height: 44, borderRadius: '50%', background: active && !current ? SUCCESS : current ? WHITE : '#DDD', 
+    pipelineIcon: (active, current) => ({
+        width: 44, height: 44, borderRadius: '50%', background: active && !current ? SUCCESS : current ? WHITE : '#DDD',
         color: active && !current ? WHITE : current ? PURPLE_MID : '#FFF',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         border: current ? `3px solid ${GOLD}` : 'none',
