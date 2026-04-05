@@ -172,7 +172,7 @@ const PublicReferral = () => {
             <button onClick={() => window.location.reload()} style={styles.newRefBtn}>Submit Another Patient</button>
         </div>
     );
- Riverside
+
     return (
         <div style={styles.container}>
             {/* Value Header */}
