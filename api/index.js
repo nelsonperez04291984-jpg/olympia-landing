@@ -276,7 +276,13 @@ app.get('/api/public/provider-info/:token', async (req, res) => {
 
 // Submit Referral via Fast-Link (Public)
 app.post('/api/public/referrals', async (req, res) => {
-  const { token, patient_name, patient_dob, patient_phone, diagnosis, services_needed } = req.body;
+  const { 
+    token, patient_name, patient_dob, patient_phone, 
+    diagnosis, services_needed, 
+    insurance_provider, insurance_policy, 
+    referral_priority, documents_provided 
+  } = req.body;
+  
   try {
     // 1. Verify Token and get Provider ID
     const providerRes = await pool.query('SELECT id FROM providers WHERE referral_token = $1', [token]);
@@ -284,15 +290,21 @@ app.post('/api/public/referrals', async (req, res) => {
     
     const providerId = providerRes.rows[0].id;
 
-    // 2. Ingest Referral with "Manual Link" source
+    // 2. Ingest Referral with "Manual Link" source and new clinical fields
     const result = await pool.query(
       `INSERT INTO referrals (
         provider_id, patient_name, patient_dob, patient_phone, 
-        diagnosis, services_needed, status, source
+        diagnosis, services_needed, status, source,
+        insurance_provider, insurance_policy, referral_priority, documents_provided
       ) 
-       VALUES ($1, $2, $3, $4, $5, $6, 'Pending', 'Manual_FastLink') 
+       VALUES ($1, $2, $3, $4, $5, $6, 'Pending', 'Manual_FastLink', $7, $8, $9, $10) 
        RETURNING *`,
-      [providerId, patient_name, patient_dob, patient_phone, diagnosis, services_needed]
+      [
+        providerId, patient_name, patient_dob, patient_phone, 
+        diagnosis, services_needed, 
+        insurance_provider, insurance_policy, 
+        referral_priority || 'Routine', documents_provided || false
+      ]
     );
     
     res.json({ message: 'Referral captured via Fast-Link', id: result.rows[0].id });
@@ -403,6 +415,12 @@ app.get('/api/admin/fix-schema', async (req, res) => {
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS external_id VARCHAR(255) UNIQUE");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS raw_fhir JSONB");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS pdgm_group_predicted VARCHAR(100)");
+    
+    // Clinical Intake Fields (Insurance & Priority)
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS insurance_provider VARCHAR(255)");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS insurance_policy VARCHAR(100)");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS referral_priority VARCHAR(20) DEFAULT 'Routine'");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS documents_provided BOOLEAN DEFAULT FALSE");
     
     // Check if the foreign key is correct. 
     // If it was created pointing to admins(id) by mistake, we fix it here.

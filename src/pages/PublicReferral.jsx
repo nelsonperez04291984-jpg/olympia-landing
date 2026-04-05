@@ -6,12 +6,19 @@ import {
     CheckCircle2, 
     Stethoscope, 
     User, 
-    Calendar, 
     Phone, 
     FileText, 
     ShieldCheck,
     AlertCircle,
-    ArrowRight
+    ArrowRight,
+    Zap,
+    HeartPulse,
+    Shield,
+    FileUp,
+    Check,
+    Clock,
+    PhoneCall,
+    Printer
 } from 'lucide-react';
 
 /* ── Design Tokens ── */
@@ -20,6 +27,7 @@ const PURPLE_MID = '#3B1F6A';
 const PURPLE_LIGHT = '#6B4FA0';
 const GOLD = '#F5C842';
 const WHITE = '#FFFFFF';
+const SUCCESS = '#10B981';
 
 const PublicReferral = () => {
     const { token } = useParams();
@@ -35,8 +43,12 @@ const PublicReferral = () => {
         patient_name: '',
         patient_dob: '',
         patient_phone: '',
+        insurance_provider: '',
+        insurance_policy: '',
+        referral_priority: 'Routine',
         diagnosis: '',
-        services_needed: ''
+        services_needed: '',
+        documents_provided: false
     });
 
     useEffect(() => {
@@ -73,7 +85,7 @@ const PublicReferral = () => {
         }
     };
 
-    if (loading && !providerInfo) return <div style={styles.loader}>Initializing Secure Referral Link...</div>;
+    if (loading && !providerInfo) return <div style={styles.loader}>Secure Connection Initializing...</div>;
     
     if (error) return (
         <div style={styles.errorContainer}>
@@ -86,389 +98,312 @@ const PublicReferral = () => {
 
     if (submitted) return (
         <div style={styles.successContainer}>
-            <div style={styles.successIcon}><CheckCircle2 size={64} color={GOLD} /></div>
-            <h2 style={styles.successTitle}>Referral Captured</h2>
+            <div style={styles.successIcon}><CheckCircle2 size={64} color={SUCCESS} /></div>
+            <h2 style={styles.successTitle}>Referral Confirmed</h2>
             <p style={styles.successText}>
-                We have received the referral for <strong>{formData.patient_name}</strong>. 
-                Our intake team is reviewing it now.
+                The transition of care for <strong>{formData.patient_name}</strong> is now in process. 
+                Our team is reviewing the clinical data.
             </p>
-            <div style={styles.refInfo}>
-                Referring from: <strong>{providerInfo?.name}</strong>
+
+            {/* Pipeline Visualization */}
+            <div style={styles.pipeline}>
+                <div style={styles.pipelineStep(true)}>
+                    <div style={styles.pipelineIcon(true)}><Check size={14} /></div>
+                    <div style={styles.pipelineLabel}>Submitted</div>
+                </div>
+                <div style={styles.pipelineLine(true)} />
+                <div style={styles.pipelineStep(true, true)}>
+                    <div style={styles.pipelineIcon(true, true)}><Clock size={14} /></div>
+                    <div style={styles.pipelineLabel}>Intake Review</div>
+                </div>
+                <div style={styles.pipelineLine(false)} />
+                <div style={styles.pipelineStep(false)}>
+                    <div style={styles.pipelineIcon(false)}><Zap size={14} /></div>
+                    <div style={styles.pipelineLabel}>Accepted</div>
+                </div>
+                <div style={styles.pipelineLine(false)} />
+                <div style={styles.pipelineStep(false)}>
+                    <div style={styles.pipelineIcon(false)}><HeartPulse size={14} /></div>
+                    <div style={styles.pipelineLabel}>Start Care</div>
+                </div>
             </div>
-            <button onClick={() => window.location.reload()} style={styles.newRefBtn}>Submit Another Referral</button>
+
+            <div style={styles.statusCallout}>
+                <Clock size={16} color={PURPLE_LIGHT} />
+                <span>Estimated clinical response: <strong>15 - 30 Minutes</strong></span>
+            </div>
+
+            <button onClick={() => window.location.reload()} style={styles.newRefBtn}>Submit Another Patient</button>
         </div>
     );
 
     return (
         <div style={styles.container}>
-            {/* Header */}
-            <div style={styles.header}>
-                <div style={styles.branding}>
-                    <ShieldCheck size={24} color={GOLD} />
-                    <span style={styles.brandText}>Olympia Homehealth</span>
+            {/* Value Header */}
+            <header style={styles.promoHeader}>
+                <div style={styles.brandingSmall}>
+                    <ShieldCheck size={20} color={GOLD} />
+                    <span>Olympia Homehealth</span>
                 </div>
-                <div style={styles.hospitalAffiliation}>
-                    Referring from: <span style={styles.hospitalName}>{providerInfo?.name}</span>
+                <h1 style={styles.promoTitle}>Secure Home Health Referral</h1>
+                <p style={styles.promoSub}>
+                    Fast-Track Intake: Submit in under 60 seconds. <br/>
+                    <strong>No Faxing Required.</strong>
+                </p>
+                <div style={styles.hospitalPill}>
+                    Partnered Hospital: <strong>{providerInfo?.name}</strong>
                 </div>
-            </div>
+            </header>
 
-            {/* Progress Bar */}
-            <div style={styles.progressBar}>
-                {[1, 2, 3].map(s => (
-                    <div key={s} style={styles.progressStep(s <= step)} />
-                ))}
-            </div>
+            {/* Wizard Container */}
+            <div style={styles.wizardBox}>
+                <div style={styles.wizardSidebar}>
+                    {[
+                        { n: 1, l: 'Patient Info', i: <User size={16} /> },
+                        { n: 2, l: 'Clinical & Insurance', i: <Shield size={16} /> },
+                        { n: 3, l: 'Review & Send', i: <FileUp size={16} /> }
+                    ].map(s => (
+                        <div key={s.n} style={styles.sideStep(s.n === step, s.n < step)}>
+                            <div style={styles.sideIcon(s.n === step, s.n < step)}>{s.n < step ? <Check size={14} /> : s.i}</div>
+                            <div style={styles.sideLabel}>{s.l}</div>
+                        </div>
+                    ))}
+                </div>
 
-            {/* Form Content */}
-            <div style={styles.formCard}>
-                {step === 1 && (
-                    <div className="animate-fadeIn">
-                        <div style={styles.stepTitle}>
-                            <User size={20} color={PURPLE_MID} />
-                            Patient Demographics
-                        </div>
-                        <div style={styles.inputGroup}>
-                            <label style={styles.label}>Full Name</label>
-                            <input 
-                                style={styles.input} 
-                                placeholder="Patient's legal name"
-                                value={formData.patient_name}
-                                onChange={e => setFormData({...formData, patient_name: e.target.value})}
-                            />
-                        </div>
-                        <div style={styles.row}>
-                            <div style={styles.inputGroup}>
-                                <label style={styles.label}>Date of Birth</label>
-                                <input 
-                                    style={styles.input} 
-                                    placeholder="MM/DD/YYYY"
-                                    value={formData.patient_dob}
-                                    onChange={e => setFormData({...formData, patient_dob: e.target.value})}
-                                />
+                <div style={styles.wizardContent}>
+                    {step === 1 && (
+                        <div className="animate-fadeIn">
+                             <div style={styles.stepHeader}>
+                                <h3 style={styles.stepTitle}>Patient Identity</h3>
+                                <div style={styles.stepCounter}>Step 1 of 3</div>
                             </div>
                             <div style={styles.inputGroup}>
-                                <label style={styles.label}>Contact Phone</label>
-                                <input 
-                                    style={styles.input} 
-                                    placeholder="(555) 000-0000"
-                                    value={formData.patient_phone}
-                                    onChange={e => setFormData({...formData, patient_phone: e.target.value})}
-                                />
+                                <label style={styles.label}>Legal Full Name</label>
+                                <input style={styles.input} placeholder="Last, First Middle" value={formData.patient_name} onChange={e => setFormData({...formData, patient_name: e.target.value})} />
+                            </div>
+                            <div style={styles.row}>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>Date of Birth</label>
+                                    <input style={styles.input} placeholder="MM/DD/YYYY" value={formData.patient_dob} onChange={e => setFormData({...formData, patient_dob: e.target.value})} />
+                                </div>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>Phone Number</label>
+                                    <input style={styles.input} placeholder="(555) 000-0000" value={formData.patient_phone} onChange={e => setFormData({...formData, patient_phone: e.target.value})} />
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
-
-                {step === 2 && (
-                    <div className="animate-fadeIn">
-                        <div style={styles.stepTitle}>
-                            <Stethoscope size={20} color={PURPLE_MID} />
-                            Clinical Details
-                        </div>
-                        <div style={styles.inputGroup}>
-                            <label style={styles.label}>Primary Diagnosis/Reason for Referral</label>
-                            <textarea 
-                                style={styles.textarea} 
-                                placeholder="Describe the reason for home health care..."
-                                value={formData.diagnosis}
-                                onChange={e => setFormData({...formData, diagnosis: e.target.value})}
-                            />
-                        </div>
-                        <div style={styles.inputGroup}>
-                            <label style={styles.label}>Services Required (SN, PT, OT, etc.)</label>
-                            <input 
-                                style={styles.input} 
-                                placeholder="e.g. Skilled Nursing and Physical Therapy"
-                                value={formData.services_needed}
-                                onChange={e => setFormData({...formData, services_needed: e.target.value})}
-                            />
-                        </div>
-                    </div>
-                )}
-
-                {step === 3 && (
-                    <div className="animate-fadeIn">
-                        <div style={styles.stepTitle}>
-                            <FileText size={20} color={PURPLE_MID} />
-                            Review & Submit
-                        </div>
-                        <div style={styles.reviewGrid}>
-                            <div style={styles.reviewItem}><strong>Patient:</strong> {formData.patient_name}</div>
-                            <div style={styles.reviewItem}><strong>DOB:</strong> {formData.patient_dob}</div>
-                            <div style={styles.reviewItem}><strong>Diagnosis:</strong> {formData.diagnosis}</div>
-                        </div>
-                        <p style={styles.disclaimer}>
-                            By clicking submit, you are initiating a transition of care for this patient 
-                            to Olympia Homehealth Inc. Our clinical team will respond within 15 minutes.
-                        </p>
-                    </div>
-                )}
-
-                {/* Controls */}
-                <div style={styles.controls}>
-                    {step > 1 && (
-                        <button onClick={() => setStep(step - 1)} style={styles.backBtn}>
-                            <ChevronLeft size={18} /> Back
-                        </button>
                     )}
-                    <div style={{ flex: 1 }} />
-                    {step < 3 ? (
-                        <button 
-                            disabled={!formData.patient_name && step === 1}
-                            onClick={() => setStep(step + 1)} 
-                            style={styles.nextBtn}
-                        >
-                            Next <ChevronRight size={18} />
-                        </button>
-                    ) : (
-                        <button onClick={handleSumbit} style={styles.submitBtn}>
-                            Submit Referral <ArrowRight size={18} />
-                        </button>
+
+                    {step === 2 && (
+                        <div className="animate-fadeIn">
+                            <div style={styles.stepHeader}>
+                                <h3 style={styles.stepTitle}>Clinical Priority</h3>
+                                <div style={styles.stepCounter}>Step 2 of 3</div>
+                            </div>
+                            
+                            <label style={styles.label}>Referral Urgency</label>
+                            <div style={styles.priorityGrid}>
+                                {['Routine', 'Urgent', 'Same-Day'].map(p => (
+                                    <button 
+                                        key={p} 
+                                        onClick={() => setFormData({...formData, referral_priority: p})}
+                                        style={styles.priorityBtn(formData.referral_priority === p)}
+                                    >
+                                        {p === 'Urgent' && <Zap size={14} />}
+                                        {p === 'Same-Day' && <Clock size={14} />}
+                                        {p}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div style={{ ...styles.row, marginTop: 20 }}>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>Insurance Provider</label>
+                                    <input style={styles.input} placeholder="e.g. Medicare / Aetna" value={formData.insurance_provider} onChange={e => setFormData({...formData, insurance_provider: e.target.value})} />
+                                </div>
+                                <div style={styles.inputGroup}>
+                                    <label style={styles.label}>Policy #</label>
+                                    <input style={styles.input} placeholder="Optional for speed" value={formData.insurance_policy} onChange={e => setFormData({...formData, insurance_policy: e.target.value})} />
+                                </div>
+                            </div>
+                        </div>
                     )}
+
+                    {step === 3 && (
+                        <div className="animate-fadeIn">
+                            <div style={styles.stepHeader}>
+                                <h3 style={styles.stepTitle}>Documents & Send</h3>
+                                <div style={styles.stepCounter}>Step 3 of 3</div>
+                            </div>
+                            
+                            <div style={styles.inputGroup}>
+                                <label style={styles.label}>Referral Reason / Diagnosis</label>
+                                <textarea style={styles.textarea} placeholder="Clinical summary..." value={formData.diagnosis} onChange={e => setFormData({...formData, diagnosis: e.target.value})} />
+                            </div>
+
+                            <div style={styles.uploadZone}>
+                                <FileUp size={32} color={PURPLE_LIGHT} style={{ marginBottom: 12 }} />
+                                <div style={styles.uploadText}>Attach Clinical Documentation</div>
+                                <div style={styles.uploadSub}>Discharge Summary, Med List, or Face Sheet</div>
+                                <div style={styles.uploadHint}>(UI Prototype: Files will be requested via email)</div>
+                            </div>
+
+                            <div style={styles.reviewSummary}>
+                                <Check size={16} color={SUCCESS} /> 
+                                <span>Referring <strong>{formData.patient_name}</strong> from <strong>{providerInfo?.name}</strong></span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Controls */}
+                    <div style={styles.controls}>
+                        {step > 1 && (
+                            <button onClick={() => setStep(step - 1)} style={styles.backBtn}>
+                                <ChevronLeft size={18} /> Back
+                            </button>
+                        )}
+                        <div style={{ flex: 1 }} />
+                        {step < 3 ? (
+                            <button 
+                                disabled={!formData.patient_name && step === 1}
+                                onClick={() => setStep(step + 1)} 
+                                style={styles.nextBtn}
+                            >
+                                Next Step <ChevronRight size={18} />
+                            </button>
+                        ) : (
+                            <button onClick={handleSumbit} style={styles.submitBtn}>
+                                Finalize & Submit <ArrowRight size={18} />
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
+
+            {/* Footer Trust Section */}
+            <footer style={styles.trustFooter}>
+                <div style={styles.footerGrid}>
+                    <div style={styles.footerItem}>
+                        <PhoneCall size={18} color={GOLD} />
+                        <div>
+                            <div style={styles.footerLabel}>Intake Hotline</div>
+                            <div style={styles.footerValue}>(555) 123-4567</div>
+                        </div>
+                    </div>
+                    <div style={styles.footerItem}>
+                        <Printer size={18} color={GOLD} />
+                        <div>
+                            <div style={styles.footerLabel}>Secure Fax</div>
+                            <div style={styles.footerValue}>(555) 765-4321</div>
+                        </div>
+                    </div>
+                </div>
+                <div style={styles.compliance}>
+                    <Shield size={12} /> HIPAA COMPLIANT SECURE REFERRAL PORTAL
+                </div>
+            </footer>
         </div>
     );
 };
 
 const styles = {
-    container: {
-        minHeight: '100vh',
-        background: '#F8F9FC',
-        padding: '24px 16px'
+    container: { minHeight: '100vh', background: '#F4F7FB', color: PURPLE_DARK, fontFamily: 'inter, system-ui, sans-serif' },
+    
+    /* Header Branding */
+    promoHeader: { 
+        textAlign: 'center', padding: '60px 24px 100px', 
+        background: 'linear-gradient(135deg, #1A0A2E 0%, #3B1F6A 100%)',
+        color: WHITE
     },
-    header: {
-        maxWidth: 600,
-        margin: '0 auto 32px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        textAlign: 'center'
+    brandingSmall: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 13, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.8, marginBottom: 16 },
+    promoTitle: { fontSize: 36, fontWeight: 950, letterSpacing: '-0.02em', margin: '0 0 12px' },
+    promoSub: { fontSize: 16, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6, fontWeight: 500 },
+    hospitalPill: { display: 'inline-block', marginTop: 24, padding: '8px 20px', borderRadius: 40, border: '1px solid rgba(245,200,66,0.3)', background: 'rgba(245,200,66,0.1)', fontSize: 13, color: GOLD },
+
+    /* Wizard Box */
+    wizardBox: { 
+        maxWidth: 900, margin: '-60px auto 48px', background: WHITE, borderRadius: 32, 
+        boxShadow: '0 20px 40px -10px rgba(26,10,46,0.15)', overflow: 'hidden', display: 'flex' 
     },
-    branding: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        marginBottom: 12
-    },
-    brandText: {
-        fontSize: 18,
-        fontWeight: 900,
-        color: PURPLE_DARK,
-        letterSpacing: '-0.02em',
-        textTransform: 'uppercase'
-    },
-    hospitalAffiliation: {
-        fontSize: 13,
-        color: '#64748B',
-        fontWeight: 600
-    },
-    hospitalName: {
-        color: PURPLE_MID,
-        fontWeight: 800
-    },
-    progressBar: {
-        maxWidth: 600,
-        margin: '0 auto 24px',
-        display: 'flex',
-        gap: 8
-    },
-    progressStep: (active) => ({
-        flex: 1,
-        height: 6,
-        borderRadius: 3,
-        background: active ? GOLD : '#E2E8F0',
-        transition: 'all 0.3s ease'
+    wizardSidebar: { width: 300, background: '#FAF9FF', padding: '48px 32px', borderRight: '1px solid #F1F0FF', display: 'flex', flexDirection: 'column', gap: 24 },
+    sideStep: (active, done) => ({ display: 'flex', alignItems: 'center', gap: 16, opacity: active || done ? 1 : 0.4 }),
+    sideIcon: (active, done) => ({ 
+        width: 36, height: 36, borderRadius: 12, border: '2.5px solid', 
+        display: 'flex', alignItems: 'center', justifyContent: 'center', 
+        background: done ? SUCCESS : active ? WHITE : 'transparent',
+        borderColor: done ? SUCCESS : active ? GOLD : '#DDD',
+        color: done ? WHITE : active ? PURPLE_MID : '#DDD'
     }),
-    formCard: {
-        maxWidth: 600,
-        margin: '0 auto',
-        background: WHITE,
-        borderRadius: 24,
-        padding: '32px',
-        boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.05)',
-        border: '1px solid #F1F5F9'
-    },
-    stepTitle: {
-        fontSize: 16,
-        fontWeight: 900,
-        color: PURPLE_DARK,
-        marginBottom: 24,
-        display: 'flex',
-        alignItems: 'center',
-        gap: 10,
-        textTransform: 'uppercase',
-        letterSpacing: '0.04em'
-    },
-    inputGroup: {
-        marginBottom: 20
-    },
-    label: {
-        display: 'block',
-        fontSize: 12,
-        fontWeight: 800,
-        color: '#64748B',
-        marginBottom: 8,
-        textTransform: 'uppercase',
-        letterSpacing: '0.025em'
-    },
-    input: {
-        width: '100%',
-        padding: '14px 18px',
-        borderRadius: 14,
-        border: '2px solid #F1F5F9',
-        fontSize: 15,
-        color: PURPLE_DARK,
-        fontWeight: 600,
-        outline: 'none',
-        transition: 'border-color 0.2s',
-        ':focus': { borderColor: GOLD }
-    },
-    textarea: {
-        width: '100%',
-        padding: '14px 18px',
-        borderRadius: 14,
-        border: '2px solid #F1F5F9',
-        fontSize: 15,
-        color: PURPLE_DARK,
-        fontWeight: 600,
-        minHeight: 120,
-        resize: 'none',
-        outline: 'none'
-    },
-    row: {
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: 16
-    },
-    controls: {
-        marginTop: 32,
-        display: 'flex',
-        alignItems: 'center'
-    },
-    nextBtn: {
-        padding: '14px 28px',
-        background: PURPLE_MID,
-        color: WHITE,
-        borderRadius: 14,
-        border: 'none',
-        fontWeight: 800,
-        fontSize: 14,
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        boxShadow: `0 4px 14px 0 rgba(59,31,106,0.25)`
-    },
-    submitBtn: {
-        padding: '14px 28px',
-        background: GOLD,
-        color: PURPLE_DARK,
-        borderRadius: 14,
-        border: 'none',
-        fontWeight: 900,
-        fontSize: 14,
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-        boxShadow: `0 4px 14px 0 rgba(245,200,66,0.4)`
-    },
-    backBtn: {
-        background: 'none',
-        border: 'none',
-        color: '#64748B',
-        fontWeight: 800,
-        fontSize: 14,
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 4
-    },
-    successContainer: {
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-        padding: 32,
-        background: '#fff'
-    },
-    successIcon: {
-        marginBottom: 24,
-        animation: 'fadeInUp 0.6s ease-out'
-    },
-    successTitle: {
-        fontSize: 28,
-        fontWeight: 950,
-        color: PURPLE_DARK,
-        marginBottom: 16
-    },
-    successText: {
-        fontSize: 16,
-        color: '#64748B',
-        maxWidth: 400,
-        lineHeight: 1.6,
-        marginBottom: 32
-    },
-    refInfo: {
-        padding: '12px 24px',
-        background: '#F8FAFC',
-        borderRadius: 12,
-        fontSize: 14,
-        color: PURPLE_LIGHT,
-        marginBottom: 32
-    },
-    newRefBtn: {
-        padding: '14px 32px',
-        background: PURPLE_MID,
-        color: WHITE,
-        borderRadius: 14,
-        border: 'none',
-        fontWeight: 800,
-        fontSize: 14,
-        cursor: 'pointer'
-    },
-    errorContainer: {
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-        padding: 32
-    },
-    errorTitle: {
-        fontSize: 24,
-        fontWeight: 900,
-        color: PURPLE_DARK,
-        margin: '16px 0 8px'
-    },
-    errorText: {
-        fontSize: 16,
-        color: '#64748B',
-        marginBottom: 32
-    },
-    backHomeBtn: {
-        padding: '12px 24px',
-        background: PURPLE_MID,
-        color: WHITE,
-        borderRadius: 12,
-        border: 'none',
-        fontWeight: 800
-    },
-    loader: {
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: 15,
-        fontWeight: 700,
-        color: PURPLE_LIGHT,
-        letterSpacing: '0.05em',
-        textTransform: 'uppercase'
-    }
+    sideLabel: { fontSize: 14, fontWeight: 800, color: PURPLE_MID },
+
+    /* Wizard Content */
+    wizardContent: { flex: 1, padding: '48px 60px', display: 'flex', flexDirection: 'column' },
+    stepHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32, borderBottom: '1px solid #F8FAFC', paddingBottom: 16 },
+    stepTitle: { fontSize: 24, fontWeight: 950, color: PURPLE_DARK, margin: 0, letterSpacing: '-0.01em' },
+    stepCounter: { fontSize: 12, fontWeight: 900, color: PURPLE_LIGHT, textTransform: 'uppercase', letterSpacing: '0.08em' },
+
+    /* Priority Switcher */
+    priorityGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 },
+    priorityBtn: (active) => ({ 
+        padding: '16px', borderRadius: 14, border: '2px solid', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        fontSize: 13, fontWeight: 900, transition: 'all 0.2s',
+        background: active ? '#F3EFF9' : WHITE,
+        borderColor: active ? PURPLE_MID : '#F1F5F9',
+        color: active ? PURPLE_MID : '#94A3B8'
+    }),
+
+    /* Form Elements */
+    inputGroup: { marginBottom: 20 },
+    label: { display: 'block', fontSize: 11, fontWeight: 900, color: '#64748B', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' },
+    input: { width: '100%', padding: '16px 20px', borderRadius: 14, border: '2.5px solid #F1F5F9', fontSize: 15, fontWeight: 700, color: PURPLE_DARK, outline: 'none', transition: 'border-color 0.2s', ':focus': { borderColor: GOLD } },
+    textarea: { width: '100%', padding: '16px 20px', borderRadius: 14, border: '2.5px solid #F1F5F9', fontSize: 15, fontWeight: 700, color: PURPLE_DARK, minHeight: 100, outline: 'none' },
+    row: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
+    uploadZone: { padding: '40px', border: '3px dashed #F1F0FF', borderRadius: 24, background: '#FAF9FF', textAlign: 'center', marginBottom: 24 },
+    uploadText: { fontSize: 15, fontWeight: 800, color: PURPLE_DARK, marginBottom: 4 },
+    uploadSub: { fontSize: 12, color: '#94A3B8', fontWeight: 500, marginBottom: 8 },
+    uploadHint: { fontSize: 10, color: PURPLE_LIGHT, fontWeight: 700, fontStyle: 'italic' },
+    reviewSummary: { display: 'flex', alignItems: 'center', gap: 10, padding: '16px 24px', background: 'rgba(16,185,129,0.06)', borderRadius: 14, fontSize: 14, color: '#065F46', border: '1px solid rgba(16,185,129,0.1)' },
+
+    /* Controls */
+    controls: { marginTop: 'auto', paddingTop: 40, display: 'flex', alignItems: 'center' },
+    nextBtn: { padding: '16px 32px', background: PURPLE_MID, color: WHITE, borderRadius: 16, border: 'none', fontWeight: 900, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, boxShadow: `0 8px 24px rgba(59,31,106,0.3)` },
+    submitBtn: { padding: '16px 32px', background: GOLD, color: PURPLE_DARK, borderRadius: 16, border: 'none', fontWeight: 950, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, boxShadow: `0 8px 24px rgba(245,200,66,0.4)` },
+    backBtn: { background: 'none', border: 'none', color: '#94A3B8', fontWeight: 800, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 },
+
+    /* Success & Pipeline Viz */
+    successContainer: { minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 48, background: WHITE },
+    successIcon: { marginBottom: 28, animation: 'fadeInUp 0.6s ease-out' },
+    successTitle: { fontSize: 32, fontWeight: 950, color: PURPLE_DARK, marginBottom: 16 },
+    successText: { fontSize: 16, color: '#64748B', maxWidth: 500, lineHeight: 1.7, marginBottom: 48 },
+    pipeline: { display: 'flex', alignItems: 'center', gap: 16, marginBottom: 48, flexWrap: 'wrap', justifyContent: 'center' },
+    pipelineStep: (active, current) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, opacity: active ? 1 : 0.3 }),
+    pipelineIcon: (active, current) => ({ 
+        width: 44, height: 44, borderRadius: '50%', background: active && !current ? SUCCESS : current ? WHITE : '#DDD', 
+        color: active && !current ? WHITE : current ? PURPLE_MID : '#FFF',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        border: current ? `3px solid ${GOLD}` : 'none',
+        boxShadow: current ? `0 0 20px ${GOLD}66` : 'none'
+    }),
+    pipelineLabel: { fontSize: 11, fontWeight: 900, color: PURPLE_DARK, textTransform: 'uppercase', letterSpacing: '0.04em' },
+    pipelineLine: (active) => ({ width: 40, height: 3, background: active ? SUCCESS : '#EEE', borderRadius: 2 }),
+    statusCallout: { display: 'flex', alignItems: 'center', gap: 10, padding: '14px 24px', background: '#F8F6FF', borderRadius: 14, fontSize: 14, color: PURPLE_MID, marginBottom: 40 },
+    newRefBtn: { padding: '16px 40px', background: PURPLE_MID, color: WHITE, borderRadius: 18, border: 'none', fontWeight: 800, fontSize: 15, cursor: 'pointer' },
+
+    /* Trust Footer */
+    trustFooter: { maxWidth: 900, margin: '48px auto', textAlign: 'center', borderTop: '1px solid #E2E8F0', paddingTop: 48, paddingBottom: 60 },
+    footerGrid: { display: 'flex', justifyContent: 'center', gap: 60, marginBottom: 40 },
+    footerItem: { display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left' },
+    footerLabel: { fontSize: 10, fontWeight: 900, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 2 },
+    footerValue: { fontSize: 16, fontWeight: 800, color: PURPLE_DARK },
+    compliance: { fontSize: 11, fontWeight: 900, color: '#CBD5E1', letterSpacing: '0.12em', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 },
+
+    /* Error & Loader */
+    errorContainer: { minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 32 },
+    errorTitle: { fontSize: 24, fontWeight: 900, color: PURPLE_DARK, margin: '16px 0 8px' },
+    errorText: { fontSize: 16, color: '#64748B', marginBottom: 32 },
+    backHomeBtn: { padding: '12px 24px', background: PURPLE_MID, color: WHITE, borderRadius: 12, border: 'none', fontWeight: 800 },
+    loader: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, fontWeight: 700, color: PURPLE_LIGHT, letterSpacing: '0.05em', textTransform: 'uppercase' }
 };
 
 export default PublicReferral;

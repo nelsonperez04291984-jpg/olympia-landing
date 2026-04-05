@@ -904,8 +904,30 @@ const AdminDashboard = () => {
                                                 <div style={{ ...styles.tdSub, display: 'flex', alignItems: 'center', gap: 5 }}>
                                                     <Mail size={11} /> {r.patient_phone || 'N/A'}
                                                 </div>
+                                                {r.insurance_provider && (
+                                                    <div style={{ 
+                                                        marginTop: 6, fontSize: 10, fontWeight: 800, color: PURPLE_MID, 
+                                                        background: '#F3EFF9', padding: '4px 10px', borderRadius: 8, width: 'fit-content',
+                                                        border: '1px solid #EDE9FE', display: 'flex', alignItems: 'center', gap: 5
+                                                    }}>
+                                                        <Shield size={10} color={GOLD_DARK} /> {r.insurance_provider}
+                                                    </div>
+                                                )}
                                             </td>
                                             <td style={{ ...styles.td, maxWidth: 220 }}>
+                                                {r.referral_priority && r.referral_priority !== 'Routine' && (
+                                                    <div style={{
+                                                        display: 'inline-flex', alignItems: 'center', gap: 6,
+                                                        padding: '6px 12px', borderRadius: 10, marginBottom: 8,
+                                                        background: r.referral_priority === 'Urgent' ? '#FEF2F2' : '#FFFBEB',
+                                                        border: `1px solid ${r.referral_priority === 'Urgent' ? '#FCA5A5' : '#FCD34D'}`,
+                                                        color: r.referral_priority === 'Urgent' ? '#DC2626' : '#B45309',
+                                                        fontSize: 10, fontWeight: 950, textTransform: 'uppercase', letterSpacing: '0.05em'
+                                                    }}>
+                                                        {r.referral_priority === 'Urgent' ? <AlertCircle size={12} /> : <Clock size={12} />}
+                                                        {r.referral_priority}
+                                                    </div>
+                                                )}
                                                 <div style={{ fontSize: 9, fontWeight: 900, color: PURPLE_SOFT, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>Diagnosis</div>
                                                 <div style={{ fontSize: 12, color: PURPLE_DARK, fontWeight: 700, marginBottom: 8 }}>{r.diagnosis}</div>
                                                 <div style={{ fontSize: 9, fontWeight: 900, color: PURPLE_SOFT, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>Services Needed</div>
