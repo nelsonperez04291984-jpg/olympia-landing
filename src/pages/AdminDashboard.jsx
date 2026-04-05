@@ -11,6 +11,7 @@ import {
     ArrowRight,
     Search,
     UserPlus,
+    User,
     Lock,
     Mail,
     UserCircle,
