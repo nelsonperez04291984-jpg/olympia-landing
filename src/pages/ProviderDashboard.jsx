@@ -150,9 +150,9 @@ const ProviderDashboard = () => {
 
     const steps = [
         { step: 1, label: 'Patient Info' },
-        { step: 2, label: 'Clinical' },
-        { step: 3, label: 'Services' },
-        { step: 4, label: 'Documents' },
+        { step: 2, label: 'Documents' },
+        { step: 3, label: 'Clinical' },
+        { step: 4, label: 'Services' },
         { step: 5, label: 'Review' }
     ];
 
@@ -320,8 +320,75 @@ const ProviderDashboard = () => {
                                         </div>
                                     )}
 
-                                    {/* STEP 2 */}
+                                    {/* STEP 2: Documents (MODIFIED ORDER) */}
                                     {currentStep === 2 && (
+                                        <div>
+                                            <div style={styles.stepHeader}>
+                                                <h3 style={styles.stepTitle}>Clinical Documentation</h3>
+                                                <p style={styles.stepDesc}>Upload the Discharge Summary or Hospital Referral Packet (PDF/JPG).</p>
+                                            </div>
+                                            
+                                            <div style={{ padding: '30px', border: '2px dashed #DCCCEF', borderRadius: 20, textAlign: 'center', background: '#F8F6FE' }}>
+                                                <FilePlus size={32} color="#9B72CF" style={{ marginBottom: 16 }} />
+                                                <h4 style={{ margin: '0 0 8px', color: '#1A0A2E', fontWeight: 800 }}>Upload Referral Packet</h4>
+                                                <p style={{ margin: '0 0 20px', color: '#7B6B99', fontSize: 13 }}>Format: PDF, JPG, or PNG. Max size 10MB.</p>
+                                                
+                                                <input 
+                                                    type="file" 
+                                                    id="referral-docs" 
+                                                    multiple 
+                                                    hidden 
+                                                    onChange={async (e) => {
+                                                        const files = Array.from(e.target.files);
+                                                        if (files.length === 0) return;
+                                                        
+                                                        setIsUploading(true);
+                                                        const formDataUpload = new FormData();
+                                                        files.forEach(f => formDataUpload.append('files', f));
+                                                        
+                                                        try {
+                                                            const res = await fetch('/api/public/upload', {
+                                                                method: 'POST',
+                                                                body: formDataUpload
+                                                            });
+                                                            if (res.ok) {
+                                                                const data = await res.json();
+                                                                setClinicalDocs(prev => [...prev, ...data.files]);
+                                                            }
+                                                        } catch (err) {
+                                                            console.error("Upload failed", err);
+                                                        } finally {
+                                                            setIsUploading(false);
+                                                        }
+                                                    }}
+                                                />
+                                                <label htmlFor="referral-docs" style={{ ...styles.continueBtn, display: 'inline-flex', cursor: 'pointer', opacity: isUploading ? 0.6 : 1 }}>
+                                                    {isUploading ? 'Uploading Packages...' : 'Select Files to Upload'}
+                                                </label>
+                                            </div>
+
+                                            {clinicalDocs.length > 0 && (
+                                                <div style={{ marginTop: 24 }}>
+                                                    <h4 style={{ fontSize: 13, fontWeight: 900, color: '#6B4FA0', textTransform: 'uppercase', marginBottom: 12 }}>Attached Documents ({clinicalDocs.length})</h4>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                                        {clinicalDocs.map((doc, i) => (
+                                                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: '#FFF', borderRadius: 12, border: '1px solid #EDE9FE' }}>
+                                                                <CheckCircle2 size={16} color="#10B981" />
+                                                                <div style={{ flex: 1 }}>
+                                                                    <div style={{ fontSize: 13, fontWeight: 700, color: '#1A0A2E' }}>{doc.name}</div>
+                                                                    <div style={{ fontSize: 11, color: '#7B6B99' }}>Link attached successfully</div>
+                                                                </div>
+                                                                <button onClick={() => setClinicalDocs(prev => prev.filter((_, idx) => idx !== i))} style={styles.removeBtnSm}><X size={14} /></button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* STEP 3: Clinical Information (MODIFIED ORDER) */}
+                                    {currentStep === 3 && (
                                         <div>
                                             <div style={styles.stepHeader}>
                                                 <h3 style={styles.stepTitle}>Clinical Information</h3>
@@ -336,7 +403,7 @@ const ProviderDashboard = () => {
                                                     {primaryDiagnosis ? (
                                                         <div style={styles.diagnosisSelected}>
                                                             <div style={{ flex: 1 }}>
-                                                                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
                                                                     <span style={styles.icdBadge}>{primaryDiagnosis.code}</span>
                                                                     <span style={styles.confirmedTag}>✓ Confirmed</span>
                                                                 </div>
@@ -431,8 +498,8 @@ const ProviderDashboard = () => {
                                         </div>
                                     )}
 
-                                    {/* STEP 3 */}
-                                    {currentStep === 3 && (
+                                    {/* STEP 4: Requested Services (MODIFIED ORDER) */}
+                                    {currentStep === 4 && (
                                         <div>
                                             <div style={styles.stepHeader}>
                                                 <h3 style={styles.stepTitle}>Requested Services</h3>
@@ -456,73 +523,6 @@ const ProviderDashboard = () => {
                                                     );
                                                 })}
                                             </div>
-                                        </div>
-                                    )}
-
-                                    {/* STEP 4: Documents */}
-                                    {currentStep === 4 && (
-                                        <div>
-                                            <div style={styles.stepHeader}>
-                                                <h3 style={styles.stepTitle}>Clinical Documentation</h3>
-                                                <p style={styles.stepDesc}>Upload the Discharge Summary or Hospital Referral Packet (PDF/JPG).</p>
-                                            </div>
-                                            
-                                            <div style={{ padding: '30px', border: '2px dashed #DCCCEF', borderRadius: 20, textAlign: 'center', background: '#F8F6FE' }}>
-                                                <FilePlus size={32} color="#9B72CF" style={{ marginBottom: 16 }} />
-                                                <h4 style={{ margin: '0 0 8px', color: '#1A0A2E', fontWeight: 800 }}>Upload Referral Packet</h4>
-                                                <p style={{ margin: '0 0 20px', color: '#7B6B99', fontSize: 13 }}>Format: PDF, JPG, or PNG. Max size 10MB.</p>
-                                                
-                                                <input 
-                                                    type="file" 
-                                                    id="referral-docs" 
-                                                    multiple 
-                                                    hidden 
-                                                    onChange={async (e) => {
-                                                        const files = Array.from(e.target.files);
-                                                        if (files.length === 0) return;
-                                                        
-                                                        setIsUploading(true);
-                                                        const formDataUpload = new FormData();
-                                                        files.forEach(f => formDataUpload.append('files', f));
-                                                        
-                                                        try {
-                                                            const res = await fetch('/api/public/upload', {
-                                                                method: 'POST',
-                                                                body: formDataUpload
-                                                            });
-                                                            if (res.ok) {
-                                                                const data = await res.json();
-                                                                setClinicalDocs(prev => [...prev, ...data.files]);
-                                                            }
-                                                        } catch (err) {
-                                                            console.error("Upload failed", err);
-                                                        } finally {
-                                                            setIsUploading(false);
-                                                        }
-                                                    }}
-                                                />
-                                                <label htmlFor="referral-docs" style={{ ...styles.continueBtn, display: 'inline-flex', cursor: 'pointer', opacity: isUploading ? 0.6 : 1 }}>
-                                                    {isUploading ? 'Uploading Packages...' : 'Select Files to Upload'}
-                                                </label>
-                                            </div>
-
-                                            {clinicalDocs.length > 0 && (
-                                                <div style={{ marginTop: 24 }}>
-                                                    <h4 style={{ fontSize: 13, fontWeight: 900, color: '#6B4FA0', textTransform: 'uppercase', marginBottom: 12 }}>Attached Documents ({clinicalDocs.length})</h4>
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                                        {clinicalDocs.map((doc, i) => (
-                                                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: '#FFF', borderRadius: 12, border: '1px solid #EDE9FE' }}>
-                                                                <CheckCircle2 size={16} color="#10B981" />
-                                                                <div style={{ flex: 1 }}>
-                                                                    <div style={{ fontSize: 13, fontWeight: 700, color: '#1A0A2E' }}>{doc.name}</div>
-                                                                    <div style={{ fontSize: 11, color: '#7B6B99' }}>Link attached successfully</div>
-                                                                </div>
-                                                                <button onClick={() => setClinicalDocs(prev => prev.filter((_, idx) => idx !== i))} style={styles.removeBtnSm}><X size={14} /></button>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
                                         </div>
                                     )}
 
