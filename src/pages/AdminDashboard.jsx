@@ -35,6 +35,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import DiagnosisAssessment from '../components/DiagnosisAssessment';
 import ClinicalCodeTool from '../components/ClinicalCodeTool';
+import PatientProfile from '../components/PatientProfile';
 
 /* ── Design Tokens (Professional Clinical Palette) ── */
 const PURPLE_DARK = '#1A0A2E';      // Deep Midnight
@@ -487,6 +488,7 @@ const AdminDashboard = () => {
     const [staffList, setStaffList] = useState([]);
     const [referrals, setReferrals] = useState([]);
     const [activeEpisode, setActiveEpisode] = useState(null);
+    const [viewingPatient, setViewingPatient] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [clinicalStatus, setClinicalStatus] = useState({ show: false, message: '', type: 'success' });
     const [error, setError] = useState('');
@@ -529,8 +531,21 @@ const AdminDashboard = () => {
             if (res.ok) {
                 setClinicalStatus({ show: true, message: 'Diagnoses Saved to Patient Record', type: 'success' });
                 setTimeout(() => setClinicalStatus({ show: false, message: '', type: 'success' }), 3000);
+                
+                // Fetch latest data then find the updated referral to show profile
+                const token = localStorage.getItem('olympia_admin_token');
+                const latestReferralsRes = await fetch('/api/admin/referrals', { 
+                    headers: { 'Authorization': `Bearer ${token}` } 
+                });
+                if (latestReferralsRes.ok) {
+                    const latestReferrals = await latestReferralsRes.json();
+                    setReferrals(latestReferrals);
+                    const updated = latestReferrals.find(r => r.id === referralId);
+                    setViewingPatient(updated);
+                }
+                
                 setActiveEpisode(null);
-                fetchDashboardData(localStorage.getItem('olympia_admin_token'));
+                fetchDashboardData(token);
             } else {
                 setClinicalStatus({ show: true, message: 'Failed to Sync Data', type: 'error' });
             }
@@ -806,6 +821,19 @@ const AdminDashboard = () => {
 
             {/* ── Main Content ── */}
             <main style={styles.main}>
+                {viewingPatient ? (
+                    <PatientProfile 
+                        patient={viewingPatient} 
+                        onBack={() => setViewingPatient(null)} 
+                        onEdit={() => { 
+                            setActiveEpisode(viewingPatient); 
+                            setViewingPatient(null); 
+                            setActiveTab('clinical');
+                            setClinicalSubTab('episodes');
+                        }}
+                    />
+                ) : (
+                    <>
 
                 {/* Header */}
                 <header style={styles.header}>
@@ -952,7 +980,12 @@ const AdminDashboard = () => {
                                                     {r.source && r.source.includes('FHIR') ? <Zap size={10} /> : <User size={10} />}
                                                     {r.source || 'Manual Portal'}
                                                 </div>
-                                                <div style={styles.tdName}>{r.patient_name}</div>
+                                                <div 
+                                                    style={{ ...styles.tdName, cursor: 'pointer', color: PURPLE_MID }}
+                                                    onClick={() => setViewingPatient(r)}
+                                                >
+                                                    {r.patient_name}
+                                                </div>
                                                 <div style={{ ...styles.tdSub, display: 'flex', alignItems: 'center', gap: 5, marginTop: 4 }}>
                                                     <Clock size={11} /> {r.patient_dob}
                                                 </div>
@@ -1135,7 +1168,12 @@ const AdminDashboard = () => {
                                                     fontSize: 13, fontWeight: 900, color: GOLD, flexShrink: 0
                                                 }}>{r.patient_name.charAt(0)}</div>
                                                 <div>
-                                                    <div style={{ fontWeight: 900, fontSize: 11, color: PURPLE_DARK, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{r.patient_name}</div>
+                                                    <div 
+                                                        style={{ fontWeight: 900, fontSize: 11, color: PURPLE_DARK, textTransform: 'uppercase', letterSpacing: '0.04em', cursor: 'pointer' }}
+                                                        onClick={(e) => { e.stopPropagation(); setViewingPatient(r); }}
+                                                    >
+                                                        {r.patient_name}
+                                                    </div>
                                                     <div style={{ fontSize: 10, color: PURPLE_SOFT, fontWeight: 600 }}>DOB: {r.patient_dob}</div>
                                                     {r.icd_primary && (
                                                         <div style={{ fontSize: 9, fontWeight: 900, color: GOLD_DARK, marginTop: 4, letterSpacing: '0.05em' }}>
@@ -1337,6 +1375,8 @@ const AdminDashboard = () => {
                             </form>
                         )}
                     </div>
+                )}
+                    </>
                 )}
             </main>
         </div>
