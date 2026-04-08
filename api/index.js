@@ -823,8 +823,17 @@ app.post('/api/admin/extract-clinical-data', async (req, res) => {
   if (!fileUrl) return res.status(400).json({ error: 'fileUrl is required' });
 
   try {
+    // Safety check: Handle case where fileUrl might be passed as an object
+    const targetUrl = typeof fileUrl === 'object' && fileUrl.url ? fileUrl.url : fileUrl;
+    
+    if (!targetUrl || typeof targetUrl !== 'string') {
+      return res.status(400).json({ error: 'Failed to extract clinical data', details: 'Invalid file URL provided' });
+    }
+
     // 1. Fetch the file from Vercel Blob
-    const response = await fetch(fileUrl);
+    const response = await fetch(targetUrl);
+    if (!response.ok) throw new Error(`Source file inaccessible: ${response.statusText}`);
+    
     const buffer = await response.arrayBuffer();
     const base64Data = Buffer.from(buffer).toString('base64');
     const mimeType = response.headers.get('content-type') || 'application/pdf';
