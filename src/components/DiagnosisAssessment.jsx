@@ -36,6 +36,7 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null, onUpdateDocs 
     const [searchQuery, setSearchQuery] = useState('');
     const [isScanning, setIsScanning] = useState(false);
     const [aiSuggestions, setAiSuggestions] = useState(null);
+    const [showQuotaAlert, setShowQuotaAlert] = useState(false);
 
     const handleSelectDiagnosis = (codeData, target) => {
         if (target === 'primary') {
@@ -155,8 +156,13 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null, onUpdateDocs 
                 const errorData = await res.json();
                 const detail = (errorData.details || "").toLowerCase();
                 const isQuotaError = detail.includes('quota') || detail.includes('limit') || detail.includes('429');
-                console.error(isQuotaError ? "AI Quota Exhausted: Please use manual search." : "AI Scan error detail:", errorData.details);
-                alert(isQuotaError ? "AI Service Limit Reached. Please search and select the Primary Diagnosis manually." : "AI Scan failed. Please use manual search.");
+                
+                if (isQuotaError) {
+                    setShowQuotaAlert(true);
+                } else {
+                    console.error("AI Scan error detail:", errorData.details);
+                    alert(`AI Scan Failed: ${errorData.details || "Service currently unavailable"}`);
+                }
             }
         } catch (err) {
             console.error("AI Scan failed", err);
@@ -166,6 +172,51 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null, onUpdateDocs 
         }
     };
 
+
+    const RenderQuotaModal = () => {
+        if (!showQuotaAlert) return null;
+
+        return (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fadeIn">
+                <div className="bg-white rounded-[32px] p-10 max-w-lg w-full relative shadow-2xl border border-slate-200 text-center overflow-hidden">
+                    <button 
+                        onClick={() => setShowQuotaAlert(false)}
+                        className="absolute top-6 right-6 p-2 bg-slate-50 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                        <X size={20} />
+                    </button>
+
+                    <div className="w-20 h-20 bg-slate-900 rounded-3xl flex items-center justify-center mx-auto mb-8 border-2 border-amber-400 shadow-xl shadow-amber-400/20">
+                        <Zap size={36} className="text-amber-400" />
+                    </div>
+
+                    <h3 className="text-2xl font-black text-slate-900 mb-4 tracking-tight">Intelligence Capacity Reached</h3>
+                    <p className="text-slate-500 mb-10 leading-relaxed font-medium">
+                        The AI Sentinel has reached its documentation processing limit. 
+                        To maintain clinical continuity, please use the high-fidelity search tool 
+                        to manually search and assign the Primary Diagnosis.
+                    </p>
+
+                    <div className="flex gap-4">
+                        <button 
+                            onClick={() => setShowQuotaAlert(false)}
+                            className="flex-1 py-4 bg-slate-50 text-slate-500 font-black text-xs uppercase tracking-widest rounded-2xl border border-slate-200 hover:bg-slate-100 transition-all"
+                        >
+                            Return to Audit
+                        </button>
+                        <button 
+                            onClick={() => {
+                                setShowQuotaAlert(false);
+                            }}
+                            className="flex-1.5 py-4 bg-slate-900 text-amber-400 font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-slate-900/30 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                        >
+                            Continue Manually <ChevronRight size={14} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     const applyAiCode = async (codeData, isPrimary = false) => {
         try {
@@ -187,7 +238,8 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null, onUpdateDocs 
     };
 
     return (
-        <div className="max-w-[1400px] mx-auto animate-fadeIn grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="max-w-[1400px] mx-auto animate-fadeIn grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
+            <RenderQuotaModal />
             
             {/* Main Assessment Area */}
             <div className="lg:col-span-8 space-y-6">
