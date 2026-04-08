@@ -661,6 +661,9 @@ const PURPLE_SOFT = '#9B72CF';
 const GOLD = '#F5C842';
 const GOLD_DARK = '#D4A017';
 const BG = '#F3EFF9';
+const WHITE = '#FFFFFF';
+const SHADOW_SM = '0 2px 8px rgba(26,10,46,0.06)';
+const SHADOW_MD = '0 8px 32px rgba(26,10,46,0.12)';
 
 const styles = {
     shell: { display: 'flex', minHeight: '100vh', background: BG, fontFamily: "'Segoe UI', system-ui, sans-serif" },
