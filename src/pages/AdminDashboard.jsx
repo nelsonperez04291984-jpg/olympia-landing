@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import DiagnosisAssessment from '../components/DiagnosisAssessment';
+import ClinicalCodeTool from '../components/ClinicalCodeTool';
 
 /* ── Design Tokens (Professional Clinical Palette) ── */
 const PURPLE_DARK = '#1A0A2E';      // Deep Midnight
@@ -479,6 +480,7 @@ const AdminDashboard = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userRole, setUserRole] = useState('admin');
     const [activeTab, setActiveTab] = useState('overview');
+    const [clinicalSubTab, setClinicalSubTab] = useState('episodes'); // 'episodes' | 'codetool'
     const [stats, setStats] = useState({
         provider_count: 0, referral_count: 0, staff_count: 0, recent_ai_logs: [], providers: []
     });
@@ -753,14 +755,38 @@ const AdminDashboard = () => {
                         { id: 'referrals', icon: <ClipboardCheck size={18} />, label: 'Referral Intake' },
                         { id: 'clinical', icon: <Stethoscope size={18} />, label: 'Clinical Tools' },
                     ].map(item => (
-                        <button
-                            key={item.id}
-                            onClick={() => { setActiveTab(item.id); if (item.id === 'users') setViewMode('list'); }}
-                            style={styles.navBtn(activeTab === item.id)}
-                        >
-                            {item.icon} <span style={styles.navLabel}>{item.label}</span>
-                            {activeTab === item.id && <ArrowRight size={14} opacity={0.6} />}
-                        </button>
+                        <React.Fragment key={item.id}>
+                            <button
+                                onClick={() => { setActiveTab(item.id); if (item.id === 'users') setViewMode('list'); }}
+                                style={styles.navBtn(activeTab === item.id)}
+                            >
+                                {item.icon} <span style={styles.navLabel}>{item.label}</span>
+                                {activeTab === item.id && <ArrowRight size={14} opacity={0.6} />}
+                            </button>
+                            {/* Sub-nav for Clinical Tools */}
+                            {item.id === 'clinical' && activeTab === 'clinical' && (
+                                <div style={{ paddingLeft: 16, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                    {[
+                                        { id: 'episodes', label: 'Episode Assessment' },
+                                        { id: 'codetool', label: 'Batch ICD Processor' },
+                                    ].map(sub => (
+                                        <button
+                                            key={sub.id}
+                                            onClick={() => setClinicalSubTab(sub.id)}
+                                            style={{
+                                                padding: '9px 16px', borderRadius: 10, border: 'none',
+                                                background: clinicalSubTab === sub.id ? 'rgba(245,200,66,0.15)' : 'transparent',
+                                                color: clinicalSubTab === sub.id ? GOLD_DARK : PURPLE_SOFT,
+                                                fontWeight: 800, fontSize: 10, letterSpacing: '0.06em',
+                                                textTransform: 'uppercase', textAlign: 'left', width: '100%',
+                                                cursor: 'pointer', transition: 'all 0.2s',
+                                                borderLeft: `2px solid ${clinicalSubTab === sub.id ? GOLD : 'rgba(169,142,221,0.2)'}`,
+                                            }}
+                                        >{sub.label}</button>
+                                    ))}
+                                </div>
+                            )}
+                        </React.Fragment>
                     ))}
                 </nav>
 
@@ -1068,7 +1094,10 @@ const AdminDashboard = () => {
 
                 {/* ── CLINICAL ── */}
                 {activeTab === 'clinical' && (
-                    !activeEpisode ? (
+                    // If Batch ICD sub-tab is active, show the tool directly
+                    clinicalSubTab === 'codetool' ? (
+                        <ClinicalCodeTool token={localStorage.getItem('olympia_admin_token')} />
+                    ) : !activeEpisode ? (
                         <div style={styles.clinicalEmpty}>
                             <div style={styles.clinicalEmptyIcon}><Stethoscope size={36} color={GOLD} /></div>
                             <h3 style={{ fontSize: 22, fontWeight: 900, color: PURPLE_DARK, margin: '0 0 10px', letterSpacing: '-0.01em', textTransform: 'uppercase' }}>Clinical Episode Directory</h3>

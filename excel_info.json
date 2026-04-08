@@ -1,0 +1,240 @@
+{
+    "ICD 10 Codes": {
+        "columns": [
+            "Unnamed: 0",
+            "Code input",
+            "Codes",
+            "Clinical Code",
+            "Unnamed: 4",
+            "Group Name",
+            "Group Order",
+            "Code Description",
+            "Unnamed: 8",
+            "ICD 10 Codes in order",
+            "Unnamed: 10",
+            "Unnamed: 11"
+        ],
+        "sample": [
+            {
+                "Unnamed: 0": 1,
+                "Code input": "I87313",
+                "Codes": "I87313",
+                "Clinical Code": "C",
+                "Unnamed: 4": "Chronic venous hypertension w ulcer of bilateral low extrm",
+                "Group Name": "Wound",
+                "Group Order": 1,
+                "Code Description": "Chronic venous hypertension w ulcer of bilateral low extrm",
+                "Unnamed: 8": 1,
+                "ICD 10 Codes in order": "I87313",
+                "Unnamed: 10": "C",
+                "Unnamed: 11": "Chronic venous hypertension w ulcer of bilateral low extrm"
+            },
+            {
+                "Unnamed: 0": 2,
+                "Code input": "S81802S",
+                "Codes": "S81802S",
+                "Clinical Code": "C",
+                "Unnamed: 4": "Unspecified open wound, left lower leg, sequela",
+                "Group Name": "Wound",
+                "Group Order": 1,
+                "Code Description": "Unspecified open wound, left lower leg, sequela",
+                "Unnamed: 8": 2,
+                "ICD 10 Codes in order": "S81802S",
+                "Unnamed: 10": "C",
+                "Unnamed: 11": "Unspecified open wound, left lower leg, sequela"
+            },
+            {
+                "Unnamed: 0": 3,
+                "Code input": "E119",
+                "Codes": "E119",
+                "Clinical Code": "I",
+                "Unnamed: 4": "Type 2 diabetes mellitus without complications",
+                "Group Name": "Endo",
+                "Group Order": 2,
+                "Code Description": "Type 2 diabetes mellitus without complications",
+                "Unnamed: 8": 3,
+                "ICD 10 Codes in order": "E119",
+                "Unnamed: 10": "I",
+                "Unnamed: 11": "Type 2 diabetes mellitus without complications"
+            },
+            {
+                "Unnamed: 0": 4,
+                "Code input": "G9009",
+                "Codes": "G9009",
+                "Clinical Code": "B",
+                "Unnamed: 4": "Other idiopathic peripheral autonomic neuropathy",
+                "Group Name": "Neuro",
+                "Group Order": 3,
+                "Code Description": "Other idiopathic peripheral autonomic neuropathy",
+                "Unnamed: 8": 4,
+                "ICD 10 Codes in order": "G9009",
+                "Unnamed: 10": "B",
+                "Unnamed: 11": "Other idiopathic peripheral autonomic neuropathy"
+            },
+            {
+                "Unnamed: 0": 5,
+                "Code input": "M1258",
+                "Codes": "M1258",
+                "Clinical Code": "E",
+                "Unnamed: 4": "Traumatic arthropathy, other specified site",
+                "Group Name": "MS",
+                "Group Order": 4,
+                "Code Description": "Traumatic arthropathy, other specified site",
+                "Unnamed: 8": 5,
+                "ICD 10 Codes in order": "M1258",
+                "Unnamed: 10": "E",
+                "Unnamed: 11": "Traumatic arthropathy, other specified site"
+            }
+        ]
+    },
+    "ICD9 Codes": {
+        "columns": [
+            "ICD 9 Codes",
+            "Potential ICD 10 Codes",
+            "Unnamed: 2",
+            "Conflicts Present in List",
+            "Unnamed: 4",
+            "Unnamed: 5",
+            "ICD 9 Codes in order",
+            "Potential ICD 10 Codes.1",
+            "Unnamed: 8"
+        ],
+        "sample": [
+            {
+                "ICD 9 Codes": 4149,
+                "Potential ICD 10 Codes": "i259",
+                "Unnamed: 2": "Chronic ischemic heart disease, unspecified",
+                "Conflicts Present in List": NaN,
+                "Unnamed: 4": NaN,
+                "Unnamed: 5": NaN,
+                "ICD 9 Codes in order": 185,
+                "Potential ICD 10 Codes.1": "c61",
+                "Unnamed: 8": "Malignant neoplasm of prostate"
+            },
+            {
+                "ICD 9 Codes": 53081,
+                "Potential ICD 10 Codes": "k219",
+                "Unnamed: 2": "Gastro-esophageal reflux disease without esophagitis",
+                "Conflicts Present in List": NaN,
+                "Unnamed: 4": NaN,
+                "Unnamed: 5": NaN,
+                "ICD 9 Codes in order": 193,
+                "Potential ICD 10 Codes.1": "c73",
+                "Unnamed: 8": "Malignant neoplasm of thyroid gland"
+            },
+            {
+                "ICD 9 Codes": 7891,
+                "Potential ICD 10 Codes": "r160",
+                "Unnamed: 2": "Hepatomegaly, not elsewhere classified",
+                "Conflicts Present in List": NaN,
+                "Unnamed: 4": NaN,
+                "Unnamed: 5": NaN,
+                "ICD 9 Codes in order": 254,
+                "Potential ICD 10 Codes.1": "z22322",
+                "Unnamed: 8": "Carrier or suspected carrier of methicillin resis staph"
+            },
+            {
+                "ICD 9 Codes": 4019,
+                "Potential ICD 10 Codes": "i10, i169",
+                "Unnamed: 2": "Multiple Options",
+                "Conflicts Present in List": NaN,
+                "Unnamed: 4": NaN,
+                "Unnamed: 5": NaN,
+                "ICD 9 Codes in order": 311,
+                "Potential ICD 10 Codes.1": "f329",
+                "Unnamed: 8": "Major depressive disorder, single episode, unspecified"
+            },
+            {
+                "ICD 9 Codes": 7242,
+                "Potential ICD 10 Codes": "m5450",
+                "Unnamed: 2": "Low back pain, unspecified",
+                "Conflicts Present in List": NaN,
+                "Unnamed: 4": NaN,
+                "Unnamed: 5": NaN,
+                "ICD 9 Codes in order": 431,
+                "Potential ICD 10 Codes.1": "z961",
+                "Unnamed: 8": "Presence of intraocular lens"
+            }
+        ]
+    },
+    "Diagnosis Codes": {
+        "columns": [
+            "DIAGNOSIS",
+            "DESCRIPTION",
+            "CLINICAL GROUP",
+            "SUBCHAPTER",
+            "COMORBIDITY GROUP"
+        ],
+        "sample": [
+            {
+                "DIAGNOSIS": "A000",
+                "DESCRIPTION": "Cholera due to Vibrio cholerae 01, biovar cholerae",
+                "CLINICAL GROUP": "K",
+                "SUBCHAPTER": "A00-A09",
+                "COMORBIDITY GROUP": "No_group"
+            },
+            {
+                "DIAGNOSIS": "A001",
+                "DESCRIPTION": "Cholera due to Vibrio cholerae 01, biovar eltor",
+                "CLINICAL GROUP": "K",
+                "SUBCHAPTER": "A00-A09",
+                "COMORBIDITY GROUP": "No_group"
+            },
+            {
+                "DIAGNOSIS": "A009",
+                "DESCRIPTION": "Cholera, unspecified",
+                "CLINICAL GROUP": "K",
+                "SUBCHAPTER": "A00-A09",
+                "COMORBIDITY GROUP": "No_group"
+            },
+            {
+                "DIAGNOSIS": "A0100",
+                "DESCRIPTION": "Typhoid fever, unspecified",
+                "CLINICAL GROUP": "K",
+                "SUBCHAPTER": "A00-A09",
+                "COMORBIDITY GROUP": "No_group"
+            },
+            {
+                "DIAGNOSIS": "A0101",
+                "DESCRIPTION": "Typhoid meningitis",
+                "CLINICAL GROUP": "B",
+                "SUBCHAPTER": "A00-A09",
+                "COMORBIDITY GROUP": "No_group"
+            }
+        ]
+    },
+    "Groups": {
+        "columns": [
+            "Clinical Group ID",
+            "Clinical Group Description",
+            "Unnamed: 2"
+        ],
+        "sample": [
+            {
+                "Clinical Group ID": "A",
+                "Clinical Group Description": "Other",
+                "Unnamed: 2": 10
+            },
+            {
+                "Clinical Group ID": "B",
+                "Clinical Group Description": "Neuro",
+                "Unnamed: 2": 3
+            },
+            {
+                "Clinical Group ID": "C",
+                "Clinical Group Description": "Wound",
+                "Unnamed: 2": 1
+            },
+            {
+                "Clinical Group ID": "D",
+                "Clinical Group Description": "Complex Nursing",
+                "Unnamed: 2": 11
+            },
+            {
+                "Clinical Group ID": "E",
+                "Clinical Group Description": "MS",
+                "Unnamed: 2": 4
+            }
+        ]
+    }
+}
