@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import multer from 'multer';
 import { put } from '@vercel/blob';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { Anthropic } from '@anthropic-ai/sdk';
 import { mapFhirBundleToReferral } from './utils/fhirMapper.js';
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -30,6 +31,7 @@ const pool = new Pool({
 });
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY);
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const JWT_SECRET = process.env.JWT_SECRET || 'olympia-secret-key-1234';
 
@@ -838,9 +840,7 @@ app.post('/api/admin/extract-clinical-data', async (req, res) => {
     const base64Data = Buffer.from(buffer).toString('base64');
     const mimeType = response.headers.get('content-type') || 'application/pdf';
 
-    // 2. Initialize Gemini 2.0 Flash (Based on verified available models list)
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
+    // 2. Claude 3.5 Sonnet Extraction Logic
     const prompt = `
       You are a Clinical Coding Specialist for a Home Health Agency. 
       Analyze the attached medical document (Discharge Summary / Referral Packet) and extract potential ICD-10 diagnosis codes.
@@ -863,17 +863,39 @@ app.post('/api/admin/extract-clinical-data', async (req, res) => {
       }
     `;
 
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
+    let contentBlocks = [];
+    if (mimeType === 'application/pdf') {
+      contentBlocks.push({
+        type: "document",
+        source: {
+          type: "base64",
+          media_type: "application/pdf",
           data: base64Data,
-          mimeType: mimeType
-        }
-      }
-    ]);
+        },
+      });
+    } else {
+      contentBlocks.push({
+        type: "image",
+        source: {
+          type: "base64",
+          media_type: mimeType,
+          data: base64Data,
+        },
+      });
+    }
 
-    const aiResponse = result.response.text();
+    contentBlocks.push({
+      type: "text",
+      text: prompt
+    });
+
+    const msg = await anthropic.messages.create({
+      model: "claude-3-5-sonnet-20241022",
+      max_tokens: 1024,
+      messages: [{ role: "user", content: contentBlocks }],
+    });
+
+    const aiResponse = msg.content.find(c => c.type === 'text')?.text || '';
     // Clean potential markdown wrap
     const cleanJson = aiResponse.replace(/```json|```/g, '').trim();
     const extractedData = JSON.parse(cleanJson);
