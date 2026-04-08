@@ -50,6 +50,7 @@ const ProviderDashboard = () => {
     const [selectedServices, setSelectedServices] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
     const [searchTarget, setSearchTarget] = useState('primary');
+    const [searchQuery, setSearchQuery] = useState('');
 
     const AVAILABLE_SERVICES = [
         "Skilled Nursing", "Physical Therapy", "Occupational Therapy",
@@ -119,6 +120,7 @@ const ProviderDashboard = () => {
                 setPrimaryDiagnosis(null);
                 setSecondaryDiagnoses([]);
                 setSelectedServices([]);
+                setSearchQuery('');
                 setCurrentStep(1);
                 fetchReferrals(token);
                 setTimeout(() => setActiveView('history'), 2000);
@@ -319,9 +321,9 @@ const ProviderDashboard = () => {
                                         <div>
                                             <div style={styles.stepHeader}>
                                                 <h3 style={styles.stepTitle}>Clinical Information</h3>
-                                                <p style={styles.stepDesc}>Select primary diagnosis and optional comorbidities.</p>
+                                                <p style={styles.stepDesc}>Identify primary diagnosis and required comorbidities.</p>
                                             </div>
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                                                 {/* Primary */}
                                                 <div>
                                                     <label style={styles.fieldLabel}>
@@ -336,16 +338,39 @@ const ProviderDashboard = () => {
                                                                 </div>
                                                                 <div style={styles.diagnosisDesc}>{primaryDiagnosis.description}</div>
                                                             </div>
-                                                            <button onClick={() => setPrimaryDiagnosis(null)} style={styles.removeBtn}><X size={16} /></button>
+                                                            <button onClick={() => { setPrimaryDiagnosis(null); setSearchQuery(''); }} style={styles.removeBtn}><X size={16} /></button>
                                                         </div>
                                                     ) : (
-                                                        <button
-                                                            onClick={() => { setIsSearching(true); setSearchTarget('primary'); }}
-                                                            style={styles.searchTrigger}
-                                                        >
-                                                            <Search size={20} color="#9B72CF" />
-                                                            <span style={{ fontSize: 12, fontWeight: 700, color: '#9B72CF', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Search ICD-10 or Condition</span>
-                                                        </button>
+                                                        <div style={{ position: 'relative' }}>
+                                                            <div style={styles.searchContainer}>
+                                                                <Search size={18} color="#9B72CF" style={{ position: 'absolute', left: 16 }} />
+                                                                <input 
+                                                                    type="text"
+                                                                    value={searchTarget === 'primary' ? searchQuery : ''}
+                                                                    onChange={(e) => {
+                                                                        setSearchQuery(e.target.value);
+                                                                        setSearchTarget('primary');
+                                                                        setIsSearching(true);
+                                                                    }}
+                                                                    placeholder="Search ICD-10 code or condition..."
+                                                                    style={styles.inputSearch}
+                                                                />
+                                                            </div>
+                                                            {isSearching && searchTarget === 'primary' && searchQuery.length > 0 && (
+                                                                <div style={styles.integratedResults}>
+                                                                    <ICD10Search 
+                                                                        isEmbedded={true}
+                                                                        hideSearch={true}
+                                                                        externalQuery={searchQuery}
+                                                                        onSelect={(codeData) => {
+                                                                            setPrimaryDiagnosis(codeData);
+                                                                            setIsSearching(false);
+                                                                            setSearchQuery('');
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </div>
 
@@ -354,7 +379,7 @@ const ProviderDashboard = () => {
                                                     <label style={styles.fieldLabel}>
                                                         <Plus size={13} color="#9B72CF" /> Secondary Diagnoses (Optional)
                                                     </label>
-                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                                         {secondaryDiagnoses.map((d, i) => (
                                                             <div key={i} style={styles.secondaryRow}>
                                                                 <span style={styles.secondaryNum}>{i + 1}</span>
@@ -363,35 +388,41 @@ const ProviderDashboard = () => {
                                                                 <button onClick={() => setSecondaryDiagnoses(prev => prev.filter(x => x.code !== d.code))} style={styles.removeBtnSm}><X size={12} /></button>
                                                             </div>
                                                         ))}
+                                                        
                                                         {secondaryDiagnoses.length < 5 && (
-                                                            <button
-                                                                onClick={() => { setIsSearching(true); setSearchTarget('secondary'); }}
-                                                                style={styles.addComorbidityBtn}
-                                                            >
-                                                                + Add Comorbidity
-                                                            </button>
+                                                            <div style={{ position: 'relative', marginTop: 8 }}>
+                                                                <div style={styles.searchContainerSmall}>
+                                                                    <Plus size={14} color="#9B72CF" style={{ position: 'absolute', left: 16 }} />
+                                                                    <input 
+                                                                        type="text"
+                                                                        value={searchTarget === 'secondary' ? searchQuery : ''}
+                                                                        onChange={(e) => {
+                                                                            setSearchQuery(e.target.value);
+                                                                            setSearchTarget('secondary');
+                                                                            setIsSearching(true);
+                                                                        }}
+                                                                        placeholder="Add secondary diagnosis (comorbidity)..."
+                                                                        style={styles.inputSearchSmall}
+                                                                    />
+                                                                </div>
+                                                                {isSearching && searchTarget === 'secondary' && searchQuery.length > 0 && (
+                                                                    <div style={styles.integratedResults}>
+                                                                        <ICD10Search 
+                                                                            isEmbedded={true}
+                                                                            hideSearch={true}
+                                                                            externalQuery={searchQuery}
+                                                                            onSelect={(codeData) => {
+                                                                                setSecondaryDiagnoses(prev => [...prev, codeData]);
+                                                                                setIsSearching(false);
+                                                                                setSearchQuery('');
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         )}
                                                     </div>
                                                 </div>
-
-                                                {isSearching && (
-                                                    <div style={styles.searchPanel}>
-                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                                                            <h4 style={{ fontSize: 11, fontWeight: 800, color: '#F5C842', letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>
-                                                                Diagnosis Search — {searchTarget}
-                                                            </h4>
-                                                            <button onClick={() => setIsSearching(false)} style={styles.removeBtnSm}><X size={16} /></button>
-                                                        </div>
-                                                        <ICD10Search
-                                                            isEmbedded={true}
-                                                            onSelect={(codeData) => {
-                                                                if (searchTarget === 'primary') setPrimaryDiagnosis(codeData);
-                                                                else setSecondaryDiagnoses(prev => [...prev, codeData]);
-                                                                setIsSearching(false);
-                                                            }}
-                                                        />
-                                                    </div>
-                                                )}
                                             </div>
                                         </div>
                                     )}
@@ -722,7 +753,7 @@ const styles = {
     /* Card */
     card: {
         background: '#fff', borderRadius: 28, border: '1px solid #E9D5FF',
-        boxShadow: '0 8px 40px rgba(107,79,160,0.12)', overflow: 'hidden', display: 'flex', flexDirection: 'column'
+        boxShadow: '0 8px 40px rgba(107,79,160,0.12)', display: 'flex', flexDirection: 'column'
     },
     cardBody: { padding: '36px 40px', flex: 1 },
     cardFooter: {
@@ -744,8 +775,35 @@ const styles = {
         width: '100%', padding: '13px 16px', borderRadius: 12,
         border: '2px solid #EDE9FE', background: '#FAF5FF',
         fontSize: 13, fontWeight: 600, color: PURPLE_DARK,
-        outline: 'none', boxSizing: 'border-box',
         transition: 'border-color 0.15s',
+    },
+
+    /* Search Integrated */
+    searchContainer: {
+        display: 'flex', alignItems: 'center', position: 'relative', width: '100%'
+    },
+    inputSearch: {
+        width: '100%', padding: '14px 16px 14px 48px', borderRadius: 16,
+        border: '2px solid #EDE9FE', background: '#FAF5FF',
+        fontSize: 14, fontWeight: 600, color: PURPLE_DARK,
+        outline: 'none', transition: 'all 0.2s',
+        boxShadow: '0 2px 8px rgba(107,79,160,0.04)',
+        ':focus': { borderColor: PURPLE_SOFT, background: '#fff', boxShadow: '0 4px 12px rgba(107,79,160,0.1)' }
+    },
+    searchContainerSmall: {
+        display: 'flex', alignItems: 'center', position: 'relative', width: '100%'
+    },
+    inputSearchSmall: {
+        width: '100%', padding: '10px 16px 10px 44px', borderRadius: 12,
+        border: '1px solid #EDE9FE', background: '#FAF5FF',
+        fontSize: 12, fontWeight: 600, color: PURPLE_DARK,
+        outline: 'none', transition: 'all 0.2s',
+        ':focus': { borderColor: PURPLE_SOFT, background: '#fff' }
+    },
+    integratedResults: {
+        position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100,
+        marginTop: 8, boxShadow: '0 20px 50px rgba(26,10,46,0.15)',
+        borderRadius: 16, overflow: 'hidden', background: WHITE, border: '1px solid #EDE9FE'
     },
 
     /* Diagnosis */
@@ -759,11 +817,6 @@ const styles = {
     diagnosisDesc: { fontWeight: 700, fontSize: 14, color: PURPLE_DARK },
     removeBtn: { background: 'none', border: 'none', cursor: 'pointer', color: PURPLE_SOFT, padding: 4, borderRadius: 8 },
     removeBtnSm: { background: 'none', border: 'none', cursor: 'pointer', color: PURPLE_SOFT, padding: 2 },
-    searchTrigger: {
-        width: '100%', padding: '32px 0', border: '2px dashed #C4B5FD', borderRadius: 20,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-        cursor: 'pointer', background: 'transparent', transition: 'all 0.15s'
-    },
     secondaryRow: {
         display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
         background: '#FAF5FF', border: '1px solid #EDE9FE', borderRadius: 12
@@ -771,15 +824,6 @@ const styles = {
     secondaryNum: { fontSize: 10, fontWeight: 800, color: PURPLE_SOFT, width: 16 },
     secondaryCode: { padding: '2px 8px', background: '#EDE9FE', color: PURPLE_MID, borderRadius: 4, fontSize: 10, fontWeight: 800 },
     secondaryDesc: { fontSize: 12, fontWeight: 600, color: PURPLE_DARK, flex: 1 },
-    addComorbidityBtn: {
-        padding: '10px 0', border: '2px dashed #EDE9FE', borderRadius: 12,
-        color: PURPLE_SOFT, fontWeight: 800, fontSize: 10, letterSpacing: '0.08em',
-        textTransform: 'uppercase', cursor: 'pointer', background: 'transparent'
-    },
-    searchPanel: {
-        padding: 20, background: '#FAF5FF', border: '1px solid #EDE9FE',
-        borderRadius: 20, marginTop: 4
-    },
 
     /* Services */
     servicesGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 },
