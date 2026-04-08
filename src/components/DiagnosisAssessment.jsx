@@ -134,11 +134,12 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
 
                 {activeSubTab === 'diagnoses' ? (
                     <div className="bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
-                        <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
-                            <div>
-                                <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight">OASIS Diagnosis Management</h3>
-                                <p className="text-slate-500 text-sm font-medium">Assign primary and secondary ICD-10-CM codes for this episode.</p>
-                            </div>
+                        <div className="p-8 space-y-8">
+                            <div className="flex items-center justify-between gap-6 border-b border-slate-100 pb-6">
+                                <div>
+                                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">OASIS DIAGNOSIS MANAGEMENT</h3>
+                                    <p className="text-slate-400 text-xs font-semibold">Assign primary and secondary ICD-10-CM codes for this episode.</p>
+                                </div>
                             <button 
                                 onClick={handleSave}
                                 className="bg-slate-900 text-white px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20 active:scale-95"
@@ -154,35 +155,50 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
                                     <ShieldCheck size={14} className="text-teal-500" /> Primary Diagnosis
                                 </h4>
                                 {primaryDiagnosis ? (
-                                    <div className="group relative bg-teal-50/30 border-2 border-teal-500/20 rounded-3xl p-6 transition-all hover:bg-teal-50/50">
+                                    <div className="group relative bg-teal-50/20 border-2 border-teal-500/20 rounded-2xl p-5 transition-all hover:bg-teal-50/40">
                                         <div className="flex items-start justify-between gap-6">
                                             <div className="flex-1">
-                                                <div className="flex items-center gap-3 mb-2">
-                                                    <span className="px-3 py-1 bg-slate-900 text-white rounded-lg text-xs font-black">{primaryDiagnosis.code}</span>
-                                                    <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">Selected as Primary</span>
+                                                <div className="flex items-center gap-3 mb-1">
+                                                    <span className="px-2 py-0.5 bg-slate-900 text-white rounded text-[10px] font-black">{primaryDiagnosis.code}</span>
+                                                    <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">Primary Assigned</span>
                                                 </div>
-                                                <h5 className="text-xl font-black text-slate-900 mb-2">{primaryDiagnosis.description}</h5>
-                                                <div className="flex items-center gap-4">
-                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Group: {primaryDiagnosis.pdgm_grouping}</span>
-                                                    <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest bg-teal-50 px-2 py-0.5 rounded">Current Case Weight: {analytics.weight}</span>
+                                                <h5 className="text-base font-black text-slate-900 leading-tight">{primaryDiagnosis.description}</h5>
+                                                <div className="flex items-center gap-4 mt-2">
+                                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Group: {primaryDiagnosis.pdgm_grouping}</span>
+                                                    <span className="text-[9px] font-black text-teal-600 uppercase tracking-widest bg-teal-50 px-1.5 py-0.5 rounded">Weight: {analytics.weight}</span>
                                                 </div>
                                             </div>
                                             <button 
                                                 onClick={() => setPrimaryDiagnosis(null)}
-                                                className="p-2 text-slate-300 hover:text-red-500 transition-colors"
+                                                className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"
                                             >
-                                                <X size={20} />
+                                                <X size={18} />
                                             </button>
                                         </div>
                                     </div>
                                 ) : (
-                                    <button 
-                                        onClick={() => { setIsSearching(true); setSearchTarget('primary'); }}
-                                        className="w-full py-8 border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center gap-3 text-slate-400 hover:border-teal-500 hover:text-teal-600 hover:bg-teal-50/30 transition-all group"
-                                    >
-                                        <Search className="group-hover:scale-110 transition-transform" />
-                                        <span className="text-xs font-black uppercase tracking-widest">Assign Primary ICD-10 Code</span>
-                                    </button>
+                                    <div className="space-y-3">
+                                        <div className="relative group">
+                                            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                                <Search className="w-4 h-4 text-slate-400" />
+                                            </div>
+                                            <input 
+                                                type="text"
+                                                placeholder="Start typing to search Primary ICD-10 codes..."
+                                                onFocus={() => { setIsSearching(true); setSearchTarget('primary'); }}
+                                                className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:border-teal-500/50 focus:bg-white transition-all shadow-sm"
+                                            />
+                                        </div>
+                                        {isSearching && searchTarget === 'primary' && (
+                                            <div className="animate-fadeInDown">
+                                                <ICD10Search 
+                                                    isEmbedded={true} 
+                                                    onSelect={(code) => handleSelectDiagnosis(code, 'primary')}
+                                                    externalContext={{ admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment }}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
                             </section>
 
@@ -193,50 +209,50 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
                                 </h4>
                                 <div className="grid grid-cols-1 gap-3">
                                     {secondaryDiagnoses.map((diag, index) => (
-                                        <div key={diag.code} className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex items-center justify-between group animate-fadeInUp">
+                                        <div key={diag.code} className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex items-center justify-between group animate-fadeInUp">
                                             <div className="flex items-center gap-4">
-                                                <span className="w-6 h-6 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-[10px] font-black text-slate-400">
+                                                <span className="w-5 h-5 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-[9px] font-black text-slate-400">
                                                     {index + 1}
                                                 </span>
-                                                <span className="px-2 py-0.5 bg-slate-200 text-slate-700 rounded text-[10px] font-black uppercase">{diag.code}</span>
-                                                <span className="text-sm font-bold text-slate-700">{diag.description}</span>
+                                                <span className="px-1.5 py-0.5 bg-slate-200 text-slate-700 rounded text-[9px] font-black uppercase tracking-tighter">{diag.code}</span>
+                                                <span className="text-xs font-bold text-slate-700">{diag.description}</span>
                                             </div>
                                             <button 
                                                 onClick={() => removeSecondary(diag.code)}
-                                                className="p-1 px-2 text-slate-300 hover:text-red-500 hover:bg-white rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                className="p-1 text-slate-300 hover:text-red-500 transition-all"
                                             >
-                                                <X size={16} />
+                                                <X size={14} />
                                             </button>
                                         </div>
                                     ))}
-                                    <button 
-                                        onClick={() => { setIsSearching(true); setSearchTarget('secondary'); }}
-                                        className="py-4 border-2 border-dashed border-slate-100 rounded-2xl flex items-center justify-center gap-2 text-slate-400 hover:border-slate-300 hover:text-slate-600 transition-all font-bold text-xs"
-                                    >
-                                        <Plus size={14} /> ADD SECONDARY DIAGNOSIS
-                                    </button>
+                                    <div className="space-y-3">
+                                        <div className="relative group">
+                                            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                                <Plus size={14} className="text-slate-400" />
+                                            </div>
+                                            <input 
+                                                type="text"
+                                                placeholder="Add Secondary Diagnosis (Comorbidity)..."
+                                                onFocus={() => { setIsSearching(true); setSearchTarget('secondary'); }}
+                                                className="w-full bg-slate-50 border-2 border-slate-50 rounded-xl py-3 pl-12 pr-4 text-xs font-medium focus:outline-none focus:border-indigo-500/30 focus:bg-white transition-all"
+                                            />
+                                        </div>
+                                        {isSearching && searchTarget === 'secondary' && (
+                                            <div className="animate-fadeInDown">
+                                                <ICD10Search 
+                                                    isEmbedded={true} 
+                                                    onSelect={(code) => handleSelectDiagnosis(code, 'secondary')}
+                                                    externalContext={{ admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment }}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </section>
 
-                            {/* Search Overlay (if active) */}
-                            {isSearching && (
-                                <div className="mt-12 p-8 bg-slate-50 rounded-[32px] border-2 border-teal-500/20 animate-fadeInUp relative">
-                                    <div className="absolute top-4 right-4">
-                                        <button onClick={() => setIsSearching(false)} className="p-2 text-slate-400 hover:text-slate-900"><X size={20} /></button>
-                                    </div>
-                                    <h5 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2 uppercase tracking-tight">
-                                        <Search size={18} className="text-teal-500" />
-                                        Search {searchTarget === 'primary' ? 'Primary' : 'Secondary'} Diagnosis
-                                    </h5>
-                                    <ICD10Search 
-                                        isEmbedded={true} 
-                                        onSelect={(code) => handleSelectDiagnosis(code, searchTarget)}
-                                        externalContext={{ admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment }}
-                                    />
-                                </div>
-                            )}
                         </div>
                     </div>
+                </div>
                 ) : activeSubTab === 'chart' ? (
                     <div className="space-y-6">
                         <div className="bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 border border-slate-100 p-10">
