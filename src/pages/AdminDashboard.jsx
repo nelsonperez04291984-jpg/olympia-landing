@@ -494,6 +494,8 @@ const AdminDashboard = () => {
     const [clinicalStatus, setClinicalStatus] = useState({ show: false, message: '', type: 'success' });
     const [error, setError] = useState('');
     const [directorySearch, setDirectorySearch] = useState('');
+    const [censusSearch, setCensusSearch] = useState('');
+    const [censusFilter, setCensusFilter] = useState('all'); // 'all' | 'referral' | 'processing' | 'admitted'
     const navigate = useNavigate();
 
     const handleFixSchema = async () => {
@@ -769,6 +771,7 @@ const AdminDashboard = () => {
                         { id: 'overview', icon: <TrendingUp size={18} />, label: 'Dashboard Home' },
                         { id: 'users', icon: <UserPlus size={18} />, label: 'Partner & Staff' },
                         { id: 'referrals', icon: <ClipboardCheck size={18} />, label: 'Referral Intake' },
+                        { id: 'patients', icon: <Users size={18} />, label: 'Clinical Census' },
                         { id: 'clinical', icon: <Stethoscope size={18} />, label: 'Clinical Tools' },
                     ].map(item => (
                         <React.Fragment key={item.id}>
@@ -1375,6 +1378,144 @@ const AdminDashboard = () => {
                                 </div>
                             </form>
                         )}
+                    </div>
+                )}
+
+                {/* ── CLINICAL CENSUS VIEW ── */}
+                {activeTab === 'patients' && (
+                    <div className="animate-fadeIn">
+                        {/* Census HUD */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+                            {[
+                                { label: 'Total Census', value: referrals.length, icon: <Users size={16} />, color: '#6B4FA0' },
+                                { label: 'Admitted / SOC', value: referrals.filter(r => r.status === 'Resolved').length, icon: <CheckCircle2 size={16} />, color: '#10B981' },
+                                { label: 'In Coding', value: referrals.filter(r => r.status === 'Processing').length, icon: <Activity size={16} />, color: GOLD_DARK },
+                                { label: 'Avg Case Weight', value: (referrals.filter(r => r.pdgm_weight).reduce((acc, curr) => acc + parseFloat(curr.pdgm_weight || 0), 0) / (referrals.filter(r => r.pdgm_weight).length || 1)).toFixed(3), icon: <TrendingUp size={16} />, color: '#3B82F6' },
+                            ].map((stat, i) => (
+                                <div key={i} style={{ padding: '20px', background: WHITE, borderRadius: 20, border: '1px solid #EDE9FE', boxShadow: SHADOW_SM }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                                        <div style={{ width: 32, height: 32, borderRadius: 10, background: `${stat.color}10`, color: stat.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            {stat.icon}
+                                        </div>
+                                        <span style={{ fontSize: 10, fontWeight: 900, color: PURPLE_SOFT, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{stat.label}</span>
+                                    </div>
+                                    <div style={{ fontSize: 24, fontWeight: 950, color: PURPLE_DARK }}>{stat.value}</div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Census Controls */}
+                        <div style={{ background: WHITE, padding: '16px 24px', borderRadius: 20, border: '1px solid #EDE9FE', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20 }}>
+                            <div style={{ display: 'flex', gap: 8 }}>
+                                {['all', 'referral', 'processing', 'admitted'].map(f => (
+                                    <button
+                                        key={f}
+                                        onClick={() => setCensusFilter(f)}
+                                        style={{
+                                            padding: '8px 16px', borderRadius: 10, border: 'none',
+                                            background: censusFilter === f ? PURPLE_DARK : '#F3EFF9',
+                                            color: censusFilter === f ? GOLD : PURPLE_MID,
+                                            fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.08em',
+                                            cursor: 'pointer', transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        {f}
+                                    </button>
+                                ))}
+                            </div>
+                            <div style={{ position: 'relative', flex: 1, maxWidth: 400 }}>
+                                <Search size={16} color={PURPLE_SOFT} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
+                                <input
+                                    type="text"
+                                    placeholder="Search by patient name, ID, or condition..."
+                                    value={censusSearch}
+                                    onChange={e => setCensusSearch(e.target.value)}
+                                    style={{ ...styles.input, paddingLeft: 42, background: '#F3EFF9', border: 'none' }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Census Table Container */}
+                        <div style={{ background: WHITE, borderRadius: 24, border: '1px solid #EDE9FE', boxShadow: '0 10px 40px rgba(26,10,46,0.08)', overflow: 'hidden' }}>
+                            <table style={styles.table}>
+                                <thead>
+                                    <tr>
+                                        <th style={styles.th}>Patient & Identity</th>
+                                        <th style={styles.th}>Clinical Status</th>
+                                        <th style={styles.th}>Financial/PDGM</th>
+                                        <th style={styles.th}>Last Interaction</th>
+                                        <th style={styles.th}>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {referrals
+                                        .filter(r => {
+                                            if (censusFilter === 'referral') return r.status === 'Pending';
+                                            if (censusFilter === 'processing') return r.status === 'Processing';
+                                            if (censusFilter === 'admitted') return r.status === 'Resolved';
+                                            return true;
+                                        })
+                                        .filter(r => 
+                                            r.patient_name.toLowerCase().includes(censusSearch.toLowerCase()) ||
+                                            (r.icd_primary && r.icd_primary.toLowerCase().includes(censusSearch.toLowerCase())) ||
+                                            (r.diagnosis && r.diagnosis.toLowerCase().includes(censusSearch.toLowerCase()))
+                                        )
+                                        .map(r => (
+                                            <tr key={r.id} style={styles.tr}>
+                                                <td style={styles.td}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                        <div style={{ width: 36, height: 36, borderRadius: 10, background: `${PURPLE_DARK}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: PURPLE_DARK, fontSize: 14 }}>
+                                                            {r.patient_name.charAt(0)}
+                                                        </div>
+                                                        <div>
+                                                            <div style={styles.tdName}>{r.patient_name}</div>
+                                                            <div style={{ fontSize: 10, color: PURPLE_SOFT, fontWeight: 700 }}>Born: {new Date(r.patient_dob).toLocaleDateString()}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td style={styles.td}>
+                                                    <span style={styles.statusPill(r.status)}>{r.status}</span>
+                                                    <div style={{ marginTop: 6, fontSize: 11, fontWeight: 700, color: PURPLE_MID }}>
+                                                        {r.primary_diagnosis?.pdgm_grouping || 'Awaiting Coding'}
+                                                    </div>
+                                                </td>
+                                                <td style={styles.td}>
+                                                    {r.pdgm_weight ? (
+                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                                            <div style={{ fontSize: 14, fontWeight: 950, color: PURPLE_DARK }}>{r.pdgm_weight}</div>
+                                                            <div style={{ fontSize: 9, fontWeight: 900, color: GOLD_DARK, textTransform: 'uppercase' }}>H-Level: {r.functional_level || 'Med'}</div>
+                                                        </div>
+                                                    ) : (
+                                                        <span style={{ fontSize: 11, color: PURPLE_SOFT, fontStyle: 'italic' }}>Pending Assessment</span>
+                                                    )}
+                                                </td>
+                                                <td style={styles.td}>
+                                                    <div style={{ fontSize: 12, fontWeight: 800, color: PURPLE_DARK }}>{formatElapsed(r.created_at)}</div>
+                                                    <div style={{ fontSize: 9, color: PURPLE_SOFT, fontWeight: 700 }}>Via: {r.provider_name || 'EHR Pipeline'}</div>
+                                                </td>
+                                                <td style={styles.td}>
+                                                    <div style={{ display: 'flex', gap: 6 }}>
+                                                        <button 
+                                                            onClick={() => setViewingPatient(r)}
+                                                            style={styles.actionIconBtn('rgba(107,79,160,0.08)', '#6B4FA0')} 
+                                                            title="View Profile"
+                                                        >
+                                                            <FileText size={15} />
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleAssessAndCode(r)}
+                                                            style={styles.actionIconBtn('rgba(245,200,66,0.1)', GOLD_DARK)} 
+                                                            title="Assess & Code"
+                                                        >
+                                                            <Stethoscope size={15} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )}
                     </>
