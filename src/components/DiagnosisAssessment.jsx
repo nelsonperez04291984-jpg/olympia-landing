@@ -183,10 +183,15 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null, onUpdateDocs 
             };
 
             // Custom logic: If text contains specific keywords, adjust fallback
-            if (patientMeta.includes('chf') || patientMeta.includes('heart')) {
+            if (patientMeta.includes('append') || patientMeta.includes('abdominal')) {
+                fallbackResults.primary = { code: 'K35.80', description: 'Unspecified acute appendicitis', group: 'G' };
+                fallbackResults.clinical_summary = "Heuristic parsing identified acute abdominal inflammation suggestive of Appendicitis.";
+            } else if (patientMeta.includes('chf') || patientMeta.includes('heart')) {
                 fallbackResults.primary = { code: 'I50.9', description: 'Heart failure, unspecified', group: 'F' };
             } else if (patientMeta.includes('copd') || patientMeta.includes('breath')) {
                 fallbackResults.primary = { code: 'J44.9', description: 'COPD, unspecified', group: 'H' };
+            } else if (patientMeta.includes('wound') || patientMeta.includes('surg')) {
+                fallbackResults.primary = { code: 'Z48.812', description: 'Encounter for surgical aftercare following surgery on the circulatory system', group: 'A' };
             }
 
             setAiSuggestions(fallbackResults);
