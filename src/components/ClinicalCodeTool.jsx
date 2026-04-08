@@ -212,9 +212,9 @@ const ClinicalCodeTool = ({ token }) => {
                         <ClipboardList size={18} color={GOLD_DARK} />
                     </div>
                     <div>
-                        <div style={{ fontSize: 14, fontWeight: 900, color: PURPLE_DARK }}>Code Entry</div>
+                        <div style={{ fontSize: 14, fontWeight: 900, color: PURPLE_DARK }}>Clinical Entry</div>
                         <div style={{ fontSize: 11, color: PURPLE_SOFT, fontWeight: 500 }}>
-                            One per line, or comma/space separated · ICD-9 and ICD-10 accepted · max 200
+                            Paste codes (ICD-9/10) or diagnosis names (e.g. "Diabetes") · max 200 items
                         </div>
                     </div>
                 </div>
@@ -226,7 +226,7 @@ const ClinicalCodeTool = ({ token }) => {
                             ref={textareaRef}
                             value={inputText}
                             onChange={e => setInputText(e.target.value)}
-                            placeholder={PLACEHOLDER_CODES}
+                            placeholder="Type or paste diagnoses here... (e.g. I10, Diabetes, 401.9)"
                             onKeyDown={e => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') handleLookup(); }}
                             style={{
                                 width: '100%', minHeight: 180, padding: '20px 24px',
@@ -521,9 +521,17 @@ const ClinicalCodeTool = ({ token }) => {
                                                 <span style={{
                                                     padding: '3px 9px', borderRadius: 6, fontSize: 9, fontWeight: 900,
                                                     letterSpacing: '0.08em', textTransform: 'uppercase',
-                                                    background: row.type === 'ICD-10' ? 'rgba(59,31,106,0.08)' : 'rgba(245,158,11,0.1)',
-                                                    color: row.type === 'ICD-10' ? PURPLE_MID : '#92400E',
-                                                    border: `1px solid ${row.type === 'ICD-10' ? 'rgba(107,79,160,0.2)' : 'rgba(245,158,11,0.3)'}`,
+                                                    background: row.type === 'ICD-10' ? 'rgba(59,31,106,0.08)' 
+                                                              : row.type === 'ICD-9' ? 'rgba(245,158,11,0.1)'
+                                                              : 'rgba(20,184,166,0.1)',
+                                                    color: row.type === 'ICD-10' ? PURPLE_MID 
+                                                         : row.type === 'ICD-9' ? '#92400E'
+                                                         : '#0D9488',
+                                                    border: `1px solid ${
+                                                        row.type === 'ICD-10' ? 'rgba(107,79,160,0.2)' 
+                                                        : row.type === 'ICD-9' ? 'rgba(245,158,11,0.3)'
+                                                        : 'rgba(20,184,166,0.3)'
+                                                    }`,
                                                 }}>
                                                     {row.type}
                                                 </span>

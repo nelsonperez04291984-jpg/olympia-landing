@@ -62,67 +62,86 @@ const ICD10Search = ({ isEmbedded = false, onSelect = null, externalContext = nu
         setError('');
         setResults(null);
 
-        const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-
-        if (!API_KEY) {
-            setError('System Error: API Key not configured. Please contact support.');
-            setIsLoading(false);
-            return;
-        }
-
         try {
-            const genAI = new GoogleGenerativeAI(API_KEY);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+            // ── 1. Local Database Search ──────────────────────────────
+            const localRes = await fetch(`/api/admin/diagnosis/search?q=${encodeURIComponent(query)}`);
+            if (!localRes.ok) throw new Error("Local search failed");
+            const localResults = await localRes.json();
 
-            const prompt = `
-            You are a professional Medical Coding & PDGM Analyst.
-            Search for ICD-10 diagnosis codes related to: "${query}".
-            
-            IMPORTANT: Support natural language, abbreviations (CVA, CHF, HTN), and clinical synonyms.
-            Return a list of the top 5 most relevant codes.
-            
-            For each code, provide:
-            1. Official ICD-10 code and description.
-            2. PDGM Clinical Group.
-            3. Estimated base Case-Mix Weight (0.8 - 2.5).
-            4. Clinical Priority (Primary vs Secondary).
-            5. Clinical reasoning for why this code might be a better choice for reimbursement.
-            6. Implementation tips for documentation.
-            7. Whether it is allowed as a primary diagnosis under PDGM.
+            if (localResults.length === 0) {
+                // If no local results, we can still fall back to AI-only search
+                // but user said "use imported data", so we should probably inform them.
+            }
 
-            Respond ONLY with a strict JSON array of objects. No markdown.
-            [
-                {
-                    "code": "ICD-10 Code",
-                    "description": "Full Description",
-                    "pdgm_grouping": "Clinical Group",
-                    "base_weight": 1.25,
-                    "is_primary_allowed": true,
-                    "priority_recommendation": "Primary/Secondary",
-                    "reasoning": "Brief clinical benefit explanation",
-                    "tips": ["Tip 1", "Tip 2"]
+            // ── 2. AI Enrichment ─────────────────────────────────────
+            const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+            if (API_KEY && localResults.length > 0) {
+                const genAI = new GoogleGenerativeAI(API_KEY);
+                const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+                const enrichPrompt = `
+                You are a PDGM Clinical Analyst. I have these ICD-10 codes from our master database.
+                For each code, provide the missing clinical analytics for home health reimbursement.
+                
+                Input Codes:
+                ${localResults.map(r => `${r.code}: ${r.description}`).join('\n')}
+
+                For each code provide:
+                1. Estimated PDGM Base Case-Mix Weight (0.8 - 2.5).
+                2. Whether it is a valid PRIMARY diagnosis under CMS 2024 rules.
+                3. Clinical reasoning (merging medical necessity with reimbursement impact).
+                4. 2-3 specific clinical documentation tips.
+
+                Respond ONLY with a JSON array of objects:
+                [
+                    {
+                        "code": "ICD-10 Code",
+                        "base_weight": 1.25,
+                        "is_primary_allowed": true,
+                        "reasoning": "...",
+                        "tips": ["..."]
+                    }
+                ]
+                `;
+
+                const aiResult = await model.generateContent(enrichPrompt);
+                const aiText = aiResult.response.text();
+                const jsonMatch = aiText.match(/\[[\s\S]*\]/);
+                
+                if (jsonMatch) {
+                    const enrichmentData = JSON.parse(jsonMatch[0]);
+                    const enriched = localResults.map(local => {
+                        const aiData = enrichmentData.find(a => a.code === local.code) || {};
+                        const base_weight = aiData.base_weight || 1.0;
+                        const calc = calculateReimbursement(base_weight);
+                        
+                        return {
+                            ...local,
+                            base_weight,
+                            is_primary_allowed: aiData.is_primary_allowed ?? true,
+                            reasoning: aiData.reasoning || "Direct match from clinical database.",
+                            tips: aiData.tips || [],
+                            calculated_payment: calc.amount,
+                            final_weight: calc.finalWeight
+                        };
+                    });
+                    setResults(enriched);
+                } else {
+                    // Fallback if AI fails: Use dummy weights
+                    setResults(localResults.map(r => {
+                        const calc = calculateReimbursement(1.0);
+                        return { ...r, base_weight: 1.0, is_primary_allowed: true, tips: [], calculated_payment: calc.amount, final_weight: calc.finalWeight };
+                    }));
                 }
-            ]
-            `;
-
-            const result = await model.generateContent(prompt);
-            let responseText = result.response.text();
-            
-            const jsonMatch = responseText.match(/\[[\s\S]*\]/);
-            if (!jsonMatch) throw new Error("Invalid response format");
-            
-            const data = JSON.parse(jsonMatch[0]);
-            
-            const enrichedResults = data.map(item => {
-                const calc = calculateReimbursement(item.base_weight);
-                return {
-                    ...item,
-                    calculated_payment: calc.amount,
-                    final_weight: calc.finalWeight
-                };
-            }).sort((a, b) => b.calculated_payment - a.calculated_payment);
-
-            setResults(enrichedResults);
+            } else if (localResults.length > 0) {
+                // No AI Key: Return basic results
+                setResults(localResults.map(r => {
+                    const calc = calculateReimbursement(1.0);
+                    return { ...r, base_weight: 1.0, is_primary_allowed: true, tips: [], calculated_payment: calc.amount, final_weight: calc.finalWeight };
+                }));
+            } else {
+                setError("No matching diagnoses found in the clinical database.");
+            }
         } catch (err) {
             console.error("Search Error:", err);
             setError(`Search failed: ${err.message}`);

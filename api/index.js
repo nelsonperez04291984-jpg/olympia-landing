@@ -586,24 +586,32 @@ app.post('/api/admin/diagnosis/batch-lookup', async (req, res) => {
   }
 
   try {
-    // Normalize: strip dots/dashes/spaces, uppercase
-    const normalized = codes
-      .map(c => String(c).replace(/[\s.-]/g, '').toUpperCase().trim())
-      .filter(Boolean);
+    // Normalize and categorize
+    const icd10Codes = [];
+    const icd9Codes  = [];
+    const descriptions = [];
 
-    // Detect ICD-9 vs ICD-10 (ICD-9 codes are purely numeric, optionally with a decimal)
-    const icd10Codes = normalized.filter(c => /[A-Z]/.test(c));
-    const icd9Codes  = normalized.filter(c => /^\d{3,5}$/.test(c));
+    codes.forEach(c => {
+      const raw = String(c).trim();
+      const norm = raw.replace(/[\s.-]/g, '').toUpperCase();
+      
+      if (/[A-Z]/.test(norm) && norm.length >= 3 && norm.length <= 7) {
+        icd10Codes.push(norm);
+      } else if (/^\d{3,5}$/.test(norm)) {
+        icd9Codes.push(norm);
+      } else if (raw.length > 2) {
+        descriptions.push(raw);
+      }
+    });
 
     // ── ICD-10 lookup ──────────────────────────────────────────
     let icd10Rows = [];
     if (icd10Codes.length > 0) {
-      const placeholders = icd10Codes.map((_, i) => `$${i + 1}`).join(', ');
       const result = await pool.query(
         `SELECT code, description, clinical_group, priority_order, subchapter, comorbidity_group
          FROM diagnosis_lookup
-         WHERE code = ANY(ARRAY[${placeholders}])`,
-        icd10Codes
+         WHERE code = ANY($1)`,
+        [icd10Codes]
       );
       icd10Rows = result.rows;
     }
@@ -614,32 +622,50 @@ app.post('/api/admin/diagnosis/batch-lookup', async (req, res) => {
     // ── ICD-9 crosswalk lookup ─────────────────────────────────
     let icd9Rows = [];
     if (icd9Codes.length > 0) {
-      const placeholders = icd9Codes.map((_, i) => `$${i + 1}`).join(', ');
       const result = await pool.query(
         `SELECT icd9_code, potential_icd10, description, needs_review
          FROM icd9_mappings
-         WHERE icd9_code = ANY(ARRAY[${placeholders}])`,
-        icd9Codes
+         WHERE icd9_code = ANY($1)`,
+        [icd9Codes]
       );
       icd9Rows = result.rows;
     }
     const icd9Map = new Map(icd9Rows.map(r => [r.icd9_code, r]));
 
-    // ── For resolved ICD-9 codes, also look up their target ICD-10 in master ──
-    const resolvedIcd10Targets = [];
-    icd9Rows.forEach(r => {
-      if (!r.needs_review && r.potential_icd10) {
-        const target = r.potential_icd10.toUpperCase().replace(/[\s.-]/g, '');
-        resolvedIcd10Targets.push(target);
+    // ── Resolved ICD-10 from ICD-9 ────────────────────────────
+    const resolvedIcd10Targets = icd9Rows
+      .filter(r => !r.needs_review && r.potential_icd10)
+      .map(r => r.potential_icd10.toUpperCase().replace(/[\s.-]/g, ''));
+
+    // ── Description-based Search ──────────────────────────────
+    let descMatches = [];
+    if (descriptions.length > 0) {
+      // Find the best match for each description string
+      for (const d of descriptions) {
+        const r = await pool.query(
+          `SELECT code, description, clinical_group, priority_order, subchapter, comorbidity_group
+           FROM diagnosis_lookup
+           WHERE description ILIKE $1 OR code ILIKE $1
+           ORDER BY (description ILIKE $2) DESC, priority_order ASC
+           LIMIT 1`,
+          [`%${d}%`, d]
+        );
+        if (r.rows.length > 0) {
+          descMatches.push({ search_term: d, ...r.rows[0] });
+        } else {
+          descMatches.push({ search_term: d, status: 'Unrecognized' });
+        }
       }
-    });
+    }
+
+    const allIcd10ToFetch = [...new Set([...resolvedIcd10Targets])];
+
     let resolvedMasterRows = [];
-    if (resolvedIcd10Targets.length > 0) {
-      const ph = resolvedIcd10Targets.map((_, i) => `$${i + 1}`).join(', ');
+    if (allIcd10ToFetch.length > 0) {
       const r = await pool.query(
         `SELECT code, description, clinical_group, priority_order, subchapter, comorbidity_group
-         FROM diagnosis_lookup WHERE code = ANY(ARRAY[${ph}])`,
-        resolvedIcd10Targets
+         FROM diagnosis_lookup WHERE code = ANY($1)`,
+        [allIcd10ToFetch]
       );
       resolvedMasterRows = r.rows;
     }
@@ -655,103 +681,73 @@ app.post('/api/admin/diagnosis/batch-lookup', async (req, res) => {
     `);
     const groupPriorityMap = new Map(groupsResult.rows.map(r => [r.clinical_group, parseInt(r.priority_order)]));
 
-    // Group name legend (hard-coded from the Excel Groups sheet for display)
+    // ── Build final result list ────────────────────────────────
+    const results = [];
+    const seenCodes = new Set();
     const GROUP_NAMES = {
       A: 'Other',       B: 'Neuro',           C: 'Wound',
-      D: 'Complex Nursing', E: 'MS',           F: 'Cardiac',
+      D: 'Complex Nursing', E: 'MS',          F: 'Cardiac',
       G: 'GIGU',        H: 'Respiratory',     I: 'Infectious',
       J: 'Behavioral',  K: 'Endo/Metabolic',  L: 'Medication Mgmt'
     };
 
-    // ── Build final result list ────────────────────────────────
-    const seenInRequest = new Map(); // code → first-occurrence index
-    const results = [];
+    // 1. Process explicit ICD-10 codes in input order
+    codes.forEach(rawCode => {
+      const norm = String(rawCode).replace(/[\s.-]/g, '').toUpperCase();
+      const isIcd9 = /^\d{3,5}$/.test(norm);
+      const isIcd10 = /[A-Z]/.test(norm) && norm.length >= 3;
 
-    normalized.forEach((code, idx) => {
-      const isIcd9 = /^\d{3,5}$/.test(code);
-
-      if (isIcd9) {
-        const crosswalk = icd9Map.get(code);
-        if (!crosswalk) {
-          results.push({
-            input_code: code,
-            type: 'ICD-9',
-            status: 'Unrecognized',
-            description: 'Not found in ICD-9 crosswalk',
-            clinical_group: null,
-            group_name: null,
-            priority_order: 999,
-            comorbidity_group: 'No_group',
-            needs_review: true,
-            icd9_options: [],
-            is_duplicate: seenInRequest.has(code),
-          });
+      if (isIcd10) {
+        const master = icd10Map.get(norm);
+        const isDup = seenCodes.has(norm);
+        if (!master) {
+          results.push({ input_code: rawCode, type: 'ICD-10', status: 'Unrecognized', description: 'Code not found', clinical_group: null, priority_order: 999, comorbidity_group: 'No_group', needs_review: false, icd9_options: [], is_duplicate: isDup });
         } else {
-          const isDup = seenInRequest.has(code);
+          results.push({ input_code: rawCode, type: 'ICD-10', status: isDup ? 'Duplicate' : 'Verified', description: master.description, clinical_group: master.clinical_group, group_name: GROUP_NAMES[master.clinical_group] || master.clinical_group, priority_order: parseInt(master.priority_order), comorbidity_group: master.comorbidity_group, subchapter: master.subchapter, needs_review: false, icd9_options: [], is_duplicate: isDup });
+        }
+        seenCodes.add(norm);
+      } else if (isIcd9) {
+        const crosswalk = icd9Map.get(norm);
+        const isDup = seenCodes.has(norm);
+        if (!crosswalk) {
+          results.push({ input_code: rawCode, type: 'ICD-9', status: 'Unrecognized', description: 'Not found in crosswalk', clinical_group: null, priority_order: 999, comorbidity_group: 'No_group', needs_review: true, icd9_options: [], is_duplicate: isDup });
+        } else {
           let masterData = null;
-          let targetCode = null;
           if (!crosswalk.needs_review && crosswalk.potential_icd10) {
-            targetCode = crosswalk.potential_icd10.toUpperCase().replace(/[\s.-]/g, '');
-            masterData = resolvedMasterMap.get(targetCode);
+            const target = crosswalk.potential_icd10.toUpperCase().replace(/[\s.-]/g, '');
+            masterData = resolvedMasterMap.get(target);
           }
-
-          results.push({
-            input_code: code,
-            mapped_icd10: crosswalk.needs_review ? null : crosswalk.potential_icd10,
-            type: 'ICD-9',
-            status: crosswalk.needs_review ? 'Needs Review' : (isDup ? 'Duplicate' : 'Mapped'),
-            description: masterData?.description || crosswalk.description || 'See ICD-9 crosswalk',
-            clinical_group: masterData?.clinical_group || null,
-            group_name: masterData ? (GROUP_NAMES[masterData.clinical_group] || masterData.clinical_group) : null,
-            priority_order: masterData?.priority_order || 998,
-            comorbidity_group: masterData?.comorbidity_group || 'No_group',
-            subchapter: masterData?.subchapter || null,
-            needs_review: crosswalk.needs_review,
-            icd9_options: crosswalk.needs_review
-              ? crosswalk.potential_icd10.split(',').map(s => s.trim()).filter(Boolean)
-              : [],
-            is_duplicate: isDup,
+          results.push({ 
+            input_code: rawCode, 
+            mapped_icd10: crosswalk.needs_review ? null : crosswalk.potential_icd10, 
+            type: 'ICD-9', 
+            status: crosswalk.needs_review ? 'Needs Review' : (isDup ? 'Duplicate' : 'Mapped'), 
+            description: masterData?.description || crosswalk.description || 'See crosswalk', 
+            clinical_group: masterData?.clinical_group || null, 
+            group_name: masterData ? (GROUP_NAMES[masterData.clinical_group] || masterData.clinical_group) : null, 
+            priority_order: masterData?.priority_order || 998, 
+            comorbidity_group: masterData?.comorbidity_group || 'No_group', 
+            subchapter: masterData?.subchapter || null, 
+            needs_review: crosswalk.needs_review, 
+            icd9_options: crosswalk.needs_review ? crosswalk.potential_icd10.split(',').map(s => s.trim()).filter(Boolean) : [], 
+            is_duplicate: isDup 
           });
         }
-      } else {
-        // ICD-10 path
-        const master = icd10Map.get(code);
-        const isDup  = seenInRequest.has(code);
-
-        if (!master) {
-          results.push({
-            input_code: code,
-            type: 'ICD-10',
-            status: 'Unrecognized',
-            description: 'Code not found in master database',
-            clinical_group: null,
-            group_name: null,
-            priority_order: 999,
-            comorbidity_group: 'No_group',
-            needs_review: false,
-            icd9_options: [],
-            is_duplicate: isDup,
-          });
+        seenCodes.add(norm);
+      } else if (rawCode.trim().length > 2) {
+        // Description match
+        const match = descMatches.find(m => m.search_term === rawCode);
+        if (!match || match.status === 'Unrecognized') {
+          results.push({ input_code: rawCode, type: 'Description', status: 'Unrecognized', description: 'No matching diagnosis found', clinical_group: null, priority_order: 999, comorbidity_group: 'No_group', needs_review: false, icd9_options: [], is_duplicate: false });
         } else {
-          results.push({
-            input_code: code,
-            type: 'ICD-10',
-            status: isDup ? 'Duplicate' : 'Verified',
-            description: master.description,
-            clinical_group: master.clinical_group,
-            group_name: GROUP_NAMES[master.clinical_group] || master.clinical_group,
-            priority_order: parseInt(master.priority_order),
-            comorbidity_group: master.comorbidity_group,
-            subchapter: master.subchapter,
-            needs_review: false,
-            icd9_options: [],
-            is_duplicate: isDup,
-          });
+          const code = match.code;
+          const isDup = seenCodes.has(code);
+          results.push({ input_code: rawCode, mapped_icd10: code, type: 'Description', status: isDup ? 'Duplicate' : 'Mapped', description: match.description, clinical_group: match.clinical_group, group_name: GROUP_NAMES[match.clinical_group] || match.clinical_group, priority_order: parseInt(match.priority_order), comorbidity_group: match.comorbidity_group, subchapter: match.subchapter, needs_review: false, icd9_options: [], is_duplicate: isDup });
+          seenCodes.add(code);
         }
       }
-
-      if (!seenInRequest.has(code)) seenInRequest.set(code, idx);
     });
+
 
     // ── Sort by priority order ─────────────────────────────────
     results.sort((a, b) => (a.priority_order || 999) - (b.priority_order || 999));
@@ -772,6 +768,45 @@ app.post('/api/admin/diagnosis/batch-lookup', async (req, res) => {
   } catch (err) {
     console.error('Batch lookup error:', err);
     res.status(500).json({ error: 'Lookup failed', details: err.message });
+  }
+});
+
+// GET /api/admin/diagnosis/search?q=...
+// Fuzzy search by code or description
+app.get('/api/admin/diagnosis/search', async (req, res) => {
+  const { q } = req.query;
+  if (!q) return res.status(400).json({ error: 'Query parameter q is required' });
+
+  try {
+    const query = `%${q}%`;
+    const result = await pool.query(
+      `SELECT code, description, clinical_group, priority_order, subchapter, comorbidity_group
+       FROM diagnosis_lookup
+       WHERE code ILIKE $1 OR description ILIKE $1
+       ORDER BY 
+         CASE WHEN code ILIKE $2 THEN 1 ELSE 2 END,
+         priority_order ASC
+       LIMIT 20`,
+      [query, q]
+    );
+
+    // Map group names
+    const GROUP_NAMES = {
+      A: 'Other',       B: 'Neuro',           C: 'Wound',
+      D: 'Complex Nursing', E: 'MS',           F: 'Cardiac',
+      G: 'GIGU',        H: 'Respiratory',     I: 'Infectious',
+      J: 'Behavioral',  K: 'Endo/Metabolic',  L: 'Medication Mgmt'
+    };
+
+    const formatted = result.rows.map(r => ({
+      ...r,
+      pdgm_grouping: GROUP_NAMES[r.clinical_group] || r.clinical_group || 'Other',
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error('Search error:', err);
+    res.status(500).json({ error: 'Search failed' });
   }
 });
 
