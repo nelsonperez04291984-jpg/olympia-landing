@@ -21,7 +21,8 @@ import {
     TrendingUp,
     Info,
     ChevronLeft,
-    X
+    X,
+    Upload
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ICD10Search from '../components/ICD10Search';
@@ -55,6 +56,7 @@ const ProviderDashboard = () => {
     const [isUploading, setIsUploading] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
     const [aiSuggestions, setAiSuggestions] = useState(null);
+    const [showQuotaAlert, setShowQuotaAlert] = useState(false);
 
     const AVAILABLE_SERVICES = [
         "Skilled Nursing", "Physical Therapy", "Occupational Therapy",
@@ -165,12 +167,14 @@ const ProviderDashboard = () => {
                 const detail = (errorData.details || "").toLowerCase();
                 const isQuotaError = detail.includes('quota') || detail.includes('limit') || detail.includes('429');
                 
-                setStatus({ 
-                    type: 'error', 
-                    message: isQuotaError 
-                        ? "AI Scan Limit Reached. Please proceed to Step 3 and use the Search tool to add your Primary Diagnosis manually."
-                        : `AI Scan Failed: ${errorData.details || "Service currently unavailable"}`
-                });
+                if (isQuotaError) {
+                    setShowQuotaAlert(true);
+                } else {
+                    setStatus({ 
+                        type: 'error', 
+                        message: `AI Scan Failed: ${errorData.details || "Service currently unavailable"}`
+                    });
+                }
             }
         } catch (err) {
             console.error("AI Scan failed", err);
@@ -199,6 +203,51 @@ const ProviderDashboard = () => {
         }
     };
 
+    const RenderQuotaModal = () => {
+        if (!showQuotaAlert) return null;
+
+        return (
+            <div style={styles.modalOverlay}>
+                <div style={styles.modalContent}>
+                    <button 
+                        onClick={() => setShowQuotaAlert(false)}
+                        style={styles.modalClose}
+                    >
+                        <X size={20} />
+                    </button>
+
+                    <div style={styles.modalIcon}>
+                        <Zap size={32} color={GOLD} />
+                    </div>
+
+                    <h3 style={styles.modalTitle}>Intelligence Capacity Reached</h3>
+                    <p style={styles.modalDesc}>
+                        The AI Sentinel has reached its documentation processing limit. 
+                        To maintain clinical continuity, please use the high-fidelity search tool 
+                        to manually assign your Primary Diagnosis in the next step.
+                    </p>
+
+                    <div style={styles.modalActionGrid}>
+                        <button 
+                            onClick={() => setShowQuotaAlert(false)}
+                            style={styles.modalSecondaryBtn}
+                        >
+                            Review Docs
+                        </button>
+                        <button 
+                            onClick={() => {
+                                setShowQuotaAlert(false);
+                                setCurrentStep(3);
+                            }}
+                            style={styles.modalPrimaryBtn}
+                        >
+                            Continue Manually <ChevronRight size={14} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     if (isLoading) {
         return (
@@ -223,6 +272,7 @@ const ProviderDashboard = () => {
 
     return (
         <div style={styles.shell}>
+            <RenderQuotaModal />
             {/* ── Sidebar ── */}
             <aside style={styles.sidebar}>
                 {/* Brand */}
@@ -385,7 +435,7 @@ const ProviderDashboard = () => {
                                         </div>
                                     )}
 
-                                    {/* STEP 2: Documents (MODIFIED ORDER) */}
+                                    {/* STEP 2: Documents */}
                                     {currentStep === 2 && (
                                         <div>
                                             <div style={styles.stepHeader}>
@@ -473,7 +523,7 @@ const ProviderDashboard = () => {
                                         </div>
                                     )}
 
-                                    {/* STEP 3: Clinical Information (MODIFIED ORDER) */}
+                                    {/* STEP 3: Clinical Information */}
                                     {currentStep === 3 && (
                                         <div>
                                             <div style={styles.stepHeader}>
@@ -617,7 +667,7 @@ const ProviderDashboard = () => {
                                         </div>
                                     )}
 
-                                    {/* STEP 4: Requested Services (MODIFIED ORDER) */}
+                                    {/* STEP 4: Requested Services */}
                                     {currentStep === 4 && (
                                         <div>
                                             <div style={styles.stepHeader}>
@@ -1178,6 +1228,49 @@ const styles = {
         boxShadow: `0 0 40px rgba(245,200,66,0.3)`
     },
     loadingText: { fontSize: 11, fontWeight: 800, color: PURPLE_SOFT, letterSpacing: '0.2em', textTransform: 'uppercase', margin: 0 },
+
+    /* Premium Modal */
+    modalOverlay: {
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        background: 'rgba(26,10,46,0.65)', backdropFilter: 'blur(8px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        zIndex: 1000, animation: 'fadeIn 0.3s ease-out'
+    },
+    modalContent: {
+        width: '100%', maxWidth: 460, background: '#fff', 
+        borderRadius: 32, padding: '40px 32px 32px',
+        position: 'relative', overflow: 'hidden',
+        boxShadow: '0 30px 60px rgba(0,0,0,0.25)',
+        textAlign: 'center', border: `1px solid rgba(245,200,66,0.3)`
+    },
+    modalClose: {
+        position: 'absolute', top: 20, right: 20,
+        background: '#FAF5FF', border: 'none', borderRadius: '50%',
+        width: 36, height: 36, display: 'flex', alignItems: 'center',
+        justifyContent: 'center', cursor: 'pointer', color: PURPLE_SOFT
+    },
+    modalIcon: {
+        width: 72, height: 72, borderRadius: 24, background: PURPLE_DARK,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        margin: '0 auto 24px', border: `2px solid ${GOLD}`,
+        boxShadow: `0 8px 24px rgba(245,200,66,0.2)`
+    },
+    modalTitle: { fontSize: 22, fontWeight: 900, color: PURPLE_DARK, margin: '0 0 12px', letterSpacing: '-0.02em' },
+    modalDesc: { fontSize: 14, color: PURPLE_SOFT, margin: '0 0 32px', lineHeight: 1.6, fontWeight: 500 },
+    modalActionGrid: { display: 'flex', gap: 12 },
+    modalSecondaryBtn: {
+        flex: 1, padding: '14px', borderRadius: 16, border: '1px solid #EDE9FE',
+        background: '#FAF5FF', color: PURPLE_SOFT, fontWeight: 800, fontSize: 11,
+        letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer'
+    },
+    modalPrimaryBtn: {
+        flex: 1.5, padding: '14px', borderRadius: 16, border: 'none',
+        background: `linear-gradient(135deg, ${PURPLE_MID} 0%, ${PURPLE_DARK} 100%)`,
+        color: GOLD, fontWeight: 800, fontSize: 11, letterSpacing: '0.05em',
+        textTransform: 'uppercase', cursor: 'pointer', display: 'flex',
+        alignItems: 'center', justifyContent: 'center', gap: 6,
+        boxShadow: `0 10px 20px rgba(107,79,160,0.2)`
+    }
 };
 
 export default ProviderDashboard;
