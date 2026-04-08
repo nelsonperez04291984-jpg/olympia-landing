@@ -1388,7 +1388,7 @@ const AdminDashboard = () => {
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
                             {[
                                 { label: 'Total Census', value: referrals.length, icon: <Users size={16} />, color: '#6B4FA0' },
-                                { label: 'Admitted / SOC', value: referrals.filter(r => r.status === 'Resolved').length, icon: <CheckCircle2 size={16} />, color: '#10B981' },
+                                { label: 'Admitted / SOC', value: referrals.filter(r => r.status === 'Admitted').length, icon: <CheckCircle2 size={16} />, color: '#10B981' },
                                 { label: 'In Coding', value: referrals.filter(r => r.status === 'Processing').length, icon: <Activity size={16} />, color: GOLD_DARK },
                                 { label: 'Avg Case Weight', value: (referrals.filter(r => r.pdgm_weight).reduce((acc, curr) => acc + parseFloat(curr.pdgm_weight || 0), 0) / (referrals.filter(r => r.pdgm_weight).length || 1)).toFixed(3), icon: <TrendingUp size={16} />, color: '#3B82F6' },
                             ].map((stat, i) => (
@@ -1452,7 +1452,7 @@ const AdminDashboard = () => {
                                         .filter(r => {
                                             if (censusFilter === 'referral') return r.status === 'Pending';
                                             if (censusFilter === 'processing') return r.status === 'Processing';
-                                            if (censusFilter === 'admitted') return r.status === 'Resolved';
+                                            if (censusFilter === 'admitted') return r.status === 'Admitted';
                                             return true;
                                         })
                                         .filter(r => 
