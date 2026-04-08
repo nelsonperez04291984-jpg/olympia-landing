@@ -153,58 +153,15 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null, onUpdateDocs 
                 setAiSuggestions(data);
             } else {
                 const errorData = await res.json();
-                // If token limit reached or AI fails, trigger Recovery Mode Heuristics
-                handleSentinelFallback(errorData.details || "AI Service Limit Reached");
+                console.error("AI Scan error detail:", errorData.details);
             }
         } catch (err) {
-            console.error("AI Scan failed, triggering Recovery Mode", err);
-            handleSentinelFallback(err.message);
+            console.error("AI Scan failed", err);
         } finally {
             setIsScanning(false);
         }
     };
 
-    const handleSentinelFallback = (reason) => {
-        // High-Fidelity Simulate Parsing Delay
-        setTimeout(() => {
-            // Heuristic Analysis: Extract potential codes from existing metadata
-            const patientMeta = (referralData.diagnosis + " " + referralData.services_needed).toLowerCase();
-            
-            // Mock clinical suggestions based on patient context
-            const fallbackResults = {
-                clinical_summary: "Clinical Sentinel identified high-probability heuristics based on referral intake metadata.",
-                is_recovery_mode: true,
-                recovery_reason: reason,
-                primary: { code: 'I10', description: 'Essential (primary) hypertension', group: 'F' },
-                secondary: [
-                    { code: 'E11.9', description: 'Type 2 diabetes mellitus without complications', group: 'K' },
-                    { code: 'I25.10', description: 'ASHD of native coronary artery without angina pectoris', group: 'F' }
-                ]
-            };
-
-            // Custom logic: If text contains specific keywords, adjust fallback
-            const searchString = (
-                referralData.diagnosis + " " + 
-                referralData.services_needed + " " + 
-                (referralData.patient_name || "") + " " + 
-                (referralData.document_urls || "")
-            ).toLowerCase();
-
-            if (searchString.includes('append') || searchString.includes('abdominal') || searchString.includes('rlq')) {
-                fallbackResults.primary = { code: 'K35.80', description: 'Unspecified acute appendicitis', group: 'G' };
-                fallbackResults.clinical_summary = "Heuristic parsing identified acute abdominal inflammation suggestive of Appendicitis.";
-            } else if (searchString.includes('chf') || searchString.includes('heart') || searchString.includes('cardiac')) {
-                fallbackResults.primary = { code: 'I50.9', description: 'Heart failure, unspecified', group: 'F' };
-                fallbackResults.clinical_summary = "Heuristic parsing identified signs of cardiovascular insufficiency.";
-            } else if (searchString.includes('copd') || searchString.includes('lung') || searchString.includes('resp')) {
-                fallbackResults.primary = { code: 'J44.9', description: 'Chronic obstructive pulmonary disease, unspecified', group: 'H' };
-            } else if (searchString.includes('wound') || searchString.includes('surg') || searchString.includes('aftercare')) {
-                fallbackResults.primary = { code: 'Z48.812', description: 'Encounter for surgical aftercare following surgery on the circulatory system', group: 'A' };
-            }
-
-            setAiSuggestions(fallbackResults);
-        }, 1200);
-    };
 
     const applyAiCode = async (codeData, isPrimary = false) => {
         try {

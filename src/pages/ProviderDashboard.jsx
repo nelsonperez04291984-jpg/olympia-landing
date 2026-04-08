@@ -162,49 +162,14 @@ const ProviderDashboard = () => {
                 setTimeout(() => setCurrentStep(3), 1500);
             } else {
                 const errorData = await res.json();
-                handleSentinelFallback(errorData.details || "AI Service Limit Reached");
+                setStatus({ type: 'error', message: `AI Scan Failed: ${errorData.details || "Service currently unavailable"}` });
             }
         } catch (err) {
-            console.error("AI Scan failed, triggering Recovery Mode", err);
-            handleSentinelFallback(err.message);
+            console.error("AI Scan failed", err);
+            setStatus({ type: 'error', message: "Scan failed. Please adjust manual diagnosis." });
         } finally {
             setIsScanning(false);
         }
-    };
-
-    const handleSentinelFallback = (reason) => {
-        setTimeout(() => {
-            const patientMeta = (formData.diagnosis_text + " " + formData.services_needed).toLowerCase();
-            const fallbackResults = {
-                clinical_summary: "Clinical Sentinel identified high-probability heuristics based on documentation metadata.",
-                is_recovery_mode: true,
-                recovery_reason: reason,
-                primary: { code: 'I10', description: 'Essential (primary) hypertension', group: 'F' },
-                secondary: [
-                    { code: 'E11.9', description: 'Type 2 diabetes mellitus without complications', group: 'K' }
-                ]
-            };
-
-            const searchString = (
-                formData.diagnosis_text + " " + 
-                formData.services_needed + " " + 
-                (clinicalDocs[0]?.name || "") + " " + 
-                formData.patient_last_name
-            ).toLowerCase();
-
-            if (searchString.includes('append') || searchString.includes('abdominal') || searchString.includes('rlq')) {
-                fallbackResults.primary = { code: 'K35.80', description: 'Unspecified acute appendicitis', group: 'G' };
-                fallbackResults.clinical_summary = "Heuristic parsing identified acute abdominal inflammation suggestive of Appendicitis.";
-            } else if (searchString.includes('chf') || searchString.includes('heart') || searchString.includes('cardiac')) {
-                fallbackResults.primary = { code: 'I50.9', description: 'Heart failure, unspecified', group: 'F' };
-                fallbackResults.clinical_summary = "Heuristic parsing identified signs of cardiovascular insufficiency.";
-            } else if (searchString.includes('copd') || searchString.includes('lung') || searchString.includes('resp')) {
-                fallbackResults.primary = { code: 'J44.9', description: 'Chronic obstructive pulmonary disease, unspecified', group: 'H' };
-            }
-
-            setAiSuggestions(fallbackResults);
-            setTimeout(() => setCurrentStep(3), 1500);
-        }, 1200);
     };
 
     const applyAiCode = async (codeData, isPrimary = false) => {
