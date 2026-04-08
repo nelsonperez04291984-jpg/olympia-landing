@@ -30,6 +30,7 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
     const [functionalLevel, setFunctionalLevel] = useState('medium');
     const [comorbidityAdjustment, setComorbidityAdjustment] = useState('none');
     const [activeSubTab, setActiveSubTab] = useState('diagnoses'); // 'diagnoses', 'chart', 'assessment'
+    const [searchQuery, setSearchQuery] = useState('');
 
     const handleSelectDiagnosis = (codeData, target) => {
         if (target === 'primary') {
@@ -45,6 +46,7 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
             }
         }
         setIsSearching(false);
+        setSearchQuery('');
     };
 
     const removeSecondary = (code) => {
@@ -184,15 +186,19 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
                                             </div>
                                             <input 
                                                 type="text"
+                                                value={searchTarget === 'primary' ? searchQuery : ''}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
                                                 placeholder="Start typing to search Primary ICD-10 codes..."
                                                 onFocus={() => { setIsSearching(true); setSearchTarget('primary'); }}
                                                 className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:border-teal-500/50 focus:bg-white transition-all shadow-sm"
                                             />
                                         </div>
-                                        {isSearching && searchTarget === 'primary' && (
-                                            <div className="animate-fadeInDown">
+                                        {isSearching && searchTarget === 'primary' && searchQuery.length > 0 && (
+                                            <div className="animate-fadeInDown mt-2">
                                                 <ICD10Search 
                                                     isEmbedded={true} 
+                                                    hideSearch={true}
+                                                    externalQuery={searchQuery}
                                                     onSelect={(code) => handleSelectDiagnosis(code, 'primary')}
                                                     externalContext={{ admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment }}
                                                 />
@@ -232,15 +238,19 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
                                             </div>
                                             <input 
                                                 type="text"
+                                                value={searchTarget === 'secondary' ? searchQuery : ''}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
                                                 placeholder="Add Secondary Diagnosis (Comorbidity)..."
                                                 onFocus={() => { setIsSearching(true); setSearchTarget('secondary'); }}
                                                 className="w-full bg-slate-50 border-2 border-slate-50 rounded-xl py-3 pl-12 pr-4 text-xs font-medium focus:outline-none focus:border-indigo-500/30 focus:bg-white transition-all"
                                             />
                                         </div>
-                                        {isSearching && searchTarget === 'secondary' && (
-                                            <div className="animate-fadeInDown">
+                                        {isSearching && searchTarget === 'secondary' && searchQuery.length > 0 && (
+                                            <div className="animate-fadeInDown mt-2">
                                                 <ICD10Search 
                                                     isEmbedded={true} 
+                                                    hideSearch={true}
+                                                    externalQuery={searchQuery}
                                                     onSelect={(code) => handleSelectDiagnosis(code, 'secondary')}
                                                     externalContext={{ admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment }}
                                                 />

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Search, Loader2, Clipboard, CheckCircle2, AlertCircle, Stethoscope, Info, TrendingUp, DollarSign, Activity, FileText } from 'lucide-react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const ICD10Search = ({ isEmbedded = false, onSelect = null, externalContext = null }) => {
-    const [query, setQuery] = useState('');
+const ICD10Search = ({ isEmbedded = false, onSelect = null, externalContext = null, hideSearch = false, externalQuery = '' }) => {
+    const [query, setQuery] = useState(externalQuery || '');
     const [results, setResults] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
@@ -34,6 +34,27 @@ const ICD10Search = ({ isEmbedded = false, onSelect = null, externalContext = nu
             finalWeight: weight.toFixed(4)
         };
     };
+
+    // Handle external query changes
+    useEffect(() => {
+        if (externalQuery !== undefined && externalQuery !== null) {
+            setQuery(externalQuery);
+        }
+    }, [externalQuery]);
+
+    // Automatic search when query changes (debounced)
+    useEffect(() => {
+        if (!query.trim()) {
+            setResults(null);
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            handleSearch({ preventDefault: () => {} });
+        }, 500); // 500ms debounce for performance
+
+        return () => clearTimeout(timer);
+    }, [query]);
 
     // Keep results reactive to context changes
     useEffect(() => {
@@ -175,7 +196,7 @@ const ICD10Search = ({ isEmbedded = false, onSelect = null, externalContext = nu
     if (isEmbedded) {
         return (
             <div className="space-y-4">
-                {searchInputUI}
+                {!hideSearch && searchInputUI}
                 {error && <p className="text-xs text-red-500 font-bold ml-1 flex items-center gap-1"><AlertCircle size={14} /> {error}</p>}
                 {results && (
                     <div className="bg-white border-2 border-slate-100 rounded-2xl overflow-hidden shadow-xl animate-fadeInUp max-h-[400px] overflow-y-auto custom-scrollbar">
