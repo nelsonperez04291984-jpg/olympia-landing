@@ -838,8 +838,8 @@ app.post('/api/admin/extract-clinical-data', async (req, res) => {
     const base64Data = Buffer.from(buffer).toString('base64');
     const mimeType = response.headers.get('content-type') || 'application/pdf';
 
-    // 2. Initialize Gemini 1.5 Flash (Using -latest alias for maximum stability)
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    // 2. Initialize Gemini 1.5 Flash (Forcing STABLE v1 API version)
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: "v1" });
 
     const prompt = `
       You are a Clinical Coding Specialist for a Home Health Agency. 
