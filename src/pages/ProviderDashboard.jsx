@@ -185,10 +185,21 @@ const ProviderDashboard = () => {
                 ]
             };
 
-            if (patientMeta.includes('append') || patientMeta.includes('abdominal')) {
+            const searchString = (
+                formData.diagnosis_text + " " + 
+                formData.services_needed + " " + 
+                (clinicalDocs[0]?.name || "") + " " + 
+                formData.patient_last_name
+            ).toLowerCase();
+
+            if (searchString.includes('append') || searchString.includes('abdominal') || searchString.includes('rlq')) {
                 fallbackResults.primary = { code: 'K35.80', description: 'Unspecified acute appendicitis', group: 'G' };
-            } else if (patientMeta.includes('chf') || patientMeta.includes('heart')) {
+                fallbackResults.clinical_summary = "Heuristic parsing identified acute abdominal inflammation suggestive of Appendicitis.";
+            } else if (searchString.includes('chf') || searchString.includes('heart') || searchString.includes('cardiac')) {
                 fallbackResults.primary = { code: 'I50.9', description: 'Heart failure, unspecified', group: 'F' };
+                fallbackResults.clinical_summary = "Heuristic parsing identified signs of cardiovascular insufficiency.";
+            } else if (searchString.includes('copd') || searchString.includes('lung') || searchString.includes('resp')) {
+                fallbackResults.primary = { code: 'J44.9', description: 'Chronic obstructive pulmonary disease, unspecified', group: 'H' };
             }
 
             setAiSuggestions(fallbackResults);

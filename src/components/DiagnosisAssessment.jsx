@@ -183,14 +183,22 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null, onUpdateDocs 
             };
 
             // Custom logic: If text contains specific keywords, adjust fallback
-            if (patientMeta.includes('append') || patientMeta.includes('abdominal')) {
+            const searchString = (
+                referralData.diagnosis + " " + 
+                referralData.services_needed + " " + 
+                (referralData.patient_name || "") + " " + 
+                (referralData.document_urls || "")
+            ).toLowerCase();
+
+            if (searchString.includes('append') || searchString.includes('abdominal') || searchString.includes('rlq')) {
                 fallbackResults.primary = { code: 'K35.80', description: 'Unspecified acute appendicitis', group: 'G' };
                 fallbackResults.clinical_summary = "Heuristic parsing identified acute abdominal inflammation suggestive of Appendicitis.";
-            } else if (patientMeta.includes('chf') || patientMeta.includes('heart')) {
+            } else if (searchString.includes('chf') || searchString.includes('heart') || searchString.includes('cardiac')) {
                 fallbackResults.primary = { code: 'I50.9', description: 'Heart failure, unspecified', group: 'F' };
-            } else if (patientMeta.includes('copd') || patientMeta.includes('breath')) {
-                fallbackResults.primary = { code: 'J44.9', description: 'COPD, unspecified', group: 'H' };
-            } else if (patientMeta.includes('wound') || patientMeta.includes('surg')) {
+                fallbackResults.clinical_summary = "Heuristic parsing identified signs of cardiovascular insufficiency.";
+            } else if (searchString.includes('copd') || searchString.includes('lung') || searchString.includes('resp')) {
+                fallbackResults.primary = { code: 'J44.9', description: 'Chronic obstructive pulmonary disease, unspecified', group: 'H' };
+            } else if (searchString.includes('wound') || searchString.includes('surg') || searchString.includes('aftercare')) {
                 fallbackResults.primary = { code: 'Z48.812', description: 'Encounter for surgical aftercare following surgery on the circulatory system', group: 'A' };
             }
 
