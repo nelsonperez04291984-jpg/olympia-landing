@@ -185,9 +185,9 @@ const styles = {
     tdSub: { fontSize: 12, color: PURPLE_SOFT, fontWeight: 500 },
 
     providerIdBadge: {
-        padding: '4px 12px', background: PURPLE_DARK, color: GOLD,
-        borderRadius: 8, fontSize: 11, fontWeight: 900, fontFamily: 'monospace',
-        boxShadow: '0 2px 8px rgba(26,10,46,0.2)'
+        padding: '3px 10px', background: '#F8F6FF', color: PURPLE_MID,
+        borderRadius: 8, fontSize: 9, fontWeight: 950, fontFamily: 'monospace',
+        border: '1.5px solid #EDE9FE', letterSpacing: '0.05em'
     },
 
     deleteBtn: {
@@ -196,10 +196,11 @@ const styles = {
         alignItems: 'center', transition: 'all 0.2s'
     },
     shareIconBtn: {
-        background: 'rgba(59,31,106,0.05)', border: 'none', cursor: 'pointer',
-        color: PURPLE_MID, padding: '10px', borderRadius: 12, display: 'flex',
+        background: WHITE, border: '1px solid #EDE9FE', cursor: 'pointer',
+        color: PURPLE_MID, padding: '8px', borderRadius: 10, display: 'flex',
         alignItems: 'center', transition: 'all 0.2s',
-        ':hover': { background: 'rgba(59,31,106,0.1)' }
+        boxShadow: SHADOW_SM,
+        ':hover': { transform: 'translateY(-1px)', borderColor: PURPLE_SOFT, color: PURPLE_DARK }
     },
 
     /* ── AI Logs ── */
@@ -884,48 +885,48 @@ const AdminDashboard = () => {
                             ))}
                         </div>
 
-                        <div style={styles.twoCol}>
-                            {/* Providers table */}
-                            <div style={styles.panelCard}>
-                                <div style={styles.panelHeader}>
-                                    <h3 style={styles.panelTitle}>Registered Providers</h3>
-                                    <button onClick={() => { setActiveTab('users'); setViewMode('create'); }} style={styles.panelLink}>Add New</button>
-                                </div>
-                                <table style={styles.table}>
-                                    <thead style={styles.thead}>
-                                        <tr>
-                                            <th style={styles.th}>Name</th>
-                                            <th style={styles.th}>Provider ID</th>
-                                            <th style={styles.th}>Fast-Link</th>
-                                            <th style={styles.th}>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {stats.providers.map((p, i) => (
-                                            <tr key={i}>
-                                                <td style={styles.td}>
-                                                    <div style={styles.tdName}>{p.name}</div>
-                                                    <div style={styles.tdSub}>{p.email}</div>
-                                                </td>
-                                                <td style={styles.td}>
-                                                    <span style={styles.providerIdBadge}>{p.provider_id}</span>
-                                                </td>
-                                                <td style={styles.td}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                                        <button 
-                                                            onClick={() => handleCopyLink(p.referral_token)}
-                                                            style={{
-                                                                display: 'flex', alignItems: 'center', gap: 6, background: copiedToken === p.referral_token ? '#F0FDF4' : 'rgba(107,79,160,0.05)',
-                                                                border: `1px solid ${copiedToken === p.referral_token ? '#16A34A' : '#EDE9FE'}`,
-                                                                borderRadius: 10, padding: '6px 12px', cursor: 'pointer',
-                                                                color: copiedToken === p.referral_token ? '#16A34A' : PURPLE_LIGHT,
-                                                                fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em',
-                                                                transition: 'all 0.2s'
-                                                            }}
-                                                        >
-                                                            {copiedToken === p.referral_token ? <Check size={12} /> : <LinkIcon size={12} />}
-                                                            {copiedToken === p.referral_token ? 'Copied' : 'Fast-Link'}
-                                                        </button>
+                        {/* Providers table */}
+                        <div style={styles.panelCard}>
+                            <div style={styles.panelHeader}>
+                                <h3 style={styles.panelTitle}>Registered Providers</h3>
+                                <button onClick={() => { setActiveTab('users'); setViewMode('create'); }} style={styles.panelLink}>Add New</button>
+                            </div>
+                            <table style={styles.table}>
+                                <thead style={styles.thead}>
+                                    <tr>
+                                        <th style={styles.th}>Name</th>
+                                        <th style={styles.th}>Provider ID</th>
+                                        <th style={styles.th}>Fast-Link</th>
+                                        <th style={styles.th}>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {stats.providers.map((p, i) => (
+                                        <tr key={i}>
+                                            <td style={styles.td}>
+                                                <div style={styles.tdName}>{p.name}</div>
+                                                <div style={styles.tdSub}>{p.email}</div>
+                                            </td>
+                                            <td style={styles.td}>
+                                                <span style={styles.providerIdBadge}>{p.provider_id}</span>
+                                            </td>
+                                            <td style={{ ...styles.td, width: 220 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                    <button 
+                                                        onClick={() => handleCopyLink(p.referral_token)}
+                                                        style={{
+                                                            display: 'flex', alignItems: 'center', gap: 6, background: copiedToken === p.referral_token ? '#F0FDF4' : PURPLE_MID,
+                                                            border: `1.5px solid ${copiedToken === p.referral_token ? '#16A34A' : PURPLE_DARK}`,
+                                                            borderRadius: 10, padding: '6px 12px', cursor: 'pointer',
+                                                            color: copiedToken === p.referral_token ? '#16A34A' : GOLD,
+                                                            fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.04em',
+                                                            transition: 'all 0.2s', boxShadow: SHADOW_SM
+                                                        }}
+                                                    >
+                                                        {copiedToken === p.referral_token ? <Check size={12} /> : <LinkIcon size={12} />}
+                                                        {copiedToken === p.referral_token ? 'Copied' : 'Fast-Link'}
+                                                    </button>
+                                                    <div style={{ display: 'flex', gap: 4 }}>
                                                         <button onClick={() => handleShareEmail(p.name, p.referral_token)} style={styles.shareIconBtn} title="Share via Email">
                                                             <Mail size={14} />
                                                         </button>
@@ -933,17 +934,17 @@ const AdminDashboard = () => {
                                                             <MessageCircle size={14} />
                                                         </button>
                                                     </div>
-                                                </td>
-                                                <td style={styles.td}>
-                                                    <button onClick={() => setConfirmDelete({ show: true, type: 'provider', id: p.id, name: p.name })} style={styles.deleteBtn}>
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                                </div>
+                                            </td>
+                                            <td style={styles.td}>
+                                                <button onClick={() => setConfirmDelete({ show: true, type: 'provider', id: p.id, name: p.name })} style={styles.deleteBtn}>
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </>
                 )}
