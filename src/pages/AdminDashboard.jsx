@@ -583,6 +583,37 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleUpdateDocuments = async (referralId, urls) => {
+        setClinicalStatus({ show: true, message: 'Attaching Clinical Packet...', type: 'loading' });
+        try {
+            const res = await fetch(`/api/admin/referrals/${referralId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('olympia_admin_token')}`
+                },
+                body: JSON.stringify({
+                    document_urls: urls
+                })
+            });
+
+            if (res.ok) {
+                const updatedReferral = await res.json();
+                setClinicalStatus({ show: true, message: 'Clinical Packet Attached Successfully', type: 'success' });
+                setTimeout(() => setClinicalStatus({ show: false, message: '', type: 'success' }), 3000);
+                
+                // Update local list
+                setReferrals(prev => prev.map(r => r.id === referralId ? { ...r, document_urls: updatedReferral.document_urls } : r));
+                // Update active episode so child sees new docs
+                setActiveEpisode(prev => prev && prev.id === referralId ? { ...prev, document_urls: updatedReferral.document_urls } : prev);
+            } else {
+                setClinicalStatus({ show: true, message: 'Failed to Attach Packet', type: 'error' });
+            }
+        } catch (err) {
+            setClinicalStatus({ show: true, message: 'Connection Error', type: 'error' });
+        }
+    };
+
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [mgmtTab, setMgmtTab] = useState('provider');
@@ -1231,7 +1262,11 @@ const AdminDashboard = () => {
                                     Case Locks in 48h
                                 </div>
                             </div>
-                            <DiagnosisAssessment referralData={activeEpisode} onSave={(data) => handleSaveDiagnosis(activeEpisode.id, data)} />
+                            <DiagnosisAssessment 
+                                referralData={activeEpisode} 
+                                onSave={(data) => handleSaveDiagnosis(activeEpisode.id, data)}
+                                onUpdateDocs={(urls) => handleUpdateDocuments(activeEpisode.id, urls)}
+                            />
                         </div>
                     )
                 )}

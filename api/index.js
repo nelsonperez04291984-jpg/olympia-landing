@@ -439,16 +439,17 @@ app.get('/api/admin/referrals', async (req, res) => {
 // Update Referral (Status & Clinical Data)
 app.patch('/api/admin/referrals/:id', async (req, res) => {
   const { id } = req.params;
-  const { status, icd_primary, icd_secondary, pdgm_weight } = req.body;
+  const { status, icd_primary, icd_secondary, pdgm_weight, document_urls } = req.body;
   try {
     const result = await pool.query(
       `UPDATE referrals 
        SET status = COALESCE($1, status), 
            icd_primary = COALESCE($2, icd_primary), 
            icd_secondary = COALESCE($3, icd_secondary), 
-           pdgm_weight = COALESCE($4, pdgm_weight) 
-       WHERE id = $5 RETURNING *`,
-      [status, icd_primary, icd_secondary, pdgm_weight, id]
+           pdgm_weight = COALESCE($4, pdgm_weight),
+           document_urls = COALESCE($5, document_urls)
+       WHERE id = $6 RETURNING *`,
+      [status, icd_primary, icd_secondary, pdgm_weight, document_urls ? JSON.stringify(document_urls) : null, id]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Referral not found' });
     res.json(result.rows[0]);

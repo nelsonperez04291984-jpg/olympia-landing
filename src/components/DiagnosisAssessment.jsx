@@ -13,11 +13,14 @@ import {
   CheckCircle2,
   Info,
   DollarSign,
-  Activity
+  Activity,
+  FilePlus,
+  Loader2
 } from 'lucide-react';
 import ICD10Search from './ICD10Search';
 
-const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
+const DiagnosisAssessment = ({ referralData = null, onSave = null, onUpdateDocs = null }) => {
+    const [isUploading, setIsUploading] = useState(false);
     const [primaryDiagnosis, setPrimaryDiagnosis] = useState(null);
     const [secondaryDiagnoses, setSecondaryDiagnoses] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -92,6 +95,32 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
             });
             setShowSaveMessage(true);
             setTimeout(() => setShowSaveMessage(false), 3000);
+        }
+    };
+
+    const handleAdminFileUpload = async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+        
+        setIsUploading(true);
+        const formDataUpload = new FormData();
+        files.forEach(f => formDataUpload.append('files', f));
+        
+        try {
+            const res = await fetch('/api/public/upload', {
+                method: 'POST',
+                body: formDataUpload
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (onUpdateDocs) {
+                    onUpdateDocs(data.files);
+                }
+            }
+        } catch (err) {
+            console.error("Admin upload failed", err);
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -196,6 +225,26 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
                                     <p className="text-slate-400 text-xs font-semibold">Assign primary and secondary ICD-10-CM codes for this episode.</p>
                                 </div>
                                 <div className="flex items-center gap-3">
+                                    {/* Upload Trigger (Visible if Docs Missing) */}
+                                    {(!referralData?.document_urls || referralData.document_urls.length === 0 || referralData.document_urls === '[]') && (
+                                        <>
+                                            <input 
+                                                type="file" 
+                                                id="admin-referral-docs" 
+                                                multiple 
+                                                hidden 
+                                                onChange={handleAdminFileUpload} 
+                                            />
+                                            <label 
+                                                htmlFor="admin-referral-docs"
+                                                className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl cursor-pointer bg-slate-100 text-slate-500 hover:bg-slate-200 ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}
+                                            >
+                                                {isUploading ? <Loader2 size={14} className="animate-spin" /> : <FilePlus size={14} />}
+                                                {isUploading ? 'Uploading...' : 'Upload Clinical Packet'}
+                                            </label>
+                                        </>
+                                    )}
+
                                     {(referralData?.document_urls?.length > 0 || (typeof referralData?.document_urls === 'string' && referralData.document_urls !== '[]')) && (
                                         <button 
                                             onClick={handlePulseScan}
@@ -214,6 +263,21 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
                                     </button>
                                 </div>
                             </div>
+
+                            {/* DOCUMENTATION MISSING ALERT */}
+                            {(!referralData?.document_urls || referralData.document_urls.length === 0 || referralData.document_urls === '[]') && (
+                                <div className="bg-amber-50 border-2 border-amber-100 rounded-3xl p-6 flex items-center justify-between gap-6 animate-pulse-subtle">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-2xl bg-amber-200 flex items-center justify-center text-amber-700 shadow-inner">
+                                            <AlertCircle size={24} />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-black text-amber-900 uppercase tracking-tight">Clinical Documentation Missing</h4>
+                                            <p className="text-amber-700 text-[11px] font-bold mt-1">AI PulseScan is disabled. Please upload a Discharge Summary or Referral Packet to enable automated extraction.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="p-8 space-y-10">
                                 {/* AI Suggestions Area */}
