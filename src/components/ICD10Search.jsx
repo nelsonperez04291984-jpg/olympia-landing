@@ -75,73 +75,73 @@ const ICD10Search = ({ isEmbedded = false, onSelect = null, externalContext = nu
 
             // ── 2. AI Enrichment ─────────────────────────────────────
             const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+            let finalResults = localResults.map(r => {
+                const calc = calculateReimbursement(1.0);
+                return { 
+                    ...r, 
+                    base_weight: 1.0, 
+                    is_primary_allowed: true, 
+                    reasoning: "Direct match from clinical database.", 
+                    tips: [], 
+                    calculated_payment: calc.amount, 
+                    final_weight: calc.finalWeight 
+                };
+            });
+
             if (API_KEY && localResults.length > 0) {
-                const genAI = new GoogleGenerativeAI(API_KEY);
-                const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+                try {
+                    const genAI = new GoogleGenerativeAI(API_KEY);
+                    // Use flash for speed, but wrap in try/catch for quota
+                    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-                const enrichPrompt = `
-                You are a PDGM Clinical Analyst. I have these ICD-10 codes from our master database.
-                For each code, provide the missing clinical analytics for home health reimbursement.
-                
-                Input Codes:
-                ${localResults.map(r => `${r.code}: ${r.description}`).join('\n')}
+                    const enrichPrompt = `
+                    You are a PDGM Clinical Analyst. I have these ICD-10 codes from our master database.
+                    For each code, provide the missing clinical analytics for home health reimbursement.
+                    
+                    Input Codes:
+                    ${localResults.map(r => `${r.code}: ${r.description}`).join('\n')}
 
-                For each code provide:
-                1. Estimated PDGM Base Case-Mix Weight (0.8 - 2.5).
-                2. Whether it is a valid PRIMARY diagnosis under CMS 2024 rules.
-                3. Clinical reasoning (merging medical necessity with reimbursement impact).
-                4. 2-3 specific clinical documentation tips.
+                    For each code provide:
+                    1. Estimated PDGM Base Case-Mix Weight (0.8 - 2.5).
+                    2. Whether it is a valid PRIMARY diagnosis under CMS 2024 rules.
+                    3. Clinical reasoning.
+                    4. 2-3 clinical documentation tips.
 
-                Respond ONLY with a JSON array of objects:
-                [
-                    {
-                        "code": "ICD-10 Code",
-                        "base_weight": 1.25,
-                        "is_primary_allowed": true,
-                        "reasoning": "...",
-                        "tips": ["..."]
+                    Respond ONLY with a JSON array: [{"code": "...", "base_weight": 1.2, "is_primary_allowed": true, "reasoning": "...", "tips": ["..."]}]
+                    `;
+
+                    const aiResult = await model.generateContent(enrichPrompt);
+                    const aiText = aiResult.response.text();
+                    const jsonMatch = aiText.match(/\[[\s\S]*\]/);
+                    
+                    if (jsonMatch) {
+                        const enrichmentData = JSON.parse(jsonMatch[0]);
+                        finalResults = localResults.map(local => {
+                            const aiData = enrichmentData.find(a => a.code === local.code) || {};
+                            const base_weight = aiData.base_weight || 1.0;
+                            const calc = calculateReimbursement(base_weight);
+                            
+                            return {
+                                ...local,
+                                base_weight,
+                                is_primary_allowed: aiData.is_primary_allowed ?? true,
+                                reasoning: aiData.reasoning || "Direct match from clinical database.",
+                                tips: aiData.tips || [],
+                                calculated_payment: calc.amount,
+                                final_weight: calc.finalWeight,
+                                ai_enriched: true
+                            };
+                        });
                     }
-                ]
-                `;
-
-                const aiResult = await model.generateContent(enrichPrompt);
-                const aiText = aiResult.response.text();
-                const jsonMatch = aiText.match(/\[[\s\S]*\]/);
-                
-                if (jsonMatch) {
-                    const enrichmentData = JSON.parse(jsonMatch[0]);
-                    const enriched = localResults.map(local => {
-                        const aiData = enrichmentData.find(a => a.code === local.code) || {};
-                        const base_weight = aiData.base_weight || 1.0;
-                        const calc = calculateReimbursement(base_weight);
-                        
-                        return {
-                            ...local,
-                            base_weight,
-                            is_primary_allowed: aiData.is_primary_allowed ?? true,
-                            reasoning: aiData.reasoning || "Direct match from clinical database.",
-                            tips: aiData.tips || [],
-                            calculated_payment: calc.amount,
-                            final_weight: calc.finalWeight
-                        };
-                    });
-                    setResults(enriched);
-                } else {
-                    // Fallback if AI fails: Use dummy weights
-                    setResults(localResults.map(r => {
-                        const calc = calculateReimbursement(1.0);
-                        return { ...r, base_weight: 1.0, is_primary_allowed: true, tips: [], calculated_payment: calc.amount, final_weight: calc.finalWeight };
-                    }));
+                } catch (aiErr) {
+                    console.warn("AI Enrichment failed (likely quota):", aiErr);
+                    // We already have the default finalResults set up above
+                    // Maybe add a flag to show AI is unavailable
+                    finalResults = finalResults.map(r => ({ ...r, ai_unavailable: true }));
                 }
-            } else if (localResults.length > 0) {
-                // No AI Key: Return basic results
-                setResults(localResults.map(r => {
-                    const calc = calculateReimbursement(1.0);
-                    return { ...r, base_weight: 1.0, is_primary_allowed: true, tips: [], calculated_payment: calc.amount, final_weight: calc.finalWeight };
-                }));
-            } else {
-                setError("No matching diagnoses found in the clinical database.");
             }
+            
+            setResults(finalResults);
         } catch (err) {
             console.error("Search Error:", err);
             setError(`Search failed: ${err.message}`);
