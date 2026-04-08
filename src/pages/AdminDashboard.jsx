@@ -30,7 +30,8 @@ import {
     Check,
     MessageCircle,
     Shield,
-    Plus
+    Plus,
+    DollarSign
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import DiagnosisAssessment from '../components/DiagnosisAssessment';
@@ -284,6 +285,31 @@ const styles = {
             background: s.bg, color: s.color, whiteSpace: 'nowrap',
             boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
         };
+    },
+
+    slaBadge: (priority) => {
+        const map = {
+            Healthy: { bg: '#F0FDF4', color: '#16A34A', border: '#DCFCE7' },
+            Warning: { bg: '#FFFBEB', color: '#B45309', border: '#FEF3C7' },
+            Overdue: { bg: '#FEF2F2', color: '#DC2626', border: '#FEE2E2' },
+            Resolved: { bg: '#F3F4F6', color: '#6B7280', border: '#E5E7EB' }
+        };
+        const s = map[priority] || map.Healthy;
+        return {
+            display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px',
+            borderRadius: 8, fontSize: 9, fontWeight: 950, textTransform: 'uppercase',
+            letterSpacing: '0.05em', background: s.bg, color: s.color, border: `1.5px solid ${s.border}`
+        };
+    },
+
+    moneyValue: {
+        fontSize: 16, fontWeight: 950, color: PURPLE_DARK, display: 'flex', alignItems: 'flex-start', gap: 1
+    },
+
+    pulseBadge: {
+        width: 14, height: 14, borderRadius: '50%', background: GOLD,
+        boxShadow: `0 0 10px ${GOLD}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        animation: 'pulse 2s infinite'
     },
 
     actionIconBtn: (bg, color) => ({
@@ -1381,73 +1407,99 @@ const AdminDashboard = () => {
                     </div>
                 )}
 
-                {/* ── CLINICAL CENSUS VIEW ── */}
+                {/* ── CLINICAL CENSUS VIEW (Advanced Control Center) ── */}
                 {activeTab === 'patients' && (
-                    <div className="animate-fadeIn">
-                        {/* Census HUD */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+                    <div className="animate-fadeIn space-y-8">
+                        
+                        {/* Control Center HUD */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {[
-                                { label: 'Total Census', value: referrals.length, icon: <Users size={16} />, color: '#6B4FA0' },
-                                { label: 'Admitted / SOC', value: referrals.filter(r => r.status === 'Admitted').length, icon: <CheckCircle2 size={16} />, color: '#10B981' },
-                                { label: 'In Coding', value: referrals.filter(r => r.status === 'Processing').length, icon: <Activity size={16} />, color: GOLD_DARK },
-                                { label: 'Avg Case Weight', value: (referrals.filter(r => r.pdgm_weight).reduce((acc, curr) => acc + parseFloat(curr.pdgm_weight || 0), 0) / (referrals.filter(r => r.pdgm_weight).length || 1)).toFixed(3), icon: <TrendingUp size={16} />, color: '#3B82F6' },
+                                { 
+                                    label: 'Clinical Census', 
+                                    value: referrals.length, 
+                                    sub: `${referrals.filter(r => r.status === 'Admitted').length} Active SOC`, 
+                                    icon: <Users size={20} />, 
+                                    color: '#6366F1' 
+                                },
+                                { 
+                                    label: 'Awaiting Coding', 
+                                    value: referrals.filter(r => r.status === 'Processing').length, 
+                                    sub: 'Avg 4.2h Latency', 
+                                    icon: <Zap size={20} />, 
+                                    color: GOLD_DARK 
+                                },
+                                { 
+                                    label: 'Case Weight Avg', 
+                                    value: (referrals.filter(r => r.pdgm_weight).reduce((acc, curr) => acc + parseFloat(curr.pdgm_weight || 0), 0) / (referrals.filter(r => r.pdgm_weight).length || 1)).toFixed(3), 
+                                    sub: '+12% vs Prev Month', 
+                                    icon: <TrendingUp size={20} />, 
+                                    color: '#10B981' 
+                                },
+                                { 
+                                    label: 'Est. Revenue Pending', 
+                                    value: `$${(referrals.filter(r => r.status === 'Processing').length * 2038).toLocaleString()}`, 
+                                    sub: 'Projected Billing', 
+                                    icon: <DollarSign size={20} />, 
+                                    color: '#3B82F6' 
+                                },
                             ].map((stat, i) => (
-                                <div key={i} style={{ padding: '20px', background: WHITE, borderRadius: 20, border: '1px solid #EDE9FE', boxShadow: SHADOW_SM }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                                        <div style={{ width: 32, height: 32, borderRadius: 10, background: `${stat.color}10`, color: stat.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div key={i} className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div style={{ backgroundColor: `${stat.color}10`, color: stat.color }} className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
                                             {stat.icon}
                                         </div>
-                                        <span style={{ fontSize: 10, fontWeight: 900, color: PURPLE_SOFT, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{stat.label}</span>
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</span>
                                     </div>
-                                    <div style={{ fontSize: 24, fontWeight: 950, color: PURPLE_DARK }}>{stat.value}</div>
+                                    <div className="text-3xl font-black text-slate-900 tracking-tight">{stat.value}</div>
+                                    <div className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-tighter">{stat.sub}</div>
                                 </div>
                             ))}
                         </div>
 
-                        {/* Census Controls */}
-                        <div style={{ background: WHITE, padding: '16px 24px', borderRadius: 20, border: '1px solid #EDE9FE', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20 }}>
-                            <div style={{ display: 'flex', gap: 8 }}>
+                        {/* Census Controls & Filters */}
+                        <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+                            <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100">
                                 {['all', 'referral', 'processing', 'admitted'].map(f => (
                                     <button
                                         key={f}
                                         onClick={() => setCensusFilter(f)}
-                                        style={{
-                                            padding: '8px 16px', borderRadius: 10, border: 'none',
-                                            background: censusFilter === f ? PURPLE_DARK : '#F3EFF9',
-                                            color: censusFilter === f ? GOLD : PURPLE_MID,
-                                            fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.08em',
-                                            cursor: 'pointer', transition: 'all 0.2s'
-                                        }}
+                                        className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${censusFilter === f ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
                                     >
                                         {f}
                                     </button>
                                 ))}
                             </div>
-                            <div style={{ position: 'relative', flex: 1, maxWidth: 400 }}>
-                                <Search size={16} color={PURPLE_SOFT} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
-                                <input
-                                    type="text"
-                                    placeholder="Search by patient name, ID, or condition..."
-                                    value={censusSearch}
-                                    onChange={e => setCensusSearch(e.target.value)}
-                                    style={{ ...styles.input, paddingLeft: 42, background: '#F3EFF9', border: 'none' }}
-                                />
+
+                            <div className="flex items-center gap-4 w-full md:w-auto">
+                                <div className="relative flex-1 md:w-80">
+                                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search clinical records..."
+                                        value={censusSearch}
+                                        onChange={e => setCensusSearch(e.target.value)}
+                                        className="w-full bg-slate-50 border-2 border-transparent focus:border-slate-100 focus:bg-white rounded-2xl py-3 pl-12 pr-4 text-sm font-bold placeholder:text-slate-300 outline-none transition-all"
+                                    />
+                                </div>
+                                <button className="p-3 bg-slate-900 text-white rounded-2xl hover:bg-slate-800 transition-all shadow-lg active:scale-95">
+                                    <Activity size={20} />
+                                </button>
                             </div>
                         </div>
 
-                        {/* Census Table Container */}
-                        <div style={{ background: WHITE, borderRadius: 24, border: '1px solid #EDE9FE', boxShadow: '0 10px 40px rgba(26,10,46,0.08)', overflow: 'hidden' }}>
-                            <table style={styles.table}>
+                        {/* Central Intelligence Table */}
+                        <div className="bg-white rounded-[40px] border border-slate-100 shadow-xl overflow-hidden">
+                            <table className="w-full border-collapse">
                                 <thead>
-                                    <tr>
-                                        <th style={styles.th}>Patient & Identity</th>
-                                        <th style={styles.th}>Clinical Status</th>
-                                        <th style={styles.th}>Financial/PDGM</th>
-                                        <th style={styles.th}>Last Interaction</th>
-                                        <th style={styles.th}>Actions</th>
+                                    <tr className="bg-slate-50/50">
+                                        <th className="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-bottom border-slate-50">Patient & Priority</th>
+                                        <th className="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-bottom border-slate-50">Clinical Pulse</th>
+                                        <th className="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-bottom border-slate-50">PDGM Financials</th>
+                                        <th className="px-8 py-6 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-bottom border-slate-50">SOC Status</th>
+                                        <th className="px-8 py-6 text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-bottom border-slate-50">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="divide-y divide-slate-50">
                                     {referrals
                                         .filter(r => {
                                             if (censusFilter === 'referral') return r.status === 'Pending';
@@ -1461,53 +1513,82 @@ const AdminDashboard = () => {
                                             (r.diagnosis && r.diagnosis.toLowerCase().includes(censusSearch.toLowerCase()))
                                         )
                                         .map(r => (
-                                            <tr key={r.id} style={styles.tr}>
-                                                <td style={styles.td}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                                        <div style={{ width: 36, height: 36, borderRadius: 10, background: `${PURPLE_DARK}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: PURPLE_DARK, fontSize: 14 }}>
+                                            <tr key={r.id} className="hover:bg-slate-50/50 transition-colors group">
+                                                <td className="px-8 py-6">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white font-black text-lg shadow-lg group-hover:scale-105 transition-transform">
                                                             {r.patient_name.charAt(0)}
                                                         </div>
                                                         <div>
-                                                            <div style={styles.tdName}>{r.patient_name}</div>
-                                                            <div style={{ fontSize: 10, color: PURPLE_SOFT, fontWeight: 700 }}>Born: {new Date(r.patient_dob).toLocaleDateString()}</div>
+                                                            <div className="font-black text-slate-900 text-sm flex items-center gap-2">
+                                                                {r.patient_name}
+                                                                {getSLAPriority(r.created_at, r.status) === 'Overdue' && (
+                                                                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" title="SLA Breached" />
+                                                                )}
+                                                            </div>
+                                                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                                                                ID: {r.id.toString().padStart(6, '0')} • {formatElapsed(r.created_at)}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td style={styles.td}>
-                                                    <span style={styles.statusPill(r.status)}>{r.status}</span>
-                                                    <div style={{ marginTop: 6, fontSize: 11, fontWeight: 700, color: PURPLE_MID }}>
-                                                        {r.primary_diagnosis?.pdgm_grouping || 'Awaiting Coding'}
-                                                    </div>
-                                                </td>
-                                                <td style={styles.td}>
-                                                    {r.pdgm_weight ? (
-                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                                            <div style={{ fontSize: 14, fontWeight: 950, color: PURPLE_DARK }}>{r.pdgm_weight}</div>
-                                                            <div style={{ fontSize: 9, fontWeight: 900, color: GOLD_DARK, textTransform: 'uppercase' }}>H-Level: {r.functional_level || 'Med'}</div>
+                                                <td className="px-8 py-6">
+                                                    {r.icd_primary ? (
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-lg text-[10px] font-black text-indigo-600 uppercase">
+                                                                {r.icd_primary}
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-500 truncate max-w-[140px]">
+                                                                {r.diagnosis}
+                                                            </div>
                                                         </div>
                                                     ) : (
-                                                        <span style={{ fontSize: 11, color: PURPLE_SOFT, fontStyle: 'italic' }}>Pending Assessment</span>
+                                                        <div className="flex items-center gap-2 text-slate-300 italic text-xs font-semibold">
+                                                            {(r.document_urls && r.document_urls.length > 0) ? (
+                                                                <div className="flex items-center gap-2 text-indigo-400">
+                                                                    <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse-subtle" />
+                                                                    <Zap size={12} /> PulseScan Ready
+                                                                </div>
+                                                            ) : (
+                                                                "Awaiting documentation..."
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </td>
-                                                <td style={styles.td}>
-                                                    <div style={{ fontSize: 12, fontWeight: 800, color: PURPLE_DARK }}>{formatElapsed(r.created_at)}</div>
-                                                    <div style={{ fontSize: 9, color: PURPLE_SOFT, fontWeight: 700 }}>Via: {r.provider_name || 'EHR Pipeline'}</div>
+                                                <td className="px-8 py-6">
+                                                    <div className="flex flex-col">
+                                                        <div className="flex items-center gap-1 font-black text-slate-900">
+                                                            <span className="text-teal-500 text-xs">$</span>
+                                                            {r.pdgm_weight ? (parseFloat(r.pdgm_weight) * 2038).toLocaleString(undefined, {minimumFractionDigits: 2}) : '0.00'}
+                                                        </div>
+                                                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                                                            Weight: {r.pdgm_weight || '0.000'} • {r.functional_level || 'Med'}
+                                                        </div>
+                                                    </div>
                                                 </td>
-                                                <td style={styles.td}>
-                                                    <div style={{ display: 'flex', gap: 6 }}>
+                                                <td className="px-8 py-6">
+                                                    <div className="space-y-2">
+                                                        <div style={styles.statusPill(r.status)}>{r.status}</div>
+                                                        <div style={styles.slaBadge(getSLAPriority(r.created_at, r.status))}>
+                                                            {getSLAPriority(r.created_at, r.status)}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-8 py-6">
+                                                    <div className="flex items-center justify-center gap-2">
                                                         <button 
                                                             onClick={() => setViewingPatient(r)}
-                                                            style={styles.actionIconBtn('rgba(107,79,160,0.08)', '#6B4FA0')} 
+                                                            className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm"
                                                             title="View Profile"
                                                         >
-                                                            <FileText size={15} />
+                                                            <FileText size={18} />
                                                         </button>
                                                         <button 
                                                             onClick={() => handleAssessAndCode(r)}
-                                                            style={styles.actionIconBtn('rgba(245,200,66,0.1)', GOLD_DARK)} 
+                                                            className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-gold-500 hover:text-white transition-all shadow-sm group"
                                                             title="Assess & Code"
                                                         >
-                                                            <Stethoscope size={15} />
+                                                            <Stethoscope size={18} className="group-hover:rotate-12 transition-transform" />
                                                         </button>
                                                     </div>
                                                 </td>

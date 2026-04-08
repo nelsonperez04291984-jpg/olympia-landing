@@ -31,6 +31,8 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
     const [comorbidityAdjustment, setComorbidityAdjustment] = useState('none');
     const [activeSubTab, setActiveSubTab] = useState('diagnoses'); // 'diagnoses', 'chart', 'assessment'
     const [searchQuery, setSearchQuery] = useState('');
+    const [isScanning, setIsScanning] = useState(false);
+    const [aiSuggestions, setAiSuggestions] = useState(null);
 
     const handleSelectDiagnosis = (codeData, target) => {
         if (target === 'primary') {
@@ -88,6 +90,57 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
                 payment: analytics.amount,
                 context: { admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment }
             });
+            setShowSaveMessage(true);
+            setTimeout(() => setShowSaveMessage(false), 3000);
+        }
+    };
+
+    const handlePulseScan = async () => {
+        if (!referralData?.document_urls || referralData.document_urls.length === 0) return;
+        
+        setIsScanning(true);
+        setAiSuggestions(null);
+        try {
+            const rawUrls = referralData.document_urls;
+            const fileUrl = typeof rawUrls === 'string' 
+                ? JSON.parse(rawUrls)[0] 
+                : rawUrls[0];
+
+            const res = await fetch('/api/admin/extract-clinical-data', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('olympia_admin_token')}`
+                },
+                body: JSON.stringify({ fileUrl })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setAiSuggestions(data);
+            }
+        } catch (err) {
+            console.error("AI Scan failed", err);
+        } finally {
+            setIsScanning(false);
+        }
+    };
+
+    const applyAiCode = async (codeData, isPrimary = false) => {
+        try {
+            const res = await fetch(`/api/admin/diagnosis/search?q=${codeData.code}`);
+            if (res.ok) {
+                const data = await res.json();
+                const fullCode = data.find(c => c.code === codeData.code) || { ...codeData, base_weight: '1.0', pdgm_grouping: 'Unknown', tips: [] };
+                if (isPrimary) {
+                    setPrimaryDiagnosis(fullCode);
+                } else {
+                    if (!secondaryDiagnoses.find(d => d.code === fullCode.code)) {
+                        setSecondaryDiagnoses(prev => [...prev, fullCode]);
+                    }
+                }
+            }
+        } catch (err) {
+            console.error("Failed to enrich AI code", err);
         }
     };
 
@@ -124,7 +177,7 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
                     {referralData && (
                         <div className="flex items-center gap-3 bg-slate-900 text-white px-5 py-2 rounded-2xl shadow-lg border border-slate-800">
                             <div className="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-[10px] font-black font-mono">
-                                {referralData.patient_name.charAt(0)}
+                                {referralData.patient_name?.charAt(0) || 'P'}
                             </div>
                             <div>
                                 <p className="text-[10px] font-black uppercase tracking-tighter leading-none text-slate-400">Active Case</p>
@@ -142,127 +195,198 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
                                     <h3 className="text-2xl font-black text-slate-900 tracking-tight">OASIS DIAGNOSIS MANAGEMENT</h3>
                                     <p className="text-slate-400 text-xs font-semibold">Assign primary and secondary ICD-10-CM codes for this episode.</p>
                                 </div>
-                            <button 
-                                onClick={handleSave}
-                                className="bg-slate-900 text-white px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20 active:scale-95"
-                            >
-                                Save Diagnoses
-                            </button>
-                        </div>
+                                <div className="flex items-center gap-3">
+                                    {(referralData?.document_urls?.length > 0 || (typeof referralData?.document_urls === 'string' && referralData.document_urls !== '[]')) && (
+                                        <button 
+                                            onClick={handlePulseScan}
+                                            disabled={isScanning}
+                                            className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl group ${isScanning ? 'bg-slate-100 text-slate-400' : 'bg-indigo-500 text-white hover:bg-indigo-600 shadow-indigo-500/20'}`}
+                                        >
+                                            <Zap size={14} className={isScanning ? 'animate-pulse' : 'group-hover:scale-125 transition-transform'} />
+                                            {isScanning ? 'AI PulseScanning...' : 'AI PulseScan'}
+                                        </button>
+                                    )}
+                                    <button 
+                                        onClick={handleSave}
+                                        className="bg-slate-900 text-white px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20 active:scale-95"
+                                    >
+                                        Save Plan
+                                    </button>
+                                </div>
+                            </div>
 
-                        <div className="p-8 space-y-10">
-                            {/* Primary Diagnosis Slot */}
-                            <section className="space-y-4">
-                                <h4 className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-slate-400">
-                                    <ShieldCheck size={14} className="text-teal-500" /> Primary Diagnosis
-                                </h4>
-                                {primaryDiagnosis ? (
-                                    <div className="group relative bg-teal-50/20 border-2 border-teal-500/20 rounded-2xl p-5 transition-all hover:bg-teal-50/40">
-                                        <div className="flex items-start justify-between gap-6">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-3 mb-1">
-                                                    <span className="px-2 py-0.5 bg-slate-900 text-white rounded text-[10px] font-black">{primaryDiagnosis.code}</span>
-                                                    <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">Primary Assigned</span>
+                            <div className="p-8 space-y-10">
+                                {/* AI Suggestions Area */}
+                                {aiSuggestions && (
+                                    <div className="bg-indigo-50/50 border-2 border-indigo-100 rounded-[32px] p-8 animate-fadeInDown">
+                                        <div className="flex items-center justify-between mb-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-2xl bg-indigo-500 flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+                                                    <Zap size={20} />
                                                 </div>
-                                                <h5 className="text-base font-black text-slate-900 leading-tight">{primaryDiagnosis.description}</h5>
-                                                <div className="flex items-center gap-4 mt-2">
-                                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Group: {primaryDiagnosis.pdgm_grouping}</span>
-                                                    <span className="text-[9px] font-black text-teal-600 uppercase tracking-widest bg-teal-50 px-1.5 py-0.5 rounded">Weight: {analytics.weight}</span>
+                                                <div>
+                                                    <h4 className="text-lg font-black text-slate-900 leading-none">AI CLINICAL SENTINEL</h4>
+                                                    <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mt-1">Suggested from Document Parsing</p>
                                                 </div>
                                             </div>
-                                            <button 
-                                                onClick={() => setPrimaryDiagnosis(null)}
-                                                className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"
-                                            >
-                                                <X size={18} />
-                                            </button>
+                                            <button onClick={() => setAiSuggestions(null)} className="p-2 text-slate-400 hover:text-slate-600"><X size={20} /></button>
                                         </div>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        <div className="relative group">
-                                            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                                                <Search className="w-4 h-4 text-slate-400" />
+
+                                        <p className="text-xs font-bold text-slate-600 italic mb-6 border-l-4 border-indigo-200 pl-4 py-1">
+                                            "{aiSuggestions.clinical_summary}"
+                                        </p>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="bg-white p-5 rounded-2xl border border-indigo-100 shadow-sm">
+                                                <div className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-3">Suggested Primary</div>
+                                                <div className="flex items-start justify-between gap-4">
+                                                    <div>
+                                                        <span className="bg-indigo-900 text-white px-2 py-0.5 rounded text-[10px] font-black">{aiSuggestions.primary.code}</span>
+                                                        <h5 className="text-sm font-black text-slate-900 mt-2">{aiSuggestions.primary.description}</h5>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => applyAiCode(aiSuggestions.primary, true)}
+                                                        className="px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase hover:bg-indigo-600 hover:text-white transition-all"
+                                                    >
+                                                        Apply
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <input 
-                                                type="text"
-                                                value={searchTarget === 'primary' ? searchQuery : ''}
-                                                onChange={(e) => setSearchQuery(e.target.value)}
-                                                placeholder="Start typing to search Primary ICD-10 codes..."
-                                                onFocus={() => { setIsSearching(true); setSearchTarget('primary'); }}
-                                                className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:border-teal-500/50 focus:bg-white transition-all shadow-sm"
-                                            />
+
+                                            <div className="bg-white/50 p-5 rounded-2xl border border-indigo-100">
+                                                <div className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-3">Comorbidities Detected ({aiSuggestions.secondary?.length || 0})</div>
+                                                <div className="space-y-3 max-h-[120px] overflow-y-auto pr-2 custom-scrollbar">
+                                                    {aiSuggestions.secondary?.map((s, idx) => (
+                                                        <div key={idx} className="flex items-center justify-between gap-3 text-xs border-b border-indigo-50/50 pb-2">
+                                                            <div className="min-w-0">
+                                                                <span className="font-black text-indigo-900 mr-2">{s.code}</span>
+                                                                <span className="font-bold text-slate-500 truncate inline-block max-w-[150px] align-bottom">{s.description}</span>
+                                                            </div>
+                                                            <button 
+                                                                onClick={() => applyAiCode(s, false)}
+                                                                className="text-[9px] font-black text-indigo-400 hover:text-indigo-600 uppercase"
+                                                            >
+                                                                Add
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
                                         </div>
-                                        {isSearching && searchTarget === 'primary' && searchQuery.length > 0 && (
-                                            <div className="animate-fadeInDown mt-2">
-                                                <ICD10Search 
-                                                    isEmbedded={true} 
-                                                    hideSearch={true}
-                                                    externalQuery={searchQuery}
-                                                    onSelect={(code) => handleSelectDiagnosis(code, 'primary')}
-                                                    externalContext={{ admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment }}
-                                                />
-                                            </div>
-                                        )}
                                     </div>
                                 )}
-                            </section>
 
-                            {/* Secondary Diagnoses List */}
-                            <section className="space-y-4">
-                                <h4 className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-slate-400">
-                                    <Plus size={14} /> Secondary Diagnoses (Comorbidities)
-                                </h4>
-                                <div className="grid grid-cols-1 gap-3">
-                                    {secondaryDiagnoses.map((diag, index) => (
-                                        <div key={diag.code} className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex items-center justify-between group animate-fadeInUp">
-                                            <div className="flex items-center gap-4">
-                                                <span className="w-5 h-5 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-[9px] font-black text-slate-400">
-                                                    {index + 1}
-                                                </span>
-                                                <span className="px-1.5 py-0.5 bg-slate-200 text-slate-700 rounded text-[9px] font-black uppercase tracking-tighter">{diag.code}</span>
-                                                <span className="text-xs font-bold text-slate-700">{diag.description}</span>
+                                {/* Primary Diagnosis Slot */}
+                                <section className="space-y-4">
+                                    <h4 className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-slate-400">
+                                        <ShieldCheck size={14} className="text-teal-500" /> Primary Diagnosis
+                                    </h4>
+                                    {primaryDiagnosis ? (
+                                        <div className="group relative bg-teal-50/20 border-2 border-teal-500/20 rounded-2xl p-5 transition-all hover:bg-teal-50/40">
+                                            <div className="flex items-start justify-between gap-6">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-3 mb-1">
+                                                        <span className="px-2 py-0.5 bg-slate-900 text-white rounded text-[10px] font-black">{primaryDiagnosis.code}</span>
+                                                        <span className="text-[10px] font-black text-teal-600 uppercase tracking-widest">Primary Assigned</span>
+                                                    </div>
+                                                    <h5 className="text-base font-black text-slate-900 leading-tight">{primaryDiagnosis.description}</h5>
+                                                    <div className="flex items-center gap-4 mt-2">
+                                                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Group: {primaryDiagnosis.pdgm_grouping}</span>
+                                                        <span className="text-[9px] font-black text-teal-600 uppercase tracking-widest bg-teal-50 px-1.5 py-0.5 rounded">Weight: {analytics.weight}</span>
+                                                    </div>
+                                                </div>
+                                                <button 
+                                                    onClick={() => setPrimaryDiagnosis(null)}
+                                                    className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"
+                                                >
+                                                    <X size={18} />
+                                                </button>
                                             </div>
-                                            <button 
-                                                onClick={() => removeSecondary(diag.code)}
-                                                className="p-1 text-slate-300 hover:text-red-500 transition-all"
-                                            >
-                                                <X size={14} />
-                                            </button>
                                         </div>
-                                    ))}
-                                    <div className="space-y-3">
-                                        <div className="relative group">
-                                            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                                                <Plus size={14} className="text-slate-400" />
-                                            </div>
-                                            <input 
-                                                type="text"
-                                                value={searchTarget === 'secondary' ? searchQuery : ''}
-                                                onChange={(e) => setSearchQuery(e.target.value)}
-                                                placeholder="Add Secondary Diagnosis (Comorbidity)..."
-                                                onFocus={() => { setIsSearching(true); setSearchTarget('secondary'); }}
-                                                className="w-full bg-slate-50 border-2 border-slate-50 rounded-xl py-3 pl-12 pr-4 text-xs font-medium focus:outline-none focus:border-indigo-500/30 focus:bg-white transition-all"
-                                            />
-                                        </div>
-                                        {isSearching && searchTarget === 'secondary' && searchQuery.length > 0 && (
-                                            <div className="animate-fadeInDown mt-2">
-                                                <ICD10Search 
-                                                    isEmbedded={true} 
-                                                    hideSearch={true}
-                                                    externalQuery={searchQuery}
-                                                    onSelect={(code) => handleSelectDiagnosis(code, 'secondary')}
-                                                    externalContext={{ admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment }}
+                                    ) : (
+                                        <div className="space-y-3">
+                                            <div className="relative group">
+                                                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                                    <Search className="w-4 h-4 text-slate-400" />
+                                                </div>
+                                                <input 
+                                                    type="text"
+                                                    value={searchTarget === 'primary' ? searchQuery : ''}
+                                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                                    placeholder="Start typing to search Primary ICD-10 codes..."
+                                                    onFocus={() => { setIsSearching(true); setSearchTarget('primary'); }}
+                                                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium focus:outline-none focus:border-teal-500/50 focus:bg-white transition-all shadow-sm"
                                                 />
                                             </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </section>
+                                            {isSearching && searchTarget === 'primary' && searchQuery.length > 0 && (
+                                                <div className="animate-fadeInDown mt-2">
+                                                    <ICD10Search 
+                                                        isEmbedded={true} 
+                                                        hideSearch={true}
+                                                        externalQuery={searchQuery}
+                                                        onSelect={(code) => handleSelectDiagnosis(code, 'primary')}
+                                                        externalContext={{ admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment }}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </section>
 
+                                {/* Secondary Diagnoses List */}
+                                <section className="space-y-4">
+                                    <h4 className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-slate-400">
+                                        <Plus size={14} /> Secondary Diagnoses (Comorbidities)
+                                    </h4>
+                                    <div className="grid grid-cols-1 gap-3">
+                                        {secondaryDiagnoses.map((diag, index) => (
+                                            <div key={diag.code} className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex items-center justify-between group animate-fadeInUp">
+                                                <div className="flex items-center gap-4">
+                                                    <span className="w-5 h-5 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-[9px] font-black text-slate-400">
+                                                        {index + 1}
+                                                    </span>
+                                                    <span className="px-1.5 py-0.5 bg-slate-200 text-slate-700 rounded text-[9px] font-black uppercase tracking-tighter">{diag.code}</span>
+                                                    <span className="text-xs font-bold text-slate-700">{diag.description}</span>
+                                                </div>
+                                                <button 
+                                                    onClick={() => removeSecondary(diag.code)}
+                                                    className="p-1 text-slate-300 hover:text-red-500 transition-all"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <div className="space-y-3">
+                                            <div className="relative group">
+                                                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                                    <Plus size={14} className="text-slate-400" />
+                                                </div>
+                                                <input 
+                                                    type="text"
+                                                    value={searchTarget === 'secondary' ? searchQuery : ''}
+                                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                                    placeholder="Add Secondary Diagnosis (Comorbidity)..."
+                                                    onFocus={() => { setIsSearching(true); setSearchTarget('secondary'); }}
+                                                    className="w-full bg-slate-50 border-2 border-slate-50 rounded-xl py-3 pl-12 pr-4 text-xs font-medium focus:outline-none focus:border-indigo-500/30 focus:bg-white transition-all"
+                                                />
+                                            </div>
+                                            {isSearching && searchTarget === 'secondary' && searchQuery.length > 0 && (
+                                                <div className="animate-fadeInDown mt-2">
+                                                    <ICD10Search 
+                                                        isEmbedded={true} 
+                                                        hideSearch={true}
+                                                        externalQuery={searchQuery}
+                                                        onSelect={(code) => handleSelectDiagnosis(code, 'secondary')}
+                                                        externalContext={{ admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment }}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
                         </div>
                     </div>
-                </div>
                 ) : activeSubTab === 'chart' ? (
                     <div className="space-y-6">
                         <div className="bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 border border-slate-100 p-10">
@@ -447,7 +571,7 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null }) => {
                                 <Clipboard size={12} /> Clinical Documentation Tips
                             </h6>
                             <div className="space-y-3">
-                                {primaryDiagnosis?.tips.map((tip, i) => (
+                                {primaryDiagnosis?.tips?.map((tip, i) => (
                                     <div key={i} className="flex gap-2">
                                         <div className="w-1 h-1 bg-teal-500 rounded-full mt-1.5 flex-shrink-0" />
                                         <p className="text-[10px] text-slate-400 font-medium leading-relaxed italic">

@@ -51,6 +51,8 @@ const ProviderDashboard = () => {
     const [isSearching, setIsSearching] = useState(false);
     const [searchTarget, setSearchTarget] = useState('primary');
     const [searchQuery, setSearchQuery] = useState('');
+    const [clinicalDocs, setClinicalDocs] = useState([]);
+    const [isUploading, setIsUploading] = useState(false);
 
     const AVAILABLE_SERVICES = [
         "Skilled Nursing", "Physical Therapy", "Occupational Therapy",
@@ -105,6 +107,7 @@ const ProviderDashboard = () => {
             diagnosis: primaryDiagnosis.code + ' - ' + primaryDiagnosis.description,
             secondary_diagnoses: secondaryDiagnoses.map(d => d.code),
             services_needed: selectedServices.join(', '),
+            document_urls: clinicalDocs.map(d => d.url),
             pdgm_metadata: { group: primaryDiagnosis.pdgm_grouping, weight: primaryDiagnosis.base_weight }
         };
         try {
@@ -149,7 +152,8 @@ const ProviderDashboard = () => {
         { step: 1, label: 'Patient Info' },
         { step: 2, label: 'Clinical' },
         { step: 3, label: 'Services' },
-        { step: 4, label: 'Review' }
+        { step: 4, label: 'Documents' },
+        { step: 5, label: 'Review' }
     ];
 
     return (
@@ -251,7 +255,7 @@ const ProviderDashboard = () => {
                                             </span>
                                             <span style={styles.stepLabel}>{s.label}</span>
                                         </div>
-                                        {idx < 3 && <ChevronRight size={12} color={currentStep > s.step ? '#F5C842' : '#6B4FA0'} />}
+                                        {idx < 4 && <ChevronRight size={12} color={currentStep > s.step ? '#F5C842' : '#6B4FA0'} />}
                                     </React.Fragment>
                                 ))}
                             </div>
@@ -455,8 +459,75 @@ const ProviderDashboard = () => {
                                         </div>
                                     )}
 
-                                    {/* STEP 4 */}
+                                    {/* STEP 4: Documents */}
                                     {currentStep === 4 && (
+                                        <div>
+                                            <div style={styles.stepHeader}>
+                                                <h3 style={styles.stepTitle}>Clinical Documentation</h3>
+                                                <p style={styles.stepDesc}>Upload the Discharge Summary or Hospital Referral Packet (PDF/JPG).</p>
+                                            </div>
+                                            
+                                            <div style={{ padding: '30px', border: '2px dashed #DCCCEF', borderRadius: 20, textAlign: 'center', background: '#F8F6FE' }}>
+                                                <FilePlus size={32} color="#9B72CF" style={{ marginBottom: 16 }} />
+                                                <h4 style={{ margin: '0 0 8px', color: '#1A0A2E', fontWeight: 800 }}>Upload Referral Packet</h4>
+                                                <p style={{ margin: '0 0 20px', color: '#7B6B99', fontSize: 13 }}>Format: PDF, JPG, or PNG. Max size 10MB.</p>
+                                                
+                                                <input 
+                                                    type="file" 
+                                                    id="referral-docs" 
+                                                    multiple 
+                                                    hidden 
+                                                    onChange={async (e) => {
+                                                        const files = Array.from(e.target.files);
+                                                        if (files.length === 0) return;
+                                                        
+                                                        setIsUploading(true);
+                                                        const formDataUpload = new FormData();
+                                                        files.forEach(f => formDataUpload.append('files', f));
+                                                        
+                                                        try {
+                                                            const res = await fetch('/api/public/upload', {
+                                                                method: 'POST',
+                                                                body: formDataUpload
+                                                            });
+                                                            if (res.ok) {
+                                                                const data = await res.json();
+                                                                setClinicalDocs(prev => [...prev, ...data.files]);
+                                                            }
+                                                        } catch (err) {
+                                                            console.error("Upload failed", err);
+                                                        } finally {
+                                                            setIsUploading(false);
+                                                        }
+                                                    }}
+                                                />
+                                                <label htmlFor="referral-docs" style={{ ...styles.continueBtn, display: 'inline-flex', cursor: 'pointer', opacity: isUploading ? 0.6 : 1 }}>
+                                                    {isUploading ? 'Uploading Packages...' : 'Select Files to Upload'}
+                                                </label>
+                                            </div>
+
+                                            {clinicalDocs.length > 0 && (
+                                                <div style={{ marginTop: 24 }}>
+                                                    <h4 style={{ fontSize: 13, fontWeight: 900, color: '#6B4FA0', textTransform: 'uppercase', marginBottom: 12 }}>Attached Documents ({clinicalDocs.length})</h4>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                                        {clinicalDocs.map((doc, i) => (
+                                                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: '#FFF', borderRadius: 12, border: '1px solid #EDE9FE' }}>
+                                                                <CheckCircle2 size={16} color="#10B981" />
+                                                                <div style={{ flex: 1 }}>
+                                                                    <div style={{ fontSize: 13, fontWeight: 700, color: '#1A0A2E' }}>{doc.name}</div>
+                                                                    <div style={{ fontSize: 11, color: '#7B6B99' }}>Link attached successfully</div>
+                                                                </div>
+                                                                <button onClick={() => setClinicalDocs(prev => prev.filter((_, idx) => idx !== i))} style={styles.removeBtnSm}><X size={14} /></button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* STEP 5 */}
+                                    {currentStep === 5 && (
                                         <div>
                                             <div style={styles.stepHeader}>
                                                 <h3 style={styles.stepTitle}>Referral Audit Summary</h3>
@@ -517,7 +588,7 @@ const ProviderDashboard = () => {
                                     >
                                         <ChevronLeft size={14} /> Back
                                     </button>
-                                    {currentStep < 4 ? (
+                                    {currentStep < 5 ? (
                                         <button
                                             onClick={() => setCurrentStep(p => p + 1)}
                                             style={styles.continueBtn}

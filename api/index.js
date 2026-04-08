@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import multer from 'multer';
 import { put } from '@vercel/blob';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { mapFhirBundleToReferral } from './utils/fhirMapper.js';
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
@@ -27,6 +28,8 @@ if (!process.env.POSTGRES_URL) {
 const pool = new Pool({
   connectionString: process.env.POSTGRES_URL,
 });
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY);
 
 const JWT_SECRET = process.env.JWT_SECRET || 'olympia-secret-key-1234';
 
@@ -807,6 +810,68 @@ app.get('/api/admin/diagnosis/search', async (req, res) => {
   } catch (err) {
     console.error('Search error:', err);
     res.status(500).json({ error: 'Search failed' });
+  }
+});
+
+// AI Document Extraction Endpoint
+app.post('/api/admin/extract-clinical-data', async (req, res) => {
+  const { fileUrl } = req.body;
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) return res.status(401).json({ error: 'Unauthorized' });
+  if (!fileUrl) return res.status(400).json({ error: 'fileUrl is required' });
+
+  try {
+    // 1. Fetch the file from Vercel Blob
+    const response = await fetch(fileUrl);
+    const buffer = await response.arrayBuffer();
+    const base64Data = Buffer.from(buffer).toString('base64');
+    const mimeType = response.headers.get('content-type') || 'application/pdf';
+
+    // 2. Initialize Gemini 1.5 Pro
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+
+    const prompt = `
+      You are a Clinical Coding Specialist for a Home Health Agency. 
+      Analyze the attached medical document (Discharge Summary / Referral Packet) and extract potential ICD-10 diagnosis codes.
+      
+      Requirements:
+      1. Identify the most likely Primary Diagnosis for Home Health care.
+      2. Identify all relevant Secondary Diagnoses (Comorbidities).
+      3. For each code, provide the ICD-10 code and a brief clinical description.
+      4. Try to infer the clinical grouping (e.g., MMTA, Neuro, Wound, Cardiac).
+      
+      IMPORTANT: Return ONLY valid JSON in the following format:
+      {
+        "primary": {"code": "...", "description": "...", "group": "..."},
+        "secondary": [
+          {"code": "...", "description": "...", "group": "..."},
+          ...
+        ],
+        "extraction_confidence": 0.95,
+        "clinical_summary": "Short 1-sentence summary of the patient case."
+      }
+    `;
+
+    const result = await model.generateContent([
+      prompt,
+      {
+        inlineData: {
+          data: base64Data,
+          mimeType: mimeType
+        }
+      }
+    ]);
+
+    const aiResponse = result.response.text();
+    // Clean potential markdown wrap
+    const cleanJson = aiResponse.replace(/```json|```/g, '').trim();
+    const extractedData = JSON.parse(cleanJson);
+
+    res.json(extractedData);
+  } catch (err) {
+    console.error('AI Extraction Error:', err);
+    res.status(500).json({ error: 'Failed to extract clinical data', details: err.message });
   }
 });
 
