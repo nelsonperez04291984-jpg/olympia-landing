@@ -153,10 +153,14 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null, onUpdateDocs 
                 setAiSuggestions(data);
             } else {
                 const errorData = await res.json();
-                console.error("AI Scan error detail:", errorData.details);
+                const detail = (errorData.details || "").toLowerCase();
+                const isQuotaError = detail.includes('quota') || detail.includes('limit') || detail.includes('429');
+                console.error(isQuotaError ? "AI Quota Exhausted: Please use manual search." : "AI Scan error detail:", errorData.details);
+                alert(isQuotaError ? "AI Service Limit Reached. Please search and select the Primary Diagnosis manually." : "AI Scan failed. Please use manual search.");
             }
         } catch (err) {
             console.error("AI Scan failed", err);
+            alert("Scan failed. Please adjust manual diagnosis.");
         } finally {
             setIsScanning(false);
         }

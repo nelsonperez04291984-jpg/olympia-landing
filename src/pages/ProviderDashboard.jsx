@@ -162,7 +162,15 @@ const ProviderDashboard = () => {
                 setTimeout(() => setCurrentStep(3), 1500);
             } else {
                 const errorData = await res.json();
-                setStatus({ type: 'error', message: `AI Scan Failed: ${errorData.details || "Service currently unavailable"}` });
+                const detail = (errorData.details || "").toLowerCase();
+                const isQuotaError = detail.includes('quota') || detail.includes('limit') || detail.includes('429');
+                
+                setStatus({ 
+                    type: 'error', 
+                    message: isQuotaError 
+                        ? "AI Scan Limit Reached. Please proceed to Step 3 and use the Search tool to add your Primary Diagnosis manually."
+                        : `AI Scan Failed: ${errorData.details || "Service currently unavailable"}`
+                });
             }
         } catch (err) {
             console.error("AI Scan failed", err);
