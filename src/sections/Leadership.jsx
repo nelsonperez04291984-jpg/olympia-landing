@@ -81,45 +81,92 @@ const Leadership = () => {
                     </p>
                 </div>
 
-                {/* Mission Statement: Premium White Card */}
+                {/* Mission Statement: The Executive Vision Card */}
                 <div className={`mb-24 transition-all duration-[1500ms] ${isInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
-                    <div className="bg-white rounded-[48px] shadow-2xl shadow-purple-900/10 overflow-hidden border border-purple-50 group/mission">
-                        <div className="grid lg:grid-cols-5 gap-0">
-                            {/* Image Side */}
-                            <div className="lg:col-span-2 relative overflow-hidden h-[400px] lg:h-auto">
-                                <div className="absolute inset-0 bg-gradient-to-r from-white via-transparent to-transparent z-10"></div>
-                                <img 
-                                    src="/jeonalyn.jpg" 
-                                    alt="Jeonalyn Ashby, Founder" 
-                                    className={`w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105`}
-                                />
-                            </div>
-
-                            {/* Mission Content */}
-                            <div className="lg:col-span-3 p-8 lg:p-20 flex flex-col justify-center">
-                                <div className={`transition-all duration-1000 ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`} style={{ transitionDelay: '300ms' }}>
-                                    <span className="inline-block px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] mb-8">
-                                        Our Mission
-                                    </span>
-                                    <h3 className="text-3xl md:text-5xl font-black text-gray-900 mb-8 leading-[1.1] tracking-tighter">
-                                        Caring Beyond Limits — One Patient, One Home.
-                                    </h3>
-                                </div>
-
-                                <p className={`text-gray-600 text-lg font-medium leading-relaxed mb-8 transition-all duration-1000 ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`} style={{ transitionDelay: '600ms' }}>
-                                    At Olympia Home Health, our mission is to deliver exceptional, compassionate healthcare directly to our patients' homes. We believe everyone deserves <span className="text-purple-700 font-black">high-quality care</span> in the dignity of their own environment.
-                                </p>
-
-                                <div className={`transition-all duration-1000 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`} style={{ transitionDelay: '900ms' }}>
-                                    <a 
-                                        href="#contact" 
-                                        className="inline-flex items-center gap-4 px-10 py-5 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-full hover:shadow-2xl hover:scale-105 transition-all font-black text-xs uppercase tracking-widest"
-                                    >
-                                        Initiate Consultation
-                                        <ArrowRight size={16} />
-                                    </a>
+                    <div className="bg-white rounded-[40px] shadow-[0_40px_100px_-20px_rgba(88,28,135,0.15)] overflow-hidden border border-purple-50 group/mission flex flex-col lg:flex-row">
+                        
+                        {/* Left Side: The Executive ID Badge */}
+                        <div className="lg:w-[42%] relative bg-white flex flex-col border-b lg:border-b-0 lg:border-r border-gray-100">
+                            {/* The Purple Branding Arc */}
+                            <div className="absolute top-0 left-0 w-full h-[240px] bg-gradient-to-br from-purple-500 to-purple-700 rounded-b-[120px] shadow-2xl overflow-hidden">
+                                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                                <div className="flex flex-col items-center justify-center h-full pt-4">
+                                    <img src="/logo.png" alt="Olympia Logo" className="w-24 h-24 object-contain brightness-0 invert" />
+                                    <div className="mt-2 text-center">
+                                        <p className="text-[10px] font-black text-white/80 uppercase tracking-[0.3em]">Olympia</p>
+                                        <p className="text-[8px] font-bold text-white/60 uppercase tracking-[0.2em]">Home Health Inc</p>
+                                    </div>
                                 </div>
                             </div>
+
+                            {/* Portrait Frame */}
+                            <div className="relative z-10 flex flex-col items-center mt-32 px-10 pb-10">
+                                <div className="relative group/portrait">
+                                    {/* Gold Glowing Border */}
+                                    <div className="absolute -inset-1.5 bg-gradient-to-t from-[#B8860B] via-[#FFD700] to-[#B8860B] rounded-[32px] blur-sm opacity-50 group-hover/portrait:opacity-100 transition-opacity duration-700"></div>
+                                    <div className="relative w-full aspect-[4/5] max-w-[280px] bg-white rounded-[28px] overflow-hidden border-[6px] border-[#D4AF37] shadow-2xl">
+                                        <img 
+                                            src="/jeonalyn.jpg" 
+                                            alt="Jeonalyn Ashby, CEO" 
+                                            className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover/portrait:scale-110" 
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 text-center">
+                                    <h4 className="text-3xl font-black text-gray-900 tracking-tighter uppercase">Jeonalyn Ashby</h4>
+                                    <div className="flex items-center justify-center gap-3 mt-1">
+                                        <div className="h-px w-6 bg-gray-300"></div>
+                                        <p className="text-sm font-black text-purple-600 uppercase tracking-[0.4em]">CEO</p>
+                                        <div className="h-px w-6 bg-gray-300"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Gold Metallic Footer */}
+                            <div className="mt-auto bg-gradient-to-r from-[#B8860B] via-[#FFD700] to-[#8B4513] p-6 flex flex-col items-center justify-center shadow-inner">
+                                <div className="flex items-center gap-3 text-[#3E2723]">
+                                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30">
+                                        <MapPin size={18} className="fill-[#3E2723]/30" />
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="text-[11px] font-black uppercase tracking-tight leading-none">20422 Beach Blvd, Suite 320</p>
+                                        <p className="text-[10px] font-bold tracking-tight">Huntington Beach, CA 92648</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Side: The Vision Content */}
+                        <div className="lg:w-[58%] p-8 lg:p-20 flex flex-col justify-center relative overflow-hidden">
+                            {/* Decorative Grid Texture */}
+                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/clothe.png')] opacity-[0.03] pointer-events-none"></div>
+                            
+                            <div className={`relative z-10 transition-all duration-1000 ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`} style={{ transitionDelay: '300ms' }}>
+                                <span className="inline-block px-4 py-2 bg-purple-50 text-purple-700 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] mb-8 border border-purple-100">
+                                    Our Mission
+                                </span>
+                                <h3 className="text-4xl md:text-6xl font-black text-gray-900 mb-8 leading-[1] tracking-tighter">
+                                    Caring Beyond Limits — One Patient, One Home.
+                                </h3>
+                            </div>
+
+                            <p className={`relative z-10 text-gray-600 text-lg md:text-xl font-medium leading-relaxed mb-10 transition-all duration-1000 ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`} style={{ transitionDelay: '600ms' }}>
+                                At Olympia Home Health, our mission is to deliver exceptional, compassionate healthcare directly to our patients' homes. We believe everyone deserves <span className="text-purple-700 font-extrabold underline decoration-purple-200 underline-offset-4">high-quality care</span> in the dignity of their own environment.
+                            </p>
+
+                            <div className={`relative z-10 transition-all duration-1000 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`} style={{ transitionDelay: '900ms' }}>
+                                <a 
+                                    href="#contact" 
+                                    className="group/btn inline-flex items-center gap-4 px-12 py-5 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-full hover:shadow-2xl hover:scale-105 transition-all font-black text-xs uppercase tracking-[0.2em]"
+                                >
+                                    Initiate Consultation
+                                    <ArrowRight size={18} className="group-hover/btn:translate-x-2 transition-transform" />
+                                </a>
+                            </div>
+
+                            {/* Background Clinical Grid (Subtle) */}
+                            <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-purple-100 rounded-full filter blur-[100px] opacity-20 pointer-events-none"></div>
                         </div>
                     </div>
                 </div>
