@@ -91,9 +91,12 @@ const Leadership = () => {
                             <div className="bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-900 rounded-b-[100px] pt-16 pb-20 relative px-8 flex flex-col items-center">
                                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
                                 <div className="relative z-10 flex flex-col items-center">
-                                    <div className="relative mb-4 group/logo">
-                                        <div className="absolute inset-0 bg-white/10 rounded-full blur-3xl opacity-0"></div>
-                                        <img src="/log_latest.png" alt="Olympia Logo" className="w-28 h-28 object-contain brightness-0 invert drop-shadow-[0_15px_30px_rgba(0,0,0,0.4)]" />
+                                    <div className="relative mb-6 group/logo">
+                                        <div className="absolute inset-0 bg-white/20 rounded-full blur-3xl opacity-0 group-hover/logo:opacity-100 transition-opacity"></div>
+                                        {/* Branded Seal: Professional container for non-transparent logos */}
+                                        <div className="relative bg-white p-4 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10 transform group-hover/logo:scale-105 transition-transform duration-500">
+                                            <img src="/log_latest.png" alt="Olympia Logo" className="w-24 h-24 object-contain" />
+                                        </div>
                                     </div>
                                     <h4 className="text-xs font-black text-white uppercase tracking-[0.4em] mb-1">Olympia</h4>
                                     <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">Home Health Inc</p>
