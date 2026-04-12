@@ -187,22 +187,22 @@ app.post('/api/referrals', async (req, res) => {
 
         const { 
           patient_name, patient_dob, patient_phone, diagnosis, services_needed,
-          payment, weight, admission_source, episode_timing, functional_level, 
+          payment, weight, pdgm_weight, admission_source, episode_timing, functional_level, 
           comorbidity_adjustment, document_urls, primary_diagnosis, secondary_diagnoses 
         } = req.body;
         
         const result = await pool.query(
           `INSERT INTO referrals (
             provider_id, patient_name, patient_dob, patient_phone, diagnosis, 
-            services_needed, status, payment, weight, admission_source, 
+            services_needed, status, payment, weight, pdgm_weight, admission_source, 
             episode_timing, functional_level, comorbidity_adjustment, 
             document_urls, clinical_docs, primary_diagnosis, secondary_diagnoses
           ) 
-           VALUES ($1, $2, $3, $4, $5, $6, 'Pending', $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) 
+           VALUES ($1, $2, $3, $4, $5, $6, 'Pending', $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) 
            RETURNING *`,
           [
             providerId, patient_name, patient_dob, patient_phone, diagnosis, 
-            services_needed, payment, weight, admission_source, 
+            services_needed, payment, weight, pdgm_weight, admission_source, 
             episode_timing, functional_level, comorbidity_adjustment, 
             JSON.stringify(document_urls || []), JSON.stringify(document_urls || []), 
             JSON.stringify(primary_diagnosis || null), 

@@ -43,23 +43,35 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null, onUpdateDocs 
         if (referralData) {
             // Initialize Diagnoses
             if (referralData.primary_diagnosis) {
-                const pd = typeof referralData.primary_diagnosis === 'string' 
-                    ? JSON.parse(referralData.primary_diagnosis) 
-                    : referralData.primary_diagnosis;
-                setPrimaryDiagnosis(pd);
-            }
-            if (referralData.secondary_diagnoses) {
-                const sd = typeof referralData.secondary_diagnoses === 'string' 
-                    ? JSON.parse(referralData.secondary_diagnoses) 
-                    : referralData.secondary_diagnoses;
-                setSecondaryDiagnoses(Array.isArray(sd) ? sd : []);
+                try {
+                    const pd = typeof referralData.primary_diagnosis === 'string' 
+                        ? JSON.parse(referralData.primary_diagnosis) 
+                        : referralData.primary_diagnosis;
+                    setPrimaryDiagnosis(pd);
+                } catch (e) {
+                    console.error("Failed to parse primary diagnosis", e);
+                }
+            } else if (referralData.diagnosis) {
+                // Fallback for legacy string-only data
+                setPrimaryDiagnosis({ code: referralData.diagnosis.split(' - ')[0], description: referralData.diagnosis.split(' - ')[1] || '', base_weight: 1.0 });
             }
 
-            // Initialize Modifiers
-            if (referralData.admission_source) setAdmissionSource(referralData.admission_source);
-            if (referralData.episode_timing) setEpisodeTiming(referralData.episode_timing);
-            if (referralData.functional_level) setFunctionalLevel(referralData.functional_level);
-            if (referralData.comorbidity_adjustment) setComorbidityAdjustment(referralData.comorbidity_adjustment);
+            if (referralData.secondary_diagnoses) {
+                try {
+                    const sd = typeof referralData.secondary_diagnoses === 'string' 
+                        ? JSON.parse(referralData.secondary_diagnoses) 
+                        : referralData.secondary_diagnoses;
+                    setSecondaryDiagnoses(Array.isArray(sd) ? sd : []);
+                } catch (e) {
+                    console.error("Failed to parse secondary diagnoses", e);
+                }
+            }
+
+            // Initialize Modifiers (ensure case consistency)
+            if (referralData.admission_source) setAdmissionSource(referralData.admission_source.toLowerCase());
+            if (referralData.episode_timing) setEpisodeTiming(referralData.episode_timing.toLowerCase());
+            if (referralData.functional_level) setFunctionalLevel(referralData.functional_level.toLowerCase());
+            if (referralData.comorbidity_adjustment) setComorbidityAdjustment(referralData.comorbidity_adjustment.toLowerCase());
         }
     }, [referralData]);
 

@@ -1465,14 +1465,24 @@ const AdminDashboard = () => {
                                 },
                                 { 
                                     label: 'Case Weight Avg', 
-                                    value: (referrals.filter(r => r.pdgm_weight).reduce((acc, curr) => acc + parseFloat(curr.pdgm_weight || 0), 0) / (referrals.filter(r => r.pdgm_weight).length || 1)).toFixed(3), 
+                                    value: (() => {
+                                        const weightedReferrals = referrals.filter(r => r.weight || r.pdgm_weight);
+                                        if (weightedReferrals.length === 0) return '0.000';
+                                        const sum = weightedReferrals.reduce((acc, curr) => acc + parseFloat(curr.weight || curr.pdgm_weight || 0), 0);
+                                        return (sum / weightedReferrals.length).toFixed(4);
+                                    })(), 
                                     sub: '+12% vs Prev Month', 
                                     icon: <TrendingUp size={20} />, 
                                     color: '#10B981' 
                                 },
                                 { 
                                     label: 'Est. Revenue Pending', 
-                                    value: `$${(referrals.filter(r => r.status === 'Processing').length * 2038).toLocaleString()}`, 
+                                    value: (() => {
+                                        const pendingPayment = referrals
+                                            .filter(r => r.status === 'Processing')
+                                            .reduce((acc, curr) => acc + parseFloat(curr.payment || (curr.weight || curr.pdgm_weight ? parseFloat(curr.weight || curr.pdgm_weight) * 2038.39 : 0) || 0), 0);
+                                        return `$${pendingPayment.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+                                    })(),
                                     sub: 'Projected Billing', 
                                     icon: <DollarSign size={20} />, 
                                     color: '#3B82F6' 
@@ -1594,10 +1604,12 @@ const AdminDashboard = () => {
                                                     <div className="flex flex-col">
                                                         <div className="flex items-center gap-1 font-black text-slate-900">
                                                             <span className="text-teal-500 text-xs">$</span>
-                                                            {r.pdgm_weight ? (parseFloat(r.pdgm_weight) * 2038).toLocaleString(undefined, {minimumFractionDigits: 2}) : '0.00'}
+                                                            {r.payment ? parseFloat(r.payment).toLocaleString(undefined, {minimumFractionDigits: 2}) : 
+                                                             (r.weight || r.pdgm_weight) ? (parseFloat(r.weight || r.pdgm_weight) * 2038.39).toLocaleString(undefined, {minimumFractionDigits: 2}) : '0.00'
+                                                            }
                                                         </div>
                                                         <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">
-                                                            Weight: {r.pdgm_weight || '0.000'} • {r.functional_level || 'Med'}
+                                                            Weight: {r.weight || r.pdgm_weight || '0.000'} • {r.functional_level || 'Med'}
                                                         </div>
                                                     </div>
                                                 </td>
