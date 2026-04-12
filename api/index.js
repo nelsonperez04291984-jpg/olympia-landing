@@ -838,8 +838,8 @@ app.post('/api/admin/extract-clinical-data', async (req, res) => {
     const base64Data = Buffer.from(buffer).toString('base64');
     const mimeType = response.headers.get('content-type') || 'application/pdf';
 
-    // 2. Initialize Gemini 3.1 Flash Lite (Based on provided 500 RPD quota)
-    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+    // 2. Initialize Gemini 3.1 Flash Lite Preview (Based on verified availability)
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite-preview" });
 
     const prompt = `
       You are a Clinical Coding Specialist for a Home Health Agency. 
