@@ -57,6 +57,12 @@ const ProviderDashboard = () => {
     const [isScanning, setIsScanning] = useState(false);
     const [aiSuggestions, setAiSuggestions] = useState(null);
     const [showQuotaAlert, setShowQuotaAlert] = useState(false);
+    
+    // PDGM Context State
+    const [admissionSource, setAdmissionSource] = useState('community');
+    const [episodeTiming, setEpisodeTiming] = useState('early');
+    const [functionalLevel, setFunctionalLevel] = useState('medium');
+    const [comorbidityAdjustment, setComorbidityAdjustment] = useState('none');
 
     const AVAILABLE_SERVICES = [
         "Skilled Nursing", "Physical Therapy", "Occupational Therapy",
@@ -96,6 +102,25 @@ const ProviderDashboard = () => {
         navigate('/provider-login');
     };
 
+    const calculatePDGMData = (baseWeight) => {
+        if (!baseWeight) return { amount: '0.00', weight: '0.0000' };
+        const BASE_RATE = 2038.39;
+        let multiplier = 1.0;
+        if (admissionSource === 'institutional') multiplier *= 1.2;
+        if (episodeTiming === 'early') multiplier *= 1.15;
+        if (functionalLevel === 'high') multiplier *= 1.4;
+        else if (functionalLevel === 'medium') multiplier *= 1.25;
+        if (comorbidityAdjustment === 'high') multiplier *= 1.2;
+        else if (comorbidityAdjustment === 'low') multiplier *= 1.1;
+        const finalWeight = (parseFloat(baseWeight) * multiplier).toFixed(4);
+        const amount = (parseFloat(finalWeight) * BASE_RATE).toFixed(2);
+        return { amount, weight: finalWeight };
+    };
+
+    const analytics = React.useMemo(() => {
+        return calculatePDGMData(primaryDiagnosis?.base_weight || 0);
+    }, [primaryDiagnosis, admissionSource, episodeTiming, functionalLevel, comorbidityAdjustment]);
+
     const handleSubmit = async (e) => {
         if (e) e.preventDefault();
         const fullName = getFullName();
@@ -112,7 +137,13 @@ const ProviderDashboard = () => {
             secondary_diagnoses: secondaryDiagnoses.map(d => d.code),
             services_needed: selectedServices.join(', '),
             document_urls: clinicalDocs.map(d => d.url),
-            pdgm_metadata: { group: primaryDiagnosis.pdgm_grouping, weight: primaryDiagnosis.base_weight }
+            pdgm_metadata: { group: primaryDiagnosis.pdgm_grouping, weight: analytics.weight, payment: analytics.amount },
+            payment: analytics.amount,
+            weight: analytics.weight,
+            admission_source: admissionSource,
+            episode_timing: episodeTiming,
+            functional_level: functionalLevel,
+            comorbidity_adjustment: comorbidityAdjustment
         };
         try {
             const res = await fetch('/api/referrals', {
@@ -626,7 +657,7 @@ const ProviderDashboard = () => {
                                                                 <span style={styles.secondaryCode}>{d.code}</span>
                                                                 <span style={styles.secondaryDesc}>{d.description}</span>
                                                                 <button onClick={() => setSecondaryDiagnoses(prev => prev.filter(x => x.code !== d.code))} style={styles.removeBtnSm}><X size={12} /></button>
-                                                            </div>
+                                                        </div>
                                                         ))}
                                                         
                                                         {secondaryDiagnoses.length < 5 && (
@@ -663,6 +694,46 @@ const ProviderDashboard = () => {
                                                         )}
                                                     </div>
                                                 </div>
+
+                                                {/* PDGM Modifiers (Admission Source, timing etc) */}
+                                                <div style={{ borderTop: '1px solid #F3EFF9', paddingTop: 24, marginTop: 12 }}>
+                                                    <h4 style={{ ...styles.fieldLabel, marginBottom: 16 }}>
+                                                        <Activity size={13} color={GOLD} /> PDGM Clinical Modifiers
+                                                    </h4>
+                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                                                        <div>
+                                                            <label style={{ ...styles.fieldLabel, fontSize: 9 }}>Admission Source</label>
+                                                            <div style={{ display: 'flex', background: '#F8F6FE', padding: '4px', borderRadius: 12, marginTop: 4 }}>
+                                                                <button onClick={() => setAdmissionSource('community')} style={{ flex: 1, padding: '8px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 10, fontWeight: 800, background: admissionSource === 'community' ? WHITE : 'transparent', color: admissionSource === 'community' ? PURPLE_DARK : PURPLE_SOFT, boxShadow: admissionSource === 'community' ? SHADOW_SM : 'none' }}>COMMUNITY</button>
+                                                                <button onClick={() => setAdmissionSource('institutional')} style={{ flex: 1, padding: '8px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 10, fontWeight: 800, background: admissionSource === 'institutional' ? WHITE : 'transparent', color: admissionSource === 'institutional' ? PURPLE_DARK : PURPLE_SOFT, boxShadow: admissionSource === 'institutional' ? SHADOW_SM : 'none' }}>INSTITUTIONAL</button>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label style={{ ...styles.fieldLabel, fontSize: 9 }}>Episode Timing</label>
+                                                            <div style={{ display: 'flex', background: '#F8F6FE', padding: '4px', borderRadius: 12, marginTop: 4 }}>
+                                                                <button onClick={() => setEpisodeTiming('early')} style={{ flex: 1, padding: '8px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 10, fontWeight: 800, background: episodeTiming === 'early' ? WHITE : 'transparent', color: episodeTiming === 'early' ? PURPLE_DARK : PURPLE_SOFT, boxShadow: episodeTiming === 'early' ? SHADOW_SM : 'none' }}>EARLY</button>
+                                                                <button onClick={() => setEpisodeTiming('late')} style={{ flex: 1, padding: '8px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 10, fontWeight: 800, background: episodeTiming === 'late' ? WHITE : 'transparent', color: episodeTiming === 'late' ? PURPLE_DARK : PURPLE_SOFT, boxShadow: episodeTiming === 'late' ? SHADOW_SM : 'none' }}>LATE</button>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label style={{ ...styles.fieldLabel, fontSize: 9 }}>Functional Level</label>
+                                                            <div style={{ display: 'flex', background: '#F8F6FE', padding: '2px', borderRadius: 10, marginTop: 4 }}>
+                                                                {['low', 'medium', 'high'].map(l => (
+                                                                    <button key={l} onClick={() => setFunctionalLevel(l)} style={{ flex: 1, padding: '6px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 9, fontWeight: 800, textTransform: 'uppercase', background: functionalLevel === l ? WHITE : 'transparent', color: functionalLevel === l ? PURPLE_DARK : PURPLE_SOFT, boxShadow: functionalLevel === l ? SHADOW_SM : 'none' }}>{l}</button>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label style={{ ...styles.fieldLabel, fontSize: 9 }}>Comorbidity Adjustment</label>
+                                                            <div style={{ display: 'flex', background: '#F8F6FE', padding: '2px', borderRadius: 10, marginTop: 4 }}>
+                                                                {['none', 'low', 'high'].map(l => (
+                                                                    <button key={l} onClick={() => setComorbidityAdjustment(l)} style={{ flex: 1, padding: '6px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 9, fontWeight: 800, textTransform: 'uppercase', background: comorbidityAdjustment === l ? WHITE : 'transparent', color: comorbidityAdjustment === l ? PURPLE_DARK : PURPLE_SOFT, boxShadow: comorbidityAdjustment === l ? SHADOW_SM : 'none' }}>{l}</button>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             </div>
                                         </div>
                                     )}
@@ -805,15 +876,15 @@ const ProviderDashboard = () => {
                                     </div>
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                                         <div style={styles.intelMetric}>
-                                            <div style={styles.intelMetricLabel}>Case Weight</div>
+                                            <div style={styles.intelMetricLabel}>Adjusted Weight</div>
                                             <div style={styles.intelMetricValue}>
-                                                <TrendingUp size={12} color="#F5C842" /> {primaryDiagnosis.base_weight}
+                                                <TrendingUp size={12} color="#F5C842" /> {analytics.weight}
                                             </div>
                                         </div>
-                                        <div style={styles.intelMetric}>
-                                            <div style={styles.intelMetricLabel}>Reimb. Impact</div>
-                                            <div style={{ ...styles.intelMetricValue, color: '#F5C842' }}>
-                                                <DollarSign size={12} color="#F5C842" /> High
+<div style={styles.intelMetric}>
+                                            <div style={styles.intelMetricLabel}>Est. Reimb.</div>
+                                            <div style={{ ...styles.intelMetricValue, color: GOLD }}>
+                                                <DollarSign size={12} color={GOLD} /> {analytics.amount}
                                             </div>
                                         </div>
                                     </div>

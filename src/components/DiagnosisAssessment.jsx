@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ChevronRight, 
   Search, 
@@ -37,6 +37,31 @@ const DiagnosisAssessment = ({ referralData = null, onSave = null, onUpdateDocs 
     const [isScanning, setIsScanning] = useState(false);
     const [aiSuggestions, setAiSuggestions] = useState(null);
     const [showQuotaAlert, setShowQuotaAlert] = useState(false);
+
+    // Synchronize with referralData on mount/change
+    useEffect(() => {
+        if (referralData) {
+            // Initialize Diagnoses
+            if (referralData.primary_diagnosis) {
+                const pd = typeof referralData.primary_diagnosis === 'string' 
+                    ? JSON.parse(referralData.primary_diagnosis) 
+                    : referralData.primary_diagnosis;
+                setPrimaryDiagnosis(pd);
+            }
+            if (referralData.secondary_diagnoses) {
+                const sd = typeof referralData.secondary_diagnoses === 'string' 
+                    ? JSON.parse(referralData.secondary_diagnoses) 
+                    : referralData.secondary_diagnoses;
+                setSecondaryDiagnoses(Array.isArray(sd) ? sd : []);
+            }
+
+            // Initialize Modifiers
+            if (referralData.admission_source) setAdmissionSource(referralData.admission_source);
+            if (referralData.episode_timing) setEpisodeTiming(referralData.episode_timing);
+            if (referralData.functional_level) setFunctionalLevel(referralData.functional_level);
+            if (referralData.comorbidity_adjustment) setComorbidityAdjustment(referralData.comorbidity_adjustment);
+        }
+    }, [referralData]);
 
     const handleSelectDiagnosis = (codeData, target) => {
         if (target === 'primary') {

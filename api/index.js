@@ -177,25 +177,43 @@ app.delete('/api/admin/admins/:id', async (req, res) => {
 
 // Create Referral
 app.post('/api/referrals', async (req, res) => {
-  const { patient_name, patient_dob, patient_phone, diagnosis, services_needed } = req.body;
-  const authHeader = req.headers.authorization;
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'No token provided' });
+    const token = authHeader.split(' ')[1];
+    
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const providerId = decoded.id;
 
-  if (!authHeader) return res.status(401).json({ error: 'No token provided' });
-  const token = authHeader.split(' ')[1];
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const providerId = decoded.id;
-
-    const result = await pool.query(
-      `INSERT INTO referrals (provider_id, patient_name, patient_dob, patient_phone, diagnosis, services_needed, status) 
-       VALUES ($1, $2, $3, $4, $5, $6, 'Pending') RETURNING *`,
-      [providerId, patient_name, patient_dob, patient_phone, diagnosis, services_needed]
-    );
-    res.json({ message: 'Referral submitted successfully', referral: result.rows[0] });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to submit referral', details: err.message });
-  }
+        const { 
+          patient_name, patient_dob, patient_phone, diagnosis, services_needed,
+          payment, weight, admission_source, episode_timing, functional_level, 
+          comorbidity_adjustment, document_urls, primary_diagnosis, secondary_diagnoses 
+        } = req.body;
+        
+        const result = await pool.query(
+          `INSERT INTO referrals (
+            provider_id, patient_name, patient_dob, patient_phone, diagnosis, 
+            services_needed, status, payment, weight, admission_source, 
+            episode_timing, functional_level, comorbidity_adjustment, 
+            document_urls, clinical_docs, primary_diagnosis, secondary_diagnoses
+          ) 
+           VALUES ($1, $2, $3, $4, $5, $6, 'Pending', $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) 
+           RETURNING *`,
+          [
+            providerId, patient_name, patient_dob, patient_phone, diagnosis, 
+            services_needed, payment, weight, admission_source, 
+            episode_timing, functional_level, comorbidity_adjustment, 
+            JSON.stringify(document_urls || []), JSON.stringify(document_urls || []), 
+            JSON.stringify(primary_diagnosis || null), 
+            JSON.stringify(secondary_diagnoses || [])
+          ]
+        );
+        res.json({ message: 'Referral submitted successfully', referral: result.rows[0] });
+    } catch (err) {
+        console.error('Submission error:', err);
+        res.status(500).json({ error: 'Failed to submit referral', details: err.message });
+    }
 });
 
 // FHIR-Compatible Referral Ingestion (Automated EHR Integration)
@@ -439,7 +457,10 @@ app.get('/api/admin/referrals', async (req, res) => {
 // Update Referral (Status & Clinical Data)
 app.patch('/api/admin/referrals/:id', async (req, res) => {
   const { id } = req.params;
-  const { status, icd_primary, icd_secondary, pdgm_weight, document_urls } = req.body;
+  const { 
+    status, icd_primary, icd_secondary, pdgm_weight, document_urls,
+    payment, weight, admission_source, episode_timing, functional_level, comorbidity_adjustment
+  } = req.body;
   try {
     const result = await pool.query(
       `UPDATE referrals 
@@ -447,9 +468,20 @@ app.patch('/api/admin/referrals/:id', async (req, res) => {
            icd_primary = COALESCE($2, icd_primary), 
            icd_secondary = COALESCE($3, icd_secondary), 
            pdgm_weight = COALESCE($4, pdgm_weight),
-           document_urls = COALESCE($5, document_urls)
-       WHERE id = $6 RETURNING *`,
-      [status, icd_primary, icd_secondary, pdgm_weight, document_urls ? JSON.stringify(document_urls) : null, id]
+           document_urls = COALESCE($5, document_urls::jsonb),
+           payment = COALESCE($6, payment),
+           weight = COALESCE($7, weight),
+           admission_source = COALESCE($8, admission_source),
+           episode_timing = COALESCE($9, episode_timing),
+           functional_level = COALESCE($10, functional_level),
+           comorbidity_adjustment = COALESCE($11, comorbidity_adjustment)
+       WHERE id = $12 RETURNING *`,
+      [
+        status, icd_primary, icd_secondary, pdgm_weight, 
+        document_urls ? JSON.stringify(document_urls) : null,
+        payment, weight, admission_source, episode_timing, functional_level, comorbidity_adjustment,
+        id
+      ]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Referral not found' });
     res.json(result.rows[0]);
@@ -531,6 +563,15 @@ app.get('/api/admin/fix-schema', async (req, res) => {
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS status_token VARCHAR(36)");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS primary_diagnosis JSONB");
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS secondary_diagnoses JSONB DEFAULT '[]'");
+    
+    // PDGM Financials & Modifiers
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS payment NUMERIC(10,2)");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS weight NUMERIC(10,4)");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS admission_source VARCHAR(50)");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS episode_timing VARCHAR(50)");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS functional_level VARCHAR(50)");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS comorbidity_adjustment VARCHAR(50)");
+    await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS clinical_docs JSONB DEFAULT '[]'");
     
     // Hospital-Grade Demographic Expansion
     await pool.query("ALTER TABLE referrals ADD COLUMN IF NOT EXISTS patient_address TEXT");

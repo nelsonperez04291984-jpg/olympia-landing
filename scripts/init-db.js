@@ -77,6 +77,12 @@ async function initDB() {
         raw_fhir JSONB,
         pdgm_group_predicted VARCHAR(100),
         pdgm_weight VARCHAR(20),
+        payment NUMERIC,
+        weight NUMERIC,
+        admission_source TEXT,
+        episode_timing TEXT,
+        functional_level TEXT,
+        comorbidity_adjustment TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
