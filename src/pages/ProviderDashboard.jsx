@@ -734,7 +734,6 @@ const ProviderDashboard = () => {
                                                     </div>
                                                 </div>
                                             </div>
-                                            </div>
                                         </div>
                                     )}
 
@@ -881,7 +880,7 @@ const ProviderDashboard = () => {
                                                 <TrendingUp size={12} color="#F5C842" /> {analytics.weight}
                                             </div>
                                         </div>
-<div style={styles.intelMetric}>
+                                        <div style={styles.intelMetric}>
                                             <div style={styles.intelMetricLabel}>Est. Reimb.</div>
                                             <div style={{ ...styles.intelMetricValue, color: GOLD }}>
                                                 <DollarSign size={12} color={GOLD} /> {analytics.amount}
