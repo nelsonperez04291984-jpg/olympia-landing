@@ -113,7 +113,7 @@ const ICD10Search = ({ isEmbedded = false, onSelect = null, externalContext = nu
                 try {
                     const genAI = new GoogleGenerativeAI(API_KEY);
                     // Use flash for speed, but wrap in try/catch for quota
-                    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+                    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
                     const enrichPrompt = `
                     You are a PDGM Clinical Analyst. I have these ICD-10 codes from our master database.
