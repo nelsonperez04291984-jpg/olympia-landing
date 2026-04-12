@@ -1565,14 +1565,17 @@ const AdminDashboard = () => {
                                                             {r.patient_name.charAt(0)}
                                                         </div>
                                                         <div>
-                                                            <div className="font-black text-slate-900 text-sm flex items-center gap-2">
+                                                            <div className="font-black text-slate-900 text-sm flex items-center gap-2 mb-0.5">
                                                                 {r.patient_name}
                                                                 {getSLAPriority(r.created_at, r.status) === 'Overdue' && (
-                                                                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" title="SLA Breached" />
+                                                                    <div className="w-2 h-2 rounded-full bg-red-500 shadow-lg shadow-red-200 animate-pulse" title="SLA Breached" />
                                                                 )}
                                                             </div>
-                                                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                                                                ID: {r.id.toString().padStart(6, '0')} • {formatElapsed(r.created_at)}
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-[10px] font-black text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded-md tracking-tighter">ID: {r.id.toString().padStart(6, '0')}</span>
+                                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                                                                    {formatElapsed(r.created_at)}
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1622,20 +1625,22 @@ const AdminDashboard = () => {
                                                     </div>
                                                 </td>
                                                 <td className="px-8 py-6">
-                                                    <div className="flex items-center justify-center gap-2">
+                                                    <div className="flex items-center justify-center gap-3">
                                                         <button 
                                                             onClick={() => setViewingPatient(r)}
-                                                            className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white transition-all shadow-sm"
+                                                            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white border border-slate-200 text-slate-600 hover:border-slate-900 hover:text-slate-900 hover:bg-slate-50 transition-all shadow-sm active:scale-95 group/btn"
                                                             title="View Profile"
                                                         >
-                                                            <FileText size={18} />
+                                                            <FileText size={16} className="text-slate-400 group-hover/btn:text-slate-900 transition-colors" />
+                                                            <span className="text-[10px] font-black uppercase tracking-widest">Review</span>
                                                         </button>
                                                         <button 
                                                             onClick={() => handleAssessAndCode(r)}
-                                                            className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-gold-500 hover:text-white transition-all shadow-sm group"
+                                                            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-900 text-white hover:bg-gold-500 hover:shadow-lg hover:shadow-gold-200 transition-all shadow-md active:scale-95 group/btn"
                                                             title="Assess & Code"
                                                         >
-                                                            <Stethoscope size={18} className="group-hover:rotate-12 transition-transform" />
+                                                            <Stethoscope size={16} className="text-gold-200 group-hover/btn:text-white group-hover/btn:rotate-12 transition-all" />
+                                                            <span className="text-[10px] font-black uppercase tracking-widest">Assess</span>
                                                         </button>
                                                     </div>
                                                 </td>
