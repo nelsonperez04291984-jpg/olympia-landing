@@ -26,35 +26,31 @@ const useInView = (threshold = 0.1) => {
 
 const values = [
     {
-        icon: Heart,
+        iconSrc: '/assets/branding/icon_comfort.png',
         title: 'Compassion',
         description: 'We treat every patient like family, delivering care with empathy, warmth, and genuine concern for their well-being.',
-        color: 'from-rose-500 to-pink-600',
-        bgLight: 'bg-rose-50',
+        color: 'from-rose-50 to-white',
         textColor: 'text-rose-600',
     },
     {
-        icon: Shield,
+        iconSrc: '/assets/branding/icon_oversight.png',
         title: 'Excellence',
         description: 'We uphold the highest standards of clinical quality, ensuring every service we provide meets rigorous professional benchmarks.',
-        color: 'from-purple-500 to-purple-700',
-        bgLight: 'bg-purple-50',
+        color: 'from-purple-50 to-white',
         textColor: 'text-purple-600',
     },
     {
-        icon: Star,
+        iconSrc: '/assets/branding/icon_integrity.png',
         title: 'Integrity',
         description: 'We operate with honesty and transparency in every interaction — with patients, families, and healthcare partners.',
-        color: 'from-amber-500 to-orange-600',
-        bgLight: 'bg-amber-50',
+        color: 'from-amber-50 to-white',
         textColor: 'text-amber-600',
     },
     {
-        icon: Users,
+        iconSrc: '/assets/branding/icon_community.png',
         title: 'Community',
         description: 'We are committed to strengthening the communities we serve by making quality home health care accessible to all.',
-        color: 'from-teal-500 to-emerald-600',
-        bgLight: 'bg-teal-50',
+        color: 'from-teal-50 to-white',
         textColor: 'text-teal-600',
     },
 ]
@@ -136,22 +132,26 @@ const Leadership = () => {
                     <h3 className="text-2xl font-bold text-gray-900 text-center mb-10">
                         The Values That Drive Us
                     </h3>
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         {values.map((value, i) => {
-                            const Icon = value.icon
                             return (
                                 <div 
                                     key={i}
-                                    className={`group bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 cursor-default`}
+                                    className={`group relative bg-white rounded-[32px] p-8 shadow-2xl shadow-purple-900/5 border border-purple-50 hover:shadow-purple-900/10 hover:-translate-y-2 transition-all duration-500 cursor-default overflow-hidden`}
                                     style={{ transitionDelay: `${600 + i * 150}ms` }}
                                 >
-                                    <div className={`w-14 h-14 ${value.bgLight} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                                        <Icon className={value.textColor} size={26} />
+                                    {/* Accent Blur */}
+                                    <div className={`absolute -top-10 -right-10 w-24 h-24 bg-gradient-to-br ${value.color} rounded-full filter blur-2xl opacity-20 group-hover:opacity-40 transition-opacity`}></div>
+                                    
+                                    <div className={`relative w-20 h-20 mb-8 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
+                                        <div className="absolute inset-0 bg-purple-100 rounded-3xl blur-xl opacity-0 group-hover:opacity-40 transition-opacity"></div>
+                                        <img src={value.iconSrc} alt={value.title} className="relative w-full h-full object-contain" />
                                     </div>
-                                    <h4 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-purple-700 transition-colors">
+                                    
+                                    <h4 className="text-xl font-black text-gray-900 mb-3 group-hover:text-purple-700 transition-colors">
                                         {value.title}
                                     </h4>
-                                    <p className="text-sm text-gray-600 leading-relaxed">
+                                    <p className="text-sm text-gray-600 font-medium leading-relaxed">
                                         {value.description}
                                     </p>
                                 </div>
