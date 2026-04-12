@@ -1,28 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Mail, Phone, MapPin, Loader2, CheckCircle, User, Stethoscope, UploadCloud } from 'lucide-react'
-import CalendlyEmbed from '../widgets/CalendlyEmbed' 
+import CalendlyEmbed from '../widgets/CalendlyEmbed'
 
 // --- Resettable Intersection Observer hook ---
 const useInView = (threshold = 0.1) => {
     const [isInView, setIsInView] = useState(false)
     const ref = useRef(null)
-    
+
     useEffect(() => {
         const observer = new IntersectionObserver(([entry]) => {
             setIsInView(entry.isIntersecting)
-        }, { threshold }) 
-        
+        }, { threshold })
+
         if (ref.current) {
             observer.observe(ref.current)
         }
-        
+
         return () => {
             if (ref.current) {
                 observer.unobserve(ref.current)
             }
         }
     }, [threshold])
-    
+
     return [ref, isInView]
 }
 
@@ -31,21 +31,21 @@ const useInView = (threshold = 0.1) => {
 // and that your form is configured to accept them.
 const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xbdzaokz';
 
-export default function Contact(){
+export default function Contact() {
     const [status, setStatus] = useState(null) // null, 'sending', 'sent', 'error'
     const [entryMode, setEntryMode] = useState('family') // 'family' or 'professional'
     const [uploadedDocs, setUploadedDocs] = useState([])
     const [isUploading, setIsUploading] = useState(false)
     const [ref, isInView] = useInView(0.2)
 
-    const handleSubmit = async (e)=>{
+    const handleSubmit = async (e) => {
         e.preventDefault()
         const form = e.target
         const formData = new FormData(form)
         const data = Object.fromEntries(formData.entries())
-        
+
         setStatus('sending')
-        
+
         try {
             const payload = {
                 patient_name: data.Patient_Name,
@@ -82,11 +82,11 @@ export default function Contact(){
     const handleFileUpload = async (e) => {
         const files = Array.from(e.target.files)
         if (files.length === 0) return
-        
+
         setIsUploading(true)
         const formDataUpload = new FormData()
         files.forEach(file => formDataUpload.append('files', file))
-        
+
         try {
             const res = await fetch('/api/upload', {
                 method: 'POST',
@@ -103,205 +103,151 @@ export default function Contact(){
         }
     }
 
-    // Tailwind Class for Inputs
-    const inputClasses = "mt-1 w-full rounded-lg p-3 text-gray-800 bg-white/90 border border-purple-300 focus:ring-2 focus:ring-purple-200 transition duration-300 placeholder-gray-500"
-    // Tailwind Class for File Input
-    const fileInputClasses = "mt-1 w-full rounded-lg p-3 text-gray-800 bg-white/90 border border-purple-300 focus:ring-2 focus:ring-purple-200 transition duration-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-100 file:text-purple-700 hover:file:bg-purple-200"
-
+    // Advanced Clinical Input Classes
+    const inputClasses = "mt-2 w-full rounded-2xl p-4 text-white bg-white/5 border border-white/10 focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 placeholder-gray-600 outline-none"
+    const fileInputClasses = "hidden"
 
     return (
-        <section id="contact" className="py-24 bg-gradient-to-br from-purple-700 to-purple-900 text-white relative overflow-hidden">
-            {/* Decorative background circle */}
-            <div className="absolute bottom-0 right-0 w-80 h-80 bg-purple-600 rounded-full filter blur-3xl opacity-20"></div>
+        <section id="contact" className="py-24 bg-[#0a0a0a] relative overflow-hidden">
+            {/* Cinematic Background Atmosphere */}
+            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-purple-600/5 rounded-full filter blur-[150px] pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-500/5 rounded-full filter blur-[120px] pointer-events-none"></div>
 
-            <div ref={ref} className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-16 relative z-10">
-                
-                {/* Contact Form Section (Animated) */}
-                <div 
-                    className={`transition-all duration-[1500ms] ease-out ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`} 
-                    style={{ transitionDelay: '300ms' }}
-                >
-                    <div className="flex items-center gap-4 mb-6">
-                        <button 
-                            onClick={() => setEntryMode('family')}
-                            className={`px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${entryMode === 'family' ? 'bg-white text-purple-800 shadow-lg' : 'bg-purple-600/30 text-purple-200 hover:bg-purple-500/40'}`}
-                        >
-                            Patient/Family
-                        </button>
-                        <button 
-                            onClick={() => setEntryMode('professional')}
-                            className={`px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${entryMode === 'professional' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-purple-600/30 text-purple-200 hover:bg-purple-500/40'}`}
-                        >
-                            Healthcare Professional
-                        </button>
-                    </div>
+            <div ref={ref} className="max-w-7xl mx-auto px-6 relative z-10">
+                <div className="grid lg:grid-cols-2 gap-20">
 
-                    <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                        {entryMode === 'family' ? 'Get Started' : 'Professional Referral'}
-                    </h2>
-                    
-                    <p className={`mt-3 leading-relaxed border-l-4 pl-4 py-2 italic transition-colors ${entryMode === 'family' ? 'text-purple-200 border-purple-400' : 'text-emerald-100 border-emerald-400'}`}>
-                        {entryMode === 'family' 
-                            ? "Request info for yourself or a loved one. Our intake specialist will reach out within 24 hours." 
-                            : "Physicians and Discharge Planners: Submit clinical data securely for immediate coordination."}
-                    </p>
-
-                    <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                        {/* Shared Contact Info */}
-                        <div className={`p-6 rounded-[24px] border transition-all ${entryMode === 'family' ? 'bg-purple-800/40 border-purple-600' : 'bg-white/5 border-white/10 shadow-xl backdrop-blur-md'}`}>
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2 mb-6">
-                                <User size={20} className={entryMode === 'family' ? 'text-purple-300' : 'text-emerald-300'}/> 
-                                Basic Contact Details
-                            </h3>
-                            <div className="grid sm:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase tracking-widest text-purple-200 mb-2">Patient's Name*</label>
-                                    <input required name="Patient_Name" placeholder="Jane Doe" className={inputClasses} disabled={status === 'sending'} />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase tracking-widest text-purple-200 mb-2">Contact Phone*</label>
-                                    <input required type="tel" name="Phone" placeholder="(555) 123-4567" className={inputClasses} disabled={status === 'sending'} />
-                                </div>
-                            </div>
-                            <div className="grid sm:grid-cols-2 gap-6 mt-6">
-                                <div>
-                                    <label className="block text-[10px] font-black uppercase tracking-widest text-purple-200 mb-2">Email Address*</label>
-                                    <input required type="email" name="Email" placeholder="you@example.com" className={inputClasses} disabled={status === 'sending'} />
-                                </div>
-                                {entryMode === 'family' && (
-                                    <div>
-                                        <label className="block text-[10px] font-black uppercase tracking-widest text-purple-200 mb-2">Your Relation to Patient</label>
-                                        <input name="Contact_Name" placeholder="e.g. Daughter, Spouse" className={inputClasses} disabled={status === 'sending'} />
-                                    </div>
-                                )}
-                            </div>
+                    {/* Left Column: Sophisticated Form */}
+                    <div className={`transition-all duration-[1500ms] ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                        <div className="flex items-center gap-3 mb-10">
+                            {[
+                                { id: 'family', label: 'Patient/Family', icon: User },
+                                { id: 'professional', label: 'Clinical Provider', icon: Stethoscope }
+                            ].map((mode) => (
+                                <button
+                                    key={mode.id}
+                                    onClick={() => setEntryMode(mode.id)}
+                                    className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${entryMode === mode.id ? 'bg-white text-black shadow-[0_0_30px_rgba(255,255,255,0.2)]' : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10'}`}
+                                >
+                                    <mode.icon size={14} />
+                                    {mode.label}
+                                </button>
+                            ))}
                         </div>
 
-                        {/* Professional-only Path */}
-                        {entryMode === 'professional' && (
-                            <div className="animate-fadeIn space-y-6">
-                                <div className="p-6 rounded-[24px] bg-emerald-900/30 border border-emerald-500/30 space-y-6">
-                                    <h3 className="text-xl font-bold text-emerald-300 flex items-center gap-2">
-                                        <Stethoscope size={20}/> Physician Details
-                                    </h3>
-                                    <div className="grid sm:grid-cols-2 gap-6">
-                                        <div>
-                                            <label className="block text-[10px] font-black uppercase tracking-widest text-emerald-200 mb-2">Physician Name*</label>
-                                            <input required name="Physician_Name" placeholder="Dr. Robert Smith" className={inputClasses} disabled={status === 'sending'} />
-                                        </div>
-                                        <div>
-                                            <label className="block text-[10px] font-black uppercase tracking-widest text-emerald-200 mb-2">10-Digit NPI*</label>
-                                            <input required name="NPI_Number" placeholder="1234567890" maxLength={10} className={inputClasses} disabled={status === 'sending'} />
+                        <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tighter">
+                            {entryMode === 'family' ? 'Initiate Your Care Path' : 'Professional Referral Interface'}
+                        </h2>
+
+                        <p className="text-gray-400 font-medium leading-relaxed mb-12 max-w-lg">
+                            {entryMode === 'family'
+                                ? "Experience clinical excellence from your first interaction. Request information for localized home care."
+                                : "Submit clinical packets through our secure coordination portal for priority patient assessment."}
+                        </p>
+
+                        <form className="space-y-8" onSubmit={handleSubmit}>
+                            {/* Input Grid: Shared Details */}
+                            <div className="grid sm:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400 ml-1">Patient Identity</label>
+                                    <input required name="Patient_Name" placeholder="Full Name" className={inputClasses} />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400 ml-1">Secure Phone</label>
+                                    <input required type="tel" name="Phone" placeholder="(555) 000-0000" className={inputClasses} />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400 ml-1">Contact Email</label>
+                                <input required type="email" name="Email" placeholder="clinical-inquiry@provider.com" className={inputClasses} />
+                            </div>
+
+                            {/* Conditional Professional Path */}
+                            {entryMode === 'professional' && (
+                                <div className="animate-fadeInUp space-y-8 pt-4">
+                                    <div className="p-8 rounded-[32px] bg-emerald-500/5 border border-emerald-500/20 space-y-8">
+                                        <div className="grid sm:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-400 ml-1">Physician Lead</label>
+                                                <input required name="Physician_Name" placeholder="Dr. Full Name" className={inputClasses} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-400 ml-1">NPI Identification</label>
+                                                <input required name="NPI_Number" placeholder="10 Digits" maxLength={10} className={inputClasses} />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div className="p-6 rounded-[24px] bg-white text-slate-900 shadow-2xl space-y-4">
-                                    <h3 className="text-xl font-black flex items-center gap-2">
-                                        <UploadCloud size={20} className='text-purple-600'/> Attach Referral Docs
-                                    </h3>
-                                    <div className="relative">
-                                        <input 
-                                            id="public_upload"
-                                            type="file" 
-                                            multiple
-                                            onChange={handleFileUpload}
-                                            className="hidden"
-                                            disabled={isUploading}
-                                        />
-                                        <label htmlFor="public_upload" className={`flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-2xl p-8 cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition-all ${isUploading ? 'opacity-50' : ''}`}>
-                                            <UploadCloud size={32} className="text-slate-300 mb-2" />
-                                            <span className="text-sm font-bold text-slate-600">{isUploading ? 'Uploading to Secure Vault...' : 'Click to Upload Patient Packet'}</span>
-                                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">PDF, JPG, or DOC (Max 10MB)</span>
+                                    <div className="p-8 rounded-[32px] bg-white/[0.03] border border-white/10 space-y-6">
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-[10px] font-black uppercase tracking-[0.4em] text-white/50">Clinical Documentation</label>
+                                            {isUploading && <span className="text-[8px] font-black text-emerald-400 uppercase animate-pulse">Encoding Docs...</span>}
+                                        </div>
+                                        <input id="public_upload" type="file" multiple onChange={handleFileUpload} className="hidden" />
+                                        <label htmlFor="public_upload" className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-white/10 rounded-[28px] cursor-pointer hover:border-purple-500/50 hover:bg-white/5 transition-all group/upload">
+                                            <UploadCloud size={32} className="text-white/20 group-hover/upload:text-purple-400 transition-colors mb-4" />
+                                            <span className="text-xs font-black text-white/60">Attach Patient Packet</span>
                                         </label>
-                                        
+
                                         {uploadedDocs.length > 0 && (
-                                            <div className="mt-4 flex flex-wrap gap-2">
+                                            <div className="flex flex-wrap gap-2">
                                                 {uploadedDocs.map((url, i) => (
-                                                    <div key={i} className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg text-xs font-black border border-emerald-100 flex items-center gap-2">
-                                                        Doc_{i+1}.pdf <CheckCircle size={12} />
+                                                    <div key={i} className="bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-xl text-[10px] font-black border border-emerald-500/20">
+                                                        UPLOAD_READY_{i + 1}
                                                     </div>
                                                 ))}
                                             </div>
                                         )}
                                     </div>
                                 </div>
-                            </div>
-                        )}
-                        
-                        <div>
-                            <label className="block text-[10px] font-black uppercase tracking-widest text-purple-200 mb-2">Describe Care Needs*</label>
-                            <textarea required name="Message" rows="4" placeholder="How can we help?" className={inputClasses} disabled={status === 'sending'} />
-                        </div>
-
-                        <button 
-                            type="submit" 
-                            disabled={status === 'sending' || status === 'sent'}
-                            className={`
-                                w-full inline-flex items-center justify-center gap-3 px-10 py-4 rounded-full font-black uppercase tracking-widest transition-all shadow-xl hover:scale-[1.02] active:scale-[0.98]
-                                ${status === 'sent' ? 'bg-emerald-500 text-white' : status === 'sending' ? 'bg-purple-300 text-purple-900' : 'bg-white text-purple-800'}
-                            `}
-                        >
-                            {status === 'sending' ? (
-                                <><Loader2 size={20} className="animate-spin" /> Synchronizing...</>
-                            ) : status === 'sent' ? (
-                                <><CheckCircle size={20} /> Application Received</>
-                            ) : (
-                                <><Mail size={20} /> {entryMode === 'family' ? 'Send Request' : 'Submit Professional Referral'}</>
                             )}
-                        </button>
 
-                        {status === 'error' && <p className="text-rose-300 text-xs font-bold mt-4 text-center">Submission failed. Please call (657) 377-0776 for assistance.</p>}
-                    </form>
-                </div>
-                
-                {/* Right Column: Contact Info / Scheduling */}
-                <div 
-                    className={`transition-all duration-[1500ms] ease-out ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`} 
-                    style={{ transitionDelay: '500ms' }}
-                >
-                    <div className="p-8 rounded-2xl bg-white/10 backdrop-blur-sm shadow-xl h-full flex flex-col justify-between">
-                        <div>
-                            <h3 className="text-3xl font-bold mb-6">Need Immediate Assistance?</h3>
-                            <p className="text-purple-100 mb-8">
-                                For urgent matters or to speak directly with an intake specialist, please use the contact details below. Our team is available Monday–Friday, 9AM–5PM.
-                            </p>
-                            
-                            <div className="space-y-6">
-                                {/* Phone Number */}
-                                <div className="flex items-start gap-4">
-                                    <Phone size={24} className="flex-shrink-0 mt-1 text-emerald-300" />
-                                    <div>
-                                        <p className="text-lg font-semibold">Office Phone Line</p>
-                                        <a href="tel:6573770776" className="text-xl font-bold text-white hover:text-emerald-300 transition-colors">(657) 377-0776</a>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400 ml-1">Clinical Context</label>
+                                <textarea required name="Message" rows="4" placeholder="Briefly describe patient condition or required services" className={inputClasses} />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={status === 'sending' || status === 'sent'}
+                                className={`w-full py-5 rounded-full font-black text-[11px] uppercase tracking-[0.3em] transition-all duration-500 hover:scale-105 ${status === 'sent' ? 'bg-emerald-500 text-white' : 'bg-white text-black shadow-[0_20px_40px_rgba(255,255,255,0.1)] hover:shadow-white/20'}`}
+                            >
+                                {status === 'sending' ? 'Synchronizing Data...' : status === 'sent' ? 'Referral Verified' : 'Initiate Secure Transfer'}
+                            </button>
+                        </form>
+                    </div>
+
+                    {/* Right Column: Information Pods */}
+                    <div className={`space-y-8 transition-all duration-[1500ms] delay-300 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-24'}`}>
+                        {/* Interactive Info Pod */}
+                        <div className="bg-gradient-to-br from-white/[0.03] to-transparent backdrop-blur-3xl rounded-[48px] p-12 border border-white/10 h-fit">
+                            <h3 className="text-3xl font-black text-white mb-8 tracking-tighter">Coordination Hub</h3>
+                            <div className="space-y-12">
+                                {[
+                                    { label: 'Direct Line', value: '(657) 377-0776', icon: Phone, sub: 'Intake available 9AM–5PM' },
+                                    { label: 'Cloud Mail', value: 'olympiahomehealthinc@gmail.com', icon: Mail, sub: 'Response within 120min' },
+                                    { label: 'Base Command', value: 'Huntington Beach, CA', icon: MapPin, sub: 'Regional Operations Center' }
+                                ].map((item, i) => (
+                                    <div key={i} className="flex gap-6 group/info">
+                                        <div className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 group-hover/info:border-purple-500/50 transition-colors">
+                                            <item.icon className="text-purple-400" size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">{item.label}</p>
+                                            <p className="text-lg font-black text-white mb-1">{item.value}</p>
+                                            <p className="text-xs text-gray-500 font-medium">{item.sub}</p>
+                                        </div>
                                     </div>
-                                </div>
-                                {/* Email */}
-                                <div className="flex items-start gap-4">
-                                    <Mail size={24} className="flex-shrink-0 mt-1 text-emerald-300" />
-                                    <div>
-                                        <p className="text-lg font-semibold">General Inquiries</p>
-                                        <a href="mailto:olympiahomehealthinc@gmail.com" className="text-white hover:text-emerald-300 transition-colors">olympiahomehealthinc@gmail.com</a>
-                                    </div>
-                                </div>
-                                {/* Address */}
-                                <div className="flex items-start gap-4">
-                                    <MapPin size={24} className="flex-shrink-0 mt-1 text-emerald-300" />
-                                    <div>
-                                        <p className="text-lg font-semibold">Office Location</p>
-                                        <p className="text-white">20422 Beach Blvd, Suite 320, Huntington Beach, CA 92648</p>
-                                    </div>
-                                </div>
+                                ))}
+                            </div>
+
+                            {/* Integrated Calendly Section */}
+                            <div className="mt-16 pt-12 border-t border-white/5">
+                                <h4 className="text-xl font-black text-white mb-4 tracking-tighter">Schedule a Strategy Call</h4>
+                                <p className="text-sm text-gray-500 font-medium mb-8">Access our clinical calendars directly to book a priority video consultation.</p>
+                                <CalendlyEmbed />
                             </div>
                         </div>
-                        
-                        {/* Calendly CTA (if enabled) */}
-                        <div className="mt-10 pt-6 border-t border-purple-600">
-                            <h4 className="text-xl font-bold mb-4">Book a Discovery Call</h4>
-                            <p className="text-purple-200 mb-4">You can also use our convenient online scheduler to book a quick call with our intake team.</p>
-                            <CalendlyEmbed />
-                        </div>
-
                     </div>
                 </div>
             </div>

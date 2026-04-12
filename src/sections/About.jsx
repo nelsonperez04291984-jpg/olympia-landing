@@ -399,78 +399,115 @@ const About = () => {
                     <ServiceAreaChecker serviceAreas={serviceAreas} />
                 </div>
 
-                {/* Service Areas with Map */}
-                <div className={`mb-16 transition-all duration-1000 delay-600 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-                    <div className="bg-gradient-to-br from-purple-600 to-purple-900 rounded-3xl p-8 md:p-12 shadow-2xl text-white">
-                        <div className="grid md:grid-cols-2 gap-12 items-center">
-
-                            {/* Left: Service Areas List */}
-                            <div>
-                                <div className="flex items-center gap-3 mb-6">
-                                    <MapPin className="text-purple-200" size={32} />
-                                    <h3 className="text-3xl font-bold">Comprehensive Coverage — San Diego to Kern County</h3>
+                {/* --- ADVANCED BENTO SERVICE AREAS --- */}
+                <div className={`mb-24 transition-all duration-[1500ms] ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-24'}`}>
+                    <div className="bg-[#020617] rounded-[48px] p-8 md:p-16 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.7)] border border-white/5 relative overflow-hidden group/bento">
+                        {/* Immersive Background Elements */}
+                        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-600/10 rounded-full filter blur-[120px] -translate-y-1/2 translate-x-1/2 animate-pulse"></div>
+                        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-500/5 rounded-full filter blur-[100px] translate-y-1/2 -translate-x-1/2"></div>
+                        
+                        <div className="relative z-10">
+                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+                                <div className="max-w-2xl">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-12 h-12 bg-purple-500/20 rounded-2xl flex items-center justify-center border border-purple-400/30">
+                                            <MapPin className="text-purple-400" size={24} />
+                                        </div>
+                                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-purple-400">Regional Coverage Network</span>
+                                    </div>
+                                    <h3 className="text-4xl md:text-6xl font-black text-white leading-tight mb-6">
+                                        Comprehensive Clinical Presence
+                                    </h3>
+                                    <p className="text-gray-400 text-lg font-medium leading-relaxed">
+                                        Providing premium home health coordination across **Southern California's primary medical corridors**, spanning 7 strategic counties.
+                                    </p>
                                 </div>
-                                <p className="text-purple-100 mb-8 text-lg">
-                                    Professional home health care services available across Southern California, spanning 7 counties:
-                                </p>
-                                <div className="space-y-4">
-                                    {[
-                                        { county: 'Orange County', cities: 'Huntington Beach, Irvine, Anaheim, Santa Ana, Newport Beach & more' },
-                                        { county: 'San Diego County', cities: 'San Diego, Chula Vista, Oceanside, Carlsbad & more' },
-                                        { county: 'Los Angeles County', cities: 'Los Angeles, Long Beach, Pasadena, Torrance & more' },
-                                        { county: 'Riverside County', cities: 'Riverside, Corona, Temecula, Palm Springs & more' },
-                                        { county: 'San Bernardino County', cities: 'San Bernardino, Ontario, Rancho Cucamonga & more' },
-                                        { county: 'Ventura County', cities: 'Ventura, Oxnard, Thousand Oaks, Simi Valley & more' },
-                                        { county: 'Kern County', cities: 'Bakersfield, Tehachapi, Delano & more' },
-                                    ].map((item, i) => (
-                                        <div key={i} className="flex items-start gap-3 group">
-                                            <CheckCircle className="text-emerald-400 flex-shrink-0 mt-0.5 group-hover:scale-125 transition-transform" size={18} />
-                                            <div>
-                                                <span className="text-white font-semibold">{item.county}</span>
-                                                <span className="text-purple-200 text-sm ml-2">— {item.cities}</span>
+                                <div className="hidden lg:block">
+                                    <div className="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl">
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex -space-x-2">
+                                                {[1,2,3].map(i => <div key={i} className="w-8 h-8 rounded-full border-2 border-[#020617] bg-purple-600 flex items-center justify-center text-[10px] font-bold text-white">RN</div>)}
                                             </div>
+                                            <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Active Clinical Units: 142</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid lg:grid-cols-12 gap-6 items-start">
+                                {/* Left Side: Bento Cards for Counties */}
+                                <div className="lg:col-span-7 grid sm:grid-cols-2 gap-4">
+                                    {[
+                                        { county: 'Orange County', cities: 'Huntington Beach, Irvine, Anaheim', size: 'col-span-2', icon: '01' },
+                                        { county: 'San Diego', cities: 'Chula Vista, Oceanside', size: 'col-span-1', icon: '02' },
+                                        { county: 'Los Angeles', cities: 'Long Beach, Pasadena', size: 'col-span-1', icon: '03' },
+                                        { county: 'Riverside', cities: 'Corona, Temecula', size: 'col-span-1', icon: '04' },
+                                        { county: 'San Bernardino', cities: 'Ontario, Rancho Cucamonga', size: 'col-span-1', icon: '05' },
+                                        { county: 'Ventura', cities: 'Oxnard, Thousand Oaks', size: 'col-span-1', icon: '06' },
+                                        { county: 'Kern County', cities: 'Bakersfield, Delano', size: 'col-span-1', icon: '07' },
+                                    ].map((item, i) => (
+                                        <div 
+                                            key={i} 
+                                            className={`${item.size} group/tile bg-white/[0.03] hover:bg-white/[0.08] backdrop-blur-xl border border-white/10 rounded-[28px] p-6 transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-500/10`}
+                                        >
+                                            <div className="flex justify-between items-start mb-4">
+                                                <span className="text-[10px] font-black text-purple-500/50 uppercase tracking-tighter">Region {item.icon}</span>
+                                                <div className="w-8 h-8 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center group-hover/tile:bg-purple-500 group-hover/tile:border-purple-500 transition-all">
+                                                    <CheckCircle className="text-purple-400 group-hover/tile:text-white" size={14} />
+                                                </div>
+                                            </div>
+                                            <h4 className="text-xl font-black text-white mb-2">{item.county}</h4>
+                                            <p className="text-gray-500 text-xs font-medium leading-relaxed group-hover/tile:text-gray-300 transition-colors">
+                                                {item.cities} & Surrounding Areas
+                                            </p>
                                         </div>
                                     ))}
                                 </div>
-                                </div>
-                            </div>
 
-                            {/* Right: Map & Confirmation */}
-                            <div className="space-y-6">
-                                <div className="p-6 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10">
-                                    <p className="text-purple-100 text-sm leading-relaxed">
-                                        <strong className="text-white text-base block mb-2 font-bold uppercase tracking-wider">Need Confirmation?</strong> 
-                                        If your specific city or zip code isn't listed, please reach out to us directly. 
-                                        We often expand our reach for specialized care cases.
-                                    </p>
-                                    <div className="mt-4 flex items-center gap-3 text-emerald-300 font-bold text-lg">
-                                        <Phone size={18} />
-                                        <a href="tel:6573770776" className="hover:text-emerald-200 transition-colors">(657) 377-0776</a>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white rounded-3xl p-5 shadow-2xl transform hover:scale-[1.02] transition-transform duration-500">
-                                    <div className="relative overflow-hidden rounded-2xl">
-                                        <iframe
-                                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3322.123!2d-117.9530!3d33.6846!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80dd268e46639c73%3A0x5fa279993a2740d6!2s20422%20Beach%20Blvd%20%23320%2C%20Huntington%20Beach%2C%20CA%2092648!5e0!3m2!1sen!2sus!4v1234567890"
-                                            width="100%"
-                                            height="350"
-                                            style={{ border: 0 }}
-                                            allowFullScreen=""
-                                            loading="lazy"
-                                            referrerPolicy="no-referrer-when-downgrade"
-                                            title="Olympia Home Health Location"
-                                        ></iframe>
-                                    </div>
-                                    <div className="mt-5 text-center px-2">
-                                        <div className="flex items-center justify-center gap-2 mb-1">
-                                            <MapPin size={16} className="text-purple-600" />
-                                            <p className="text-gray-900 font-black text-lg">Our Office</p>
+                                {/* Right Side: Advanced Map UI */}
+                                <div className="lg:col-span-5 space-y-6">
+                                    <div className="bg-[#0f172a] rounded-[36px] p-2 shadow-2xl border border-white/10 overflow-hidden relative group/map">
+                                        <div className="absolute top-6 left-6 z-20 bg-black/60 backdrop-blur-xl border border-white/20 rounded-2xl p-4 animate-fadeIn">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                                <span className="text-[8px] font-black text-emerald-400 uppercase tracking-[0.2em]">Operational HQ</span>
+                                            </div>
+                                            <h5 className="text-xs font-black text-white">Huntington Beach, CA</h5>
                                         </div>
-                                        <p className="text-gray-500 text-sm font-medium">20422 Beach Blvd, Suite 320, Huntington Beach, CA 92648</p>
+
+                                        <div className="relative overflow-hidden rounded-[30px] border border-white/5 shadow-inner">
+                                            <iframe
+                                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3322.123!2d-117.9530!3d33.6846!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80dd268e46639c73%3A0x5fa279993a2740d6!2s20422%20Beach%20Blvd%20%23320%2C%20Huntington%20Beach%2C%20CA%2092648!5e0!3m2!1sen!2sus!4v1234567890"
+                                                width="100%"
+                                                height="420"
+                                                style={{ border: 0, filter: 'invert(90%) hue-rotate(240deg) brightness(1.2)' }}
+                                                allowFullScreen=""
+                                                loading="lazy"
+                                                title="Advanced Operations Map"
+                                            ></iframe>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-gradient-to-br from-purple-600 to-indigo-900 rounded-[36px] p-8 shadow-2xl relative overflow-hidden group/cta">
+                                        <div className="absolute top-0 right-0 p-4 opacity-20 transform translate-x-1/4 -translate-y-1/4">
+                                            <Phone size={120} className="text-white fill-white/10" />
+                                        </div>
+                                        <div className="relative z-10">
+                                            <h4 className="text-2xl font-black text-white mb-4">Immediate Coordination</h4>
+                                            <p className="text-purple-100 text-sm font-medium leading-relaxed mb-6">
+                                                If your specific city isn't shown, our clinical intake team can often authorize extended range cases. 
+                                            </p>
+                                            <div className="flex items-center gap-4">
+                                                <a href="tel:6573770776" className="px-6 py-3 bg-white text-indigo-950 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all">
+                                                    (657) 377-0776
+                                                </a>
+                                                <span className="text-[10px] font-black text-purple-200 uppercase tracking-widest">Available 24/7</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
                     </div>
                 </div>
 
