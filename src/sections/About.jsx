@@ -27,12 +27,15 @@ const useInView = (threshold = 0.1) => {
 }
 
 // --- Component for Marketing Details (Commitment Items, kept as it's used above) ---
-const CommitmentCard = ({ title, description, icon: Icon }) => (
-    <div className="flex gap-4 p-4 rounded-xl bg-purple-50 shadow-md border-l-4 border-purple-500 transition-shadow hover:shadow-lg">
-        <Icon className="w-8 h-8 text-purple-600 flex-shrink-0 mt-1" />
+const CommitmentCard = ({ title, description, iconSrc }) => (
+    <div className="flex gap-5 p-6 rounded-3xl bg-white shadow-2xl shadow-purple-900/5 border border-purple-50 transition-all hover:-translate-y-1 hover:shadow-purple-900/10 group">
+        <div className="relative flex-shrink-0">
+            <div className="absolute inset-0 bg-purple-200 rounded-full blur-xl opacity-0 group-hover:opacity-40 transition-opacity"></div>
+            <img src={iconSrc} alt={title} className="relative w-16 h-16 object-contain" />
+        </div>
         <div>
-            <p className="font-bold text-gray-900 mb-1">{title}</p>
-            <p className="text-sm text-gray-700">{description}</p>
+            <p className="font-black text-gray-900 mb-1 text-lg">{title}</p>
+            <p className="text-sm text-gray-600 font-medium leading-relaxed">{description}</p>
         </div>
     </div>
 );
@@ -234,17 +237,17 @@ const About = () => {
         {
             title: "Holistic & Patient-Centered Care",
             description: "We focus on the patient's dignity and independence, integrating physical needs with emotional and social well-being in every tailored plan.",
-            icon: Heart
+            iconSrc: "/assets/branding/icon_comfort.png"
         },
         {
             title: "RN-Led Clinical Oversight",
             description: "Every care team is managed and monitored by Registered Nurses (RNs) to ensure adherence to the highest clinical and safety standards.",
-            icon: Shield
+            iconSrc: "/assets/branding/icon_oversight.png"
         },
         {
             title: "Unwavering Family Communication",
             description: "We provide consistent, transparent updates to family members, ensuring confidence and peace of mind regarding the care their loved ones receive.",
-            icon: Users
+            iconSrc: "/assets/branding/icon_community.png"
         }
     ]
 
@@ -277,9 +280,10 @@ const About = () => {
 
                     {/* Left Column: Mission Statement */}
                     <div className={`transition-all duration-1000 ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`}>
-                        <div className="bg-gradient-to-br from-purple-50 to-white rounded-3xl p-8 shadow-2xl border-2 border-purple-200 h-full">
-                            <h3 className="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                                <Heart className="text-purple-600 w-8 h-8" /> Our Foundation of Care
+                        <div className="bg-gradient-to-br from-purple-50 to-white rounded-3xl p-8 shadow-2xl border-2 border-purple-200 h-full relative overflow-hidden">
+                            <h3 className="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-4">
+                                <img src="/assets/branding/icon_comfort.png" alt="Foundation" className="w-12 h-12 object-contain" />
+                                Our Foundation of Care
                             </h3>
                             <p className="text-xl text-purple-700 leading-relaxed font-semibold mb-6">
                                 "Our mission is simple: to provide the highest quality of healthcare professionals in the comfort of your home, ensuring every patient receives **exceptional care with unparalleled compassion.**"
@@ -297,9 +301,10 @@ const About = () => {
 
                     {/* Right Column: Core Commitments */}
                     <div className={`transition-all duration-1000 delay-300 ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`}>
-                        <div className="bg-gradient-to-br from-white to-purple-100 rounded-3xl p-8 shadow-2xl border-2 border-purple-200 h-full">
-                            <h3 className="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                                <Award className="text-purple-600 w-8 h-8" /> Our Unwavering Commitments
+                        <div className="bg-gradient-to-br from-white to-purple-100 rounded-3xl p-8 shadow-2xl border-2 border-purple-200 h-full relative">
+                            <h3 className="text-3xl font-bold text-gray-900 mb-6 flex items-center gap-4">
+                                <img src="/assets/branding/icon_oversight.png" alt="Commitments" className="w-12 h-12 object-contain" />
+                                Our Unwavering Commitments
                             </h3>
                             <div className="space-y-4">
                                 {commitments.map((item, i) => (
@@ -307,7 +312,7 @@ const About = () => {
                                         key={i}
                                         title={item.title}
                                         description={item.description}
-                                        icon={item.icon}
+                                        iconSrc={item.iconSrc}
                                     />
                                 ))}
                             </div>

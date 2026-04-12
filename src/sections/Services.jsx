@@ -34,7 +34,7 @@ const Services = () => {
     const services = [
         { 
             title: 'Skilled Nursing', 
-            icon: Heart,
+            iconSrc: '/assets/branding/icon_comfort.png',
             image: '/1.png',
             desc: 'Comprehensive nursing services provided under physician supervision.',
             features: [ 'Treatment and injections',
@@ -52,7 +52,7 @@ const Services = () => {
         },
         { 
             title: 'Home Health Aide', 
-            icon: Users,
+            iconSrc: '/assets/branding/icon_community.png',
             image: '/2.png',
             desc: 'Assistance with personal care, hygiene, ambulation, and exercises under professional supervision.',
             features: ['Personal care assistance',
@@ -63,7 +63,7 @@ const Services = () => {
         },
         { 
             title: 'Physical Therapy', 
-            icon: Activity,
+            iconSrc: '/assets/branding/icon_activity.png',
             image: '/3.png',
             desc: 'Physical, occupational and speech therapy to support recovery and mobility.',
             features: ['Adaptive equipment utilization',
@@ -75,7 +75,7 @@ const Services = () => {
         },
         { 
             title: 'Speech Therapy', 
-            icon: Activity,
+            iconSrc: '/assets/branding/icon_activity.png',
             image: '/SpeechTherapy.png',
             desc: 'Assist patients with speech challenges following illness or accident.',
             features: ['Adaptive equipment utilization',
@@ -86,7 +86,7 @@ const Services = () => {
         },
         { 
             title: 'Occupational Therapy', 
-            icon: Activity,
+            iconSrc: '/assets/branding/icon_activity.png',
             image: '/OccupationalTherapy.png',
             desc: 'Assist patients with speech challenges following illness or accident.',
             features: ['Adaptive equipment utilization',
@@ -97,7 +97,7 @@ const Services = () => {
         },
         { 
             title: 'Social Services', 
-            icon: Activity,
+            iconSrc: '/assets/branding/icon_community.png',
             image: '/Social.png',
             desc: 'Support for patients and families coping with illness or disability.',
             features: ['Emotional support',
@@ -108,7 +108,7 @@ const Services = () => {
         },
         { 
             title: 'Nutritional Guidance', 
-            icon: Activity,
+            iconSrc: '/assets/branding/icon_comfort.png',
             image: '/Nutrition.png',
             desc: 'Help patients understand and follow special diets prescribed by physicians.',
             features: ['Diet education',
@@ -161,8 +161,8 @@ const Services = () => {
                                 />
                                 
                                 {/* Icon badge */}
-                                <div className="absolute -bottom-4 left-4 w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-800 rounded-full flex items-center justify-center shadow-lg border-2 border-white z-20 group-hover:scale-110 transition-transform">
-                                    <service.icon className="text-white" size={20} />
+                                <div className="absolute -bottom-6 left-4 w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-2xl border border-purple-100 z-20 group-hover:scale-110 transition-transform">
+                                    <img src={service.iconSrc} alt={service.title} className="w-10 h-10 object-contain" />
                                 </div>
                             </div>
 
