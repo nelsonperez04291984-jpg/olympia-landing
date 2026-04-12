@@ -160,15 +160,9 @@ const Leadership = () => {
                                     <ArrowRight size={18} className="group-hover/btn:translate-x-2 transition-transform" />
                                 </a>
                             </div>
-                        </div>
                     </div>
                 </div>
-
-                            {/* Background Clinical Grid (Subtle) */}
-                            <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-purple-100 rounded-full filter blur-[100px] opacity-20 pointer-events-none"></div>
-                        </div>
-                    </div>
-                </div>
+            </div>
 
                 {/* Core Values: Interactive Grid */}
                 <div className={`transition-all duration-[2000ms] ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`} style={{ transitionDelay: '400ms' }}>
