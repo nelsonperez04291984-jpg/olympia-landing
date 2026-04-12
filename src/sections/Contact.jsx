@@ -33,35 +33,75 @@ const FORMSPREE_ENDPOINT = 'https://formspree.io/f/xbdzaokz';
 
 export default function Contact(){
     const [status, setStatus] = useState(null) // null, 'sending', 'sent', 'error'
-    const [ref, isInView] = useInView(0.2) // Increased threshold for a smoother trigger
+    const [entryMode, setEntryMode] = useState('family') // 'family' or 'professional'
+    const [uploadedDocs, setUploadedDocs] = useState([])
+    const [isUploading, setIsUploading] = useState(false)
+    const [ref, isInView] = useInView(0.2)
 
     const handleSubmit = async (e)=>{
         e.preventDefault()
         const form = e.target
-        const data = new FormData(form)
+        const formData = new FormData(form)
+        const data = Object.fromEntries(formData.entries())
+        
         setStatus('sending')
         
-        try{
-            const res = await fetch(FORMSPREE_ENDPOINT, {
+        try {
+            const payload = {
+                patient_name: data.Patient_Name,
+                email: data.Email,
+                patient_phone: data.Phone,
+                contact_name: data.Contact_Name,
+                physician_name: data.Physician_Name,
+                physician_phone: data.Physician_Phone,
+                npi_number: data.NPI_Number,
+                message: data.Message,
+                document_urls: uploadedDocs,
+                source: entryMode === 'professional' ? 'Public Portal (Pro)' : 'Public Lead'
+            }
+
+            const res = await fetch('/api/public/referrals', {
                 method: 'POST',
-                body: data,
-                // Do not set 'Content-Type': 'multipart/form-data' here; FormData does it.
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             })
-            if(res.ok){
+
+            if (res.ok) {
                 setStatus('sent')
                 form.reset()
+                setUploadedDocs([])
             } else {
                 setStatus('error')
             }
-        } catch(error){
+        } catch (error) {
             console.error("Form submission error:", error);
             setStatus('error')
         }
     }
 
-    const isSending = status === 'sending';
-    const isSent = status === 'sent';
-    const isError = status === 'error';
+    const handleFileUpload = async (e) => {
+        const files = Array.from(e.target.files)
+        if (files.length === 0) return
+        
+        setIsUploading(true)
+        const formDataUpload = new FormData()
+        files.forEach(file => formDataUpload.append('files', file))
+        
+        try {
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formDataUpload
+            })
+            if (res.ok) {
+                const data = await res.json()
+                setUploadedDocs(prev => [...prev, ...data.files.map(f => f.url)])
+            }
+        } catch (err) {
+            console.error("Upload failed", err)
+        } finally {
+            setIsUploading(false)
+        }
+    }
 
     // Tailwind Class for Inputs
     const inputClasses = "mt-1 w-full rounded-lg p-3 text-gray-800 bg-white/90 border border-purple-300 focus:ring-2 focus:ring-purple-200 transition duration-300 placeholder-gray-500"
@@ -81,210 +121,138 @@ export default function Contact(){
                     className={`transition-all duration-[1500ms] ease-out ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`} 
                     style={{ transitionDelay: '300ms' }}
                 >
-                    <span className="inline-block px-4 py-1 bg-purple-500/50 text-purple-100 rounded-full text-sm font-semibold mb-4">
-                        Begin Care Coordination
-                    </span>
-                    <h2 className="text-4xl md:text-5xl font-bold mb-4">Start Your Admission</h2>
+                    <div className="flex items-center gap-4 mb-6">
+                        <button 
+                            onClick={() => setEntryMode('family')}
+                            className={`px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${entryMode === 'family' ? 'bg-white text-purple-800 shadow-lg' : 'bg-purple-600/30 text-purple-200 hover:bg-purple-500/40'}`}
+                        >
+                            Patient/Family
+                        </button>
+                        <button 
+                            onClick={() => setEntryMode('professional')}
+                            className={`px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all ${entryMode === 'professional' ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-purple-600/30 text-purple-200 hover:bg-purple-500/40'}`}
+                        >
+                            Healthcare Professional
+                        </button>
+                    </div>
+
+                    <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                        {entryMode === 'family' ? 'Get Started' : 'Professional Referral'}
+                    </h2>
                     
-                    {/* COPY TO REFLECT FILE UPLOAD REQUIREMENT */}
-                    <p className="mt-3 text-purple-200 leading-relaxed border-l-4 border-emerald-400 pl-4 py-2 italic">
-                        As a certified Home Health Agency, we require a **Physician's Referral** to initiate services. Please complete the form and **upload the required document** below. Our intake coordinator will then confirm details with the referring physician.
+                    <p className={`mt-3 leading-relaxed border-l-4 pl-4 py-2 italic transition-colors ${entryMode === 'family' ? 'text-purple-200 border-purple-400' : 'text-emerald-100 border-emerald-400'}`}>
+                        {entryMode === 'family' 
+                            ? "Request info for yourself or a loved one. Our intake specialist will reach out within 24 hours." 
+                            : "Physicians and Discharge Planners: Submit clinical data securely for immediate coordination."}
                     </p>
 
-                    <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-                        
-                        {/* 1. PATIENT AND PRIMARY CONTACT INFORMATION */}
-                        <div className="p-5 rounded-xl bg-purple-800/40 border border-purple-600 space-y-4">
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                <User size={20} className='text-emerald-300'/> Patient/Family Contact Details
+                    <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                        {/* Shared Contact Info */}
+                        <div className={`p-6 rounded-[24px] border transition-all ${entryMode === 'family' ? 'bg-purple-800/40 border-purple-600' : 'bg-white/5 border-white/10 shadow-xl backdrop-blur-md'}`}>
+                            <h3 className="text-xl font-bold text-white flex items-center gap-2 mb-6">
+                                <User size={20} className={entryMode === 'family' ? 'text-purple-300' : 'text-emerald-300'}/> 
+                                Basic Contact Details
                             </h3>
-                            <div className="grid sm:grid-cols-2 gap-4">
-                                {/* Patient Name */}
+                            <div className="grid sm:grid-cols-2 gap-6">
                                 <div>
-                                    <label htmlFor="patient_name" className="block text-sm font-medium text-purple-100">Patient's Full Name*</label>
-                                    <input 
-                                        id="patient_name"
-                                        required 
-                                        name="Patient_Name" 
-                                        placeholder="Jane Doe"
-                                        className={inputClasses} 
-                                        disabled={isSending}
-                                    />
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-purple-200 mb-2">Patient's Name*</label>
+                                    <input required name="Patient_Name" placeholder="Jane Doe" className={inputClasses} disabled={status === 'sending'} />
                                 </div>
-                                {/* Contact Name (Optional) */}
                                 <div>
-                                    <label htmlFor="name" className="block text-sm font-medium text-purple-100">Contact Person Name (Your Name)</label>
-                                    <input 
-                                        id="name"
-                                        name="Contact_Name" 
-                                        placeholder="John Doe"
-                                        className={inputClasses} 
-                                        disabled={isSending}
-                                    />
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-purple-200 mb-2">Contact Phone*</label>
+                                    <input required type="tel" name="Phone" placeholder="(555) 123-4567" className={inputClasses} disabled={status === 'sending'} />
                                 </div>
                             </div>
-                            
-                            <div className="grid sm:grid-cols-2 gap-4">
-                                {/* Email */}
+                            <div className="grid sm:grid-cols-2 gap-6 mt-6">
                                 <div>
-                                    <label htmlFor="email" className="block text-sm font-medium text-purple-100">Email*</label>
-                                    <input 
-                                        id="email"
-                                        required 
-                                        type="email" 
-                                        name="Email" 
-                                        placeholder="you@example.com"
-                                        className={inputClasses} 
-                                        disabled={isSending}
-                                    />
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-purple-200 mb-2">Email Address*</label>
+                                    <input required type="email" name="Email" placeholder="you@example.com" className={inputClasses} disabled={status === 'sending'} />
                                 </div>
-                                {/* Phone */}
-                                <div>
-                                    <label htmlFor="phone" className="block text-sm font-medium text-purple-100">Contact Phone*</label>
-                                    <input 
-                                        id="phone"
-                                        required
-                                        type="tel" 
-                                        name="Phone" 
-                                        placeholder="(555) 123-4567"
-                                        className={inputClasses} 
-                                        disabled={isSending}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-
-                        {/* 2. REFERRING PHYSICIAN INFORMATION (UPDATED WITH NPI) */}
-                        <div className="p-5 rounded-xl bg-purple-800/40 border border-purple-600 space-y-4">
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                <Stethoscope size={20} className='text-emerald-300'/> Referring Physician's Information
-                            </h3>
-                            <div className="grid sm:grid-cols-2 gap-4">
-                                {/* Physician Name */}
-                                <div>
-                                    <label htmlFor="dr_name" className="block text-sm font-medium text-purple-100">Physician's Full Name*</label>
-                                    <input 
-                                        id="dr_name"
-                                        required 
-                                        name="Physician_Name" 
-                                        placeholder="Dr. Smith"
-                                        className={inputClasses} 
-                                        disabled={isSending}
-                                    />
-                                </div>
-                                {/* Physician Phone */}
-                                <div>
-                                    <label htmlFor="dr_phone" className="block text-sm font-medium text-purple-100">Physician's Phone Number*</label>
-                                    <input 
-                                        id="dr_phone"
-                                        required 
-                                        type="tel" 
-                                        name="Physician_Phone" 
-                                        placeholder="(555) 987-6543"
-                                        className={inputClasses} 
-                                        disabled={isSending}
-                                    />
-                                </div>
-                            </div>
-                            
-                            {/* NPI Number (NEW FIELD) */}
-                            <div>
-                                <label htmlFor="npi_number" className="block text-sm font-medium text-purple-100">NPI Number*</label>
-                                <input 
-                                    id="npi_number"
-                                    required 
-                                    type="text" 
-                                    name="NPI_Number" 
-                                    placeholder="10-digit NPI (e.g., 1234567890)"
-                                    className={inputClasses} 
-                                    maxLength={10}
-                                    pattern="\d{10}"
-                                    title="NPI must be 10 digits"
-                                    disabled={isSending}
-                                />
-                            </div>
-
-                        </div>
-
-                        {/* 3. FILE UPLOAD SECTION */}
-                        <div className="p-5 rounded-xl bg-emerald-700/40 border border-emerald-500 space-y-4">
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                <UploadCloud size={20} className='text-white'/> Upload Referral Document
-                            </h3>
-                            <div>
-                                <label htmlFor="referral_file" className="block text-sm font-medium text-white mb-2">
-                                    Physician's Referral (Required)*
-                                </label>
-                                <input 
-                                    id="referral_file"
-                                    required 
-                                    type="file" 
-                                    name="Referral_Document" 
-                                    accept=".pdf,.doc,.docx,.jpg,.png"
-                                    className={fileInputClasses} 
-                                    disabled={isSending}
-                                />
-                                <p className="text-xs text-white/70 mt-2">Accepted formats: PDF, DOC, DOCX, JPG, PNG. File size limit may apply depending on your form service.</p>
-                            </div>
-                            <div className="text-center p-2 bg-emerald-800/50 rounded-lg">
-                                <p className="text-sm font-semibold text-white">
-                                    Your information is kept confidential and secure.
-                                </p>
-                            </div>
-                        </div>
-                        
-                        {/* 4. MESSAGE / CARE NEEDS */}
-                        <div>
-                            <label htmlFor="message" className="block text-sm font-medium text-purple-100">Describe Care Needs / Message*</label>
-                            <textarea 
-                                id="message"
-                                required 
-                                name="Message" 
-                                rows="4" 
-                                placeholder="E.g., Patient requires post-surgery wound care and physical therapy."
-                                className={inputClasses} 
-                                disabled={isSending}
-                            />
-                        </div>
-
-                        {/* SUBMIT BUTTON */}
-                        <div>
-                            <button 
-                                type="submit" 
-                                disabled={isSending || isSent}
-                                className={`
-                                    inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full font-semibold transition-all duration-300 transform 
-                                    ${isSent 
-                                        ? 'bg-green-500 text-white cursor-not-allowed'
-                                        : isSending
-                                        ? 'bg-purple-300 text-purple-900 cursor-wait'
-                                        : 'bg-white text-purple-800 hover:bg-purple-100 hover:scale-[1.02]'
-                                    }
-                                `}
-                            >
-                                {isSending ? (
-                                    <>
-                                        <Loader2 size={20} className="animate-spin" />
-                                        Sending Referral...
-                                    </>
-                                ) : isSent ? (
-                                    <>
-                                        <CheckCircle size={20} />
-                                        Referral Received!
-                                    </>
-                                ) : (
-                                    <>
-                                        <Mail size={20} />
-                                        Submit Care Request
-                                    </>
+                                {entryMode === 'family' && (
+                                    <div>
+                                        <label className="block text-[10px] font-black uppercase tracking-widest text-purple-200 mb-2">Your Relation to Patient</label>
+                                        <input name="Contact_Name" placeholder="e.g. Daughter, Spouse" className={inputClasses} disabled={status === 'sending'} />
+                                    </div>
                                 )}
-                            </button>
+                            </div>
                         </div>
 
-                        {isError && <p className="text-yellow-300 mt-4 flex items-center gap-2">⚠️ There was a problem submitting your request. Please try again or call us immediately at (657) 377-0776.</p>}
-                    </form>
+                        {/* Professional-only Path */}
+                        {entryMode === 'professional' && (
+                            <div className="animate-fadeIn space-y-6">
+                                <div className="p-6 rounded-[24px] bg-emerald-900/30 border border-emerald-500/30 space-y-6">
+                                    <h3 className="text-xl font-bold text-emerald-300 flex items-center gap-2">
+                                        <Stethoscope size={20}/> Physician Details
+                                    </h3>
+                                    <div className="grid sm:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-[10px] font-black uppercase tracking-widest text-emerald-200 mb-2">Physician Name*</label>
+                                            <input required name="Physician_Name" placeholder="Dr. Robert Smith" className={inputClasses} disabled={status === 'sending'} />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black uppercase tracking-widest text-emerald-200 mb-2">10-Digit NPI*</label>
+                                            <input required name="NPI_Number" placeholder="1234567890" maxLength={10} className={inputClasses} disabled={status === 'sending'} />
+                                        </div>
+                                    </div>
+                                </div>
 
+                                <div className="p-6 rounded-[24px] bg-white text-slate-900 shadow-2xl space-y-4">
+                                    <h3 className="text-xl font-black flex items-center gap-2">
+                                        <UploadCloud size={20} className='text-purple-600'/> Attach Referral Docs
+                                    </h3>
+                                    <div className="relative">
+                                        <input 
+                                            id="public_upload"
+                                            type="file" 
+                                            multiple
+                                            onChange={handleFileUpload}
+                                            className="hidden"
+                                            disabled={isUploading}
+                                        />
+                                        <label htmlFor="public_upload" className={`flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-2xl p-8 cursor-pointer hover:border-purple-500 hover:bg-purple-50 transition-all ${isUploading ? 'opacity-50' : ''}`}>
+                                            <UploadCloud size={32} className="text-slate-300 mb-2" />
+                                            <span className="text-sm font-bold text-slate-600">{isUploading ? 'Uploading to Secure Vault...' : 'Click to Upload Patient Packet'}</span>
+                                            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">PDF, JPG, or DOC (Max 10MB)</span>
+                                        </label>
+                                        
+                                        {uploadedDocs.length > 0 && (
+                                            <div className="mt-4 flex flex-wrap gap-2">
+                                                {uploadedDocs.map((url, i) => (
+                                                    <div key={i} className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg text-xs font-black border border-emerald-100 flex items-center gap-2">
+                                                        Doc_{i+1}.pdf <CheckCircle size={12} />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
+                        <div>
+                            <label className="block text-[10px] font-black uppercase tracking-widest text-purple-200 mb-2">Describe Care Needs*</label>
+                            <textarea required name="Message" rows="4" placeholder="How can we help?" className={inputClasses} disabled={status === 'sending'} />
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            disabled={status === 'sending' || status === 'sent'}
+                            className={`
+                                w-full inline-flex items-center justify-center gap-3 px-10 py-4 rounded-full font-black uppercase tracking-widest transition-all shadow-xl hover:scale-[1.02] active:scale-[0.98]
+                                ${status === 'sent' ? 'bg-emerald-500 text-white' : status === 'sending' ? 'bg-purple-300 text-purple-900' : 'bg-white text-purple-800'}
+                            `}
+                        >
+                            {status === 'sending' ? (
+                                <><Loader2 size={20} className="animate-spin" /> Synchronizing...</>
+                            ) : status === 'sent' ? (
+                                <><CheckCircle size={20} /> Application Received</>
+                            ) : (
+                                <><Mail size={20} /> {entryMode === 'family' ? 'Send Request' : 'Submit Professional Referral'}</>
+                            )}
+                        </button>
+
+                        {status === 'error' && <p className="text-rose-300 text-xs font-bold mt-4 text-center">Submission failed. Please call (657) 377-0776 for assistance.</p>}
+                    </form>
                 </div>
                 
                 {/* Right Column: Contact Info / Scheduling */}

@@ -216,6 +216,43 @@ app.post('/api/referrals', async (req, res) => {
     }
 });
 
+// Public Referral Creation (for Landing Page Inquiries)
+app.post('/api/public/referrals', async (req, res) => {
+    try {
+        const { 
+          patient_name, patient_dob, patient_phone, diagnosis, services_needed,
+          email, contact_name, physician_name, physician_phone, npi_number,
+          document_urls, message, source
+        } = req.body;
+        
+        // Map public fields to internal model
+        const result = await pool.query(
+          `INSERT INTO referrals (
+            patient_name, patient_dob, patient_phone, diagnosis, 
+            services_needed, status, payment, weight, source,
+            document_urls, clinical_docs, message
+          ) 
+           VALUES ($1, $2, $3, $4, $5, 'Pending', 0, 0, $6, $7, $8, $9) 
+           RETURNING *`,
+          [
+            patient_name, 
+            patient_dob || null, 
+            patient_phone, 
+            diagnosis || 'Public Inquiry', 
+            services_needed || 'Home Health Consultation',
+            source || 'Public Lead',
+            JSON.stringify(document_urls || []),
+            JSON.stringify(document_urls || []),
+            `Contact: ${contact_name || 'N/A'} (Email: ${email || 'N/A'})\n\nPhysician: ${physician_name || 'N/A'} (NPI: ${npi_number || 'N/A'}, Phone: ${physician_phone || 'N/A'})\n\nMessage: ${message || 'No additional details provided.'}`
+          ]
+        );
+        res.json({ message: 'Request received successfully', referral: result.rows[0] });
+    } catch (err) {
+        console.error('Public submission error:', err);
+        res.status(500).json({ error: 'Failed to process request', details: err.message });
+    }
+});
+
 // FHIR-Compatible Referral Ingestion (Automated EHR Integration)
 app.post('/api/fhir/ingest', async (req, res) => {
   const bundle = req.body;
