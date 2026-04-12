@@ -84,7 +84,7 @@ const Leadership = () => {
                 {/* Mission Statement: The Executive Vision Card (Clean Rebuild) */}
                 <div className={`mb-24 transition-all duration-[1500ms] ${isInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
                     <div className="bg-white rounded-[48px] shadow-[0_50px_100px_-20px_rgba(88,28,135,0.15)] overflow-hidden border border-purple-100/50 flex flex-col lg:flex-row max-w-6xl mx-auto group/mission">
-                        
+
                         {/* --- LEFT SIDE: THE EXECUTIVE ID --- */}
                         <div className="lg:w-[40%] relative bg-white flex flex-col border-b lg:border-b-0 lg:border-r border-gray-100">
                             {/* Branding Header: Simplified High-Fidelity Flow */}
@@ -93,7 +93,7 @@ const Leadership = () => {
                                 <div className="relative z-10 flex flex-col items-center">
                                     <div className="relative mb-4 group/logo">
                                         <div className="absolute inset-0 bg-white/10 rounded-full blur-3xl opacity-0"></div>
-                                        <img src="/logo.png" alt="Olympia Logo" className="w-28 h-28 object-contain brightness-0 invert drop-shadow-[0_15px_30px_rgba(0,0,0,0.4)]" />
+                                        <img src="/log_latest.png" alt="Olympia Logo" className="w-28 h-28 object-contain brightness-0 invert drop-shadow-[0_15px_30px_rgba(0,0,0,0.4)]" />
                                     </div>
                                     <h4 className="text-xs font-black text-white uppercase tracking-[0.4em] mb-1">Olympia</h4>
                                     <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">Home Health Inc</p>
@@ -105,10 +105,10 @@ const Leadership = () => {
                                 <div className="relative group/portrait">
                                     <div className="absolute -inset-1.5 bg-gradient-to-tr from-[#B8860B] via-[#FFD700] to-[#B8860B] rounded-[40px] blur opacity-40"></div>
                                     <div className="relative w-full aspect-[4/5] max-w-[260px] bg-white rounded-[32px] overflow-hidden border-[6px] border-[#D4AF37] shadow-3xl">
-                                        <img 
-                                            src="/jeonalyn.jpg" 
-                                            alt="Jeonalyn Ashby, CEO" 
-                                            className="w-full h-full object-cover transition-all duration-1000 group-hover/portrait:scale-105" 
+                                        <img
+                                            src="/jeonalyn.jpg"
+                                            alt="Jeonalyn Ashby, CEO"
+                                            className="w-full h-full object-cover transition-all duration-1000 group-hover/portrait:scale-105"
                                         />
                                     </div>
                                 </div>
@@ -127,7 +127,7 @@ const Leadership = () => {
                             <div className="mt-auto bg-gradient-to-r from-[#B8860B] via-[#FFD700] to-[#8B4513] p-8 flex items-center justify-center gap-4 text-[#3E2723] shadow-inner">
                                 <MapPin size={20} className="text-[#3E2723]/60" />
                                 <div className="text-left font-black tracking-tighter text-sm uppercase leading-tight">
-                                    20422 Beach Blvd, Suite 320<br/>
+                                    20422 Beach Blvd, Suite 320<br />
                                     <span className="text-[11px] opacity-70">Huntington Beach, CA 92648</span>
                                 </div>
                             </div>
@@ -152,17 +152,17 @@ const Leadership = () => {
                             </p>
 
                             <div className={`transition-all duration-1000 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`} style={{ transitionDelay: '900ms' }}>
-                                <a 
-                                    href="#contact" 
+                                <a
+                                    href="#contact"
                                     className="group/btn inline-flex items-center gap-4 px-12 py-6 bg-gradient-to-br from-purple-600 to-indigo-800 text-white rounded-full hover:shadow-3xl hover:scale-105 transition-all font-black text-xs uppercase tracking-[0.3em]"
                                 >
                                     Initiate Consultation
                                     <ArrowRight size={18} className="group-hover/btn:translate-x-2 transition-transform" />
                                 </a>
                             </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
                 {/* Core Values: Interactive Grid */}
                 <div className={`transition-all duration-[2000ms] ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`} style={{ transitionDelay: '400ms' }}>
