@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Shield, Heart, Users, Award, Clock, MapPin, Phone, Mail, CheckCircle, Search, XCircle, ArrowRight, Loader2 } from 'lucide-react'
+import { Shield, Heart, Users, Award, Clock, MapPin, Phone, Mail, CheckCircle, Search, XCircle, ArrowRight, Loader2, Zap } from 'lucide-react'
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // --- 1. Intersection Observer hook ---
@@ -163,48 +163,82 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
 
 
     return (
-        <div className="max-w-2xl mx-auto p-8 bg-white rounded-3xl shadow-xl border-t-4 border-purple-500 relative overflow-hidden">
+        <div className="max-w-3xl mx-auto p-10 bg-white/40 backdrop-blur-xl rounded-[40px] shadow-[0_32px_64px_-16px_rgba(88,28,135,0.15)] border border-white/60 relative overflow-hidden group">
+            {/* Animated Glow Backdrop */}
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-400/20 rounded-full filter blur-[80px] group-hover:bg-purple-400/30 transition-colors duration-700"></div>
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-400/10 rounded-full filter blur-[80px] group-hover:bg-emerald-400/20 transition-colors duration-700"></div>
 
-            <h4 className="text-2xl font-bold text-gray-900 text-center mb-2">
-                Intelligent Care Matcher
-            </h4>
-            <p className="text-center text-sm text-gray-500 mb-6">Powered by AI</p>
+            <div className="relative z-10">
+                <div className="flex flex-col items-center mb-10">
+                    <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl flex items-center justify-center shadow-2xl mb-6 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                        <Zap size={32} className="text-white fill-purple-200/50" />
+                    </div>
+                    <h4 className="text-3xl font-black text-gray-900 tracking-tight mb-2">
+                        Intelligent Care Matcher
+                    </h4>
+                    <div className="flex items-center gap-2">
+                        <span className="h-px w-8 bg-purple-200"></span>
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
+                            Powered by Olympia AI
+                        </p>
+                        <span className="h-px w-8 bg-purple-200"></span>
+                    </div>
+                </div>
 
-            <form onSubmit={checkServiceArea} className="flex flex-col sm:flex-row gap-3">
-                <input
-                    type="text"
-                    placeholder='e.g., "My dad needs physical therapy in Huntington Beach"'
-                    value={location}
-                    onChange={(e) => {
-                        setLocation(e.target.value);
-                        if (status !== 'initial') setStatus('initial');
-                    }}
-                    required
-                    className="flex-grow p-4 border border-purple-300 rounded-xl focus:ring-2 focus:ring-purple-500 transition duration-300 text-gray-800 placeholder-gray-400"
-                />
-                <button
-                    type="submit"
-                    disabled={status === 'checking' || location.trim() === ''}
-                    className="flex items-center justify-center p-4 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition duration-300 disabled:bg-purple-300 sm:w-auto w-full"
-                >
-                    {status === 'checking' ? (
-                        <span className="flex items-center gap-2"><Loader2 size={20} className="animate-spin" /> Checking</span>
-                    ) : (
-                        <span className="flex items-center gap-2"><Search size={20} /> Match Care</span>
-                    )}
-                </button>
-            </form>
+                <form onSubmit={checkServiceArea} className="relative max-w-2xl mx-auto">
+                    <div className="relative flex flex-col sm:flex-row items-center gap-4 bg-white p-2 rounded-[30px] border-2 border-purple-100 shadow-xl focus-within:border-purple-400 focus-within:ring-4 focus-within:ring-purple-500/10 transition-all duration-500">
+                        <div className="flex-grow flex items-center pl-6 w-full">
+                            <Search className="text-purple-300 mr-3" size={20} />
+                            <input
+                                type="text"
+                                placeholder='e.g., "I need wound care in Huntington Beach"'
+                                value={location}
+                                onChange={(e) => {
+                                    setLocation(e.target.value);
+                                    if (status !== 'initial') setStatus('initial');
+                                }}
+                                required
+                                className="w-full py-4 bg-transparent text-gray-800 font-semibold focus:outline-none placeholder-gray-400"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            disabled={status === 'checking' || location.trim() === ''}
+                            className={`
+                                flex items-center justify-center px-10 py-4 rounded-[22px] font-black text-xs uppercase tracking-widest text-white shadow-lg transition-all duration-300 group/btn
+                                ${status === 'checking' ? 'bg-purple-300' : 'bg-gradient-to-r from-purple-600 to-purple-800 hover:scale-[1.02] hover:shadow-purple-500/40 active:scale-95'}
+                                sm:w-auto w-full
+                            `}
+                        >
+                            {status === 'checking' ? (
+                                <><Loader2 size={16} className="animate-spin mr-2" /> Mapping...</>
+                            ) : (
+                                <span className="flex items-center gap-2">
+                                    Match My Care <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+                                </span>
+                            )}
+                        </button>
+                    </div>
+                    <p className="mt-4 text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                        Verify coverage for cities, zip codes, or specific medical needs
+                    </p>
+                </form>
 
-            {renderStatusMessage()}
+                <div className="max-w-2xl mx-auto">
+                    {renderStatusMessage()}
+                </div>
 
-            {status === 'served' && (
-                <a
-                    href="#contact"
-                    className="mt-6 w-full inline-flex items-center justify-center px-6 py-3 text-lg font-bold text-white bg-emerald-500 rounded-xl hover:bg-emerald-600 transition-all"
-                >
-                    Start My Care Now <ArrowRight size={20} className="ml-2" />
-                </a>
-            )}
+                {status === 'served' && (
+                    <div className="mt-8 flex justify-center animate-bounceIn">
+                        <a
+                            href="#contact"
+                            className="inline-flex items-center px-12 py-5 text-lg font-black text-white bg-emerald-500 rounded-full hover:bg-emerald-600 shadow-[0_20px_40px_-10px_rgba(16,185,129,0.3)] hover:scale-105 transition-all"
+                        >
+                            Start Coordination Now <ArrowRight size={20} className="ml-3" />
+                        </a>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
