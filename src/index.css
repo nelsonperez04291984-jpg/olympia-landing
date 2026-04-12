@@ -75,39 +75,7 @@ html {
     filter: drop-shadow(0 0 20px rgba(107, 33, 168, 0.3));
 }
 
-/* --- Sophisticated Mesh Flow --- */
-@keyframes mesh-flow {
-  0% { background-position: 0% 50%; opacity: 0.8; }
-  50% { background-position: 100% 50%; opacity: 1; }
-  100% { background-position: 0% 50%; opacity: 0.8; }
-}
-
-.mesh-background {
-  background: linear-gradient(-45deg, #1e1b4b, #312e81, #4c1d95, #1e1b4b);
-  background-size: 400% 400%;
-  animation: mesh-flow 15s ease infinite;
-}
-
-/* --- Interactive Cursor --- */
-.custom-cursor {
-  width: 20px;
-  height: 20px;
-  background: white;
-  border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-  mix-blend-mode: difference;
-  transition: transform 0.2s ease, width 0.3s ease, height 0.3s ease;
-}
-
-.cursor-active {
-  transform: scale(2);
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  mix-blend-mode: normal;
-}
+/* --- Reveal Stagger --- */
 
 /* --- Reveal Stagger --- */
 .reveal-stagger {

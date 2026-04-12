@@ -59,63 +59,61 @@ const Leadership = () => {
     const [ref, isInView] = useInView()
 
     return (
-        <section id="leadership" className="py-24 bg-[#020617] relative overflow-hidden">
-            {/* Cinematic Background Decorations */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] bg-gradient-to-b from-purple-900/10 to-transparent pointer-events-none"></div>
-            <div className="absolute top-1/4 left-0 w-96 h-96 bg-purple-600/5 rounded-full filter blur-[120px] animate-pulse"></div>
-            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 rounded-full filter blur-[150px]"></div>
+        <section id="leadership" className="py-24 bg-gradient-to-br from-purple-50 via-white to-purple-50 relative overflow-hidden">
+            {/* Background Decorations */}
+            <div className="absolute top-0 left-0 w-96 h-96 bg-purple-200 rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
+            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-rose-200 rounded-full filter blur-[120px] opacity-20"></div>
             
             <div ref={ref} className="max-w-7xl mx-auto px-6 relative z-10">
                 
                 {/* Section Header */}
                 <div className={`text-center mb-24 transition-all duration-[1500ms] ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
                     <div className="flex items-center justify-center gap-3 mb-6">
-                        <span className="h-px w-8 bg-purple-500/50"></span>
-                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400">Institutional Foundation</span>
-                        <span className="h-px w-8 bg-purple-500/50"></span>
+                        <span className="h-px w-8 bg-purple-500"></span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-600">Who We Are</span>
+                        <span className="h-px w-8 bg-purple-500"></span>
                     </div>
-                    <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tighter">
-                        Mission & Clinical Values
+                    <h2 className="text-4xl md:text-6xl font-black text-gray-900 mb-6 tracking-tighter">
+                        Mission & Values
                     </h2>
-                    <p className="text-lg text-gray-400 max-w-2xl mx-auto font-medium">
-                        Guided by a century of combined clinical expertise and a personal commitment to high-fidelity home care.
+                    <p className="text-lg text-gray-600 max-w-2xl mx-auto font-medium">
+                        Built on a foundation of compassion and clinical excellence, our mission guides everything we do.
                     </p>
                 </div>
 
-                {/* Mission Statement: High-Fidelity Glass Card */}
+                {/* Mission Statement: Premium White Card */}
                 <div className={`mb-24 transition-all duration-[1500ms] ${isInView ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
-                    <div className="bg-white/[0.02] backdrop-blur-3xl rounded-[48px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.7)] overflow-hidden border border-white/10 group/mission">
+                    <div className="bg-white rounded-[48px] shadow-2xl shadow-purple-900/10 overflow-hidden border border-purple-50 group/mission">
                         <div className="grid lg:grid-cols-5 gap-0">
-                            {/* Image Side: Cinematic Overlay */}
+                            {/* Image Side */}
                             <div className="lg:col-span-2 relative overflow-hidden h-[400px] lg:h-auto">
-                                <div className="absolute inset-0 bg-gradient-to-r from-[#020617] via-transparent to-transparent z-10"></div>
-                                <div className="absolute inset-0 bg-purple-600/10 mix-blend-overlay z-10"></div>
+                                <div className="absolute inset-0 bg-gradient-to-r from-white via-transparent to-transparent z-10"></div>
                                 <img 
                                     src="/jeonalyn.jpg" 
                                     alt="Jeonalyn Ashby, Founder" 
-                                    className={`w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 group-hover:scale-105`}
+                                    className={`w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105`}
                                 />
                             </div>
 
                             {/* Mission Content */}
                             <div className="lg:col-span-3 p-8 lg:p-20 flex flex-col justify-center">
                                 <div className={`transition-all duration-1000 ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`} style={{ transitionDelay: '300ms' }}>
-                                    <span className="inline-block px-4 py-2 bg-purple-500/10 border border-purple-500/20 text-purple-400 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] mb-8">
-                                        Executive Vision
+                                    <span className="inline-block px-4 py-2 bg-purple-100 text-purple-700 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] mb-8">
+                                        Our Mission
                                     </span>
-                                    <h3 className="text-3xl md:text-5xl font-black text-white mb-8 leading-[1.1] tracking-tighter">
+                                    <h3 className="text-3xl md:text-5xl font-black text-gray-900 mb-8 leading-[1.1] tracking-tighter">
                                         Caring Beyond Limits — One Patient, One Home.
                                     </h3>
                                 </div>
 
-                                <p className={`text-gray-400 text-lg font-medium leading-relaxed mb-8 transition-all duration-1000 ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`} style={{ transitionDelay: '600ms' }}>
-                                    Olympia was born from a personal commitment to professionalize community health. We believe every individual deserves access to <span className="text-white">high-fidelity clinical care</span> in the dignity of their own environment.
+                                <p className={`text-gray-600 text-lg font-medium leading-relaxed mb-8 transition-all duration-1000 ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`} style={{ transitionDelay: '600ms' }}>
+                                    At Olympia Home Health, our mission is to deliver exceptional, compassionate healthcare directly to our patients' homes. We believe everyone deserves <span className="text-purple-700 font-black">high-quality care</span> in the dignity of their own environment.
                                 </p>
 
                                 <div className={`transition-all duration-1000 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`} style={{ transitionDelay: '900ms' }}>
                                     <a 
                                         href="#contact" 
-                                        className="inline-flex items-center gap-4 px-10 py-5 bg-white text-black rounded-full hover:scale-105 transition-all font-black text-xs uppercase tracking-widest shadow-[0_20px_40px_rgba(255,255,255,0.1)]"
+                                        className="inline-flex items-center gap-4 px-10 py-5 bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-full hover:shadow-2xl hover:scale-105 transition-all font-black text-xs uppercase tracking-widest"
                                     >
                                         Initiate Consultation
                                         <ArrowRight size={16} />
@@ -126,30 +124,30 @@ const Leadership = () => {
                     </div>
                 </div>
 
-                {/* Core Values: Advanced Interactive Grid */}
+                {/* Core Values: Interactive Grid */}
                 <div className={`transition-all duration-[2000ms] ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`} style={{ transitionDelay: '400ms' }}>
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         {values.map((value, i) => {
                             return (
                                 <div 
                                     key={i}
-                                    className={`group relative bg-white/[0.02] backdrop-blur-2xl rounded-[36px] p-8 border border-white/5 hover:border-purple-500/40 hover:bg-white/[0.05] transition-all duration-700 cursor-default overflow-hidden`}
+                                    className={`group relative bg-white rounded-[40px] p-8 shadow-2xl shadow-purple-900/5 border border-purple-50 hover:shadow-purple-900/10 hover:-translate-y-2 transition-all duration-700 cursor-default overflow-hidden`}
                                     style={{ transitionDelay: `${600 + i * 150}ms` }}
                                 >
-                                    {/* Advanced Hover Glow */}
-                                    <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-purple-600/10 rounded-full filter blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+                                    {/* Accent Blur */}
+                                    <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br ${value.color} to-transparent rounded-full filter blur-2xl opacity-10 group-hover:opacity-30 transition-opacity`}></div>
                                     
-                                    <div className="relative mb-10 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-700">
-                                        <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                        <div className="w-16 h-16 bg-[#020617] rounded-2xl border border-white/10 flex items-center justify-center relative overflow-hidden shadow-inner">
+                                    <div className="relative mb-8 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-700">
+                                        <div className="absolute inset-0 bg-purple-100 rounded-3xl blur-2xl opacity-0 group-hover:opacity-40 transition-opacity"></div>
+                                        <div className="w-16 h-16 bg-purple-50 rounded-2xl border border-purple-100 flex items-center justify-center relative shadow-inner">
                                             <img src={value.iconSrc} alt={value.title} className="w-10 h-10 object-contain" />
                                         </div>
                                     </div>
                                     
-                                    <h4 className="text-xl font-black text-white mb-3 group-hover:text-purple-400 transition-colors">
+                                    <h4 className="text-xl font-black text-gray-900 mb-3 group-hover:text-purple-700 transition-colors">
                                         {value.title}
                                     </h4>
-                                    <p className="text-xs text-gray-500 font-medium leading-relaxed group-hover:text-gray-400 transition-colors">
+                                    <p className="text-[13px] text-gray-600 font-medium leading-relaxed">
                                         {value.description}
                                     </p>
                                 </div>
@@ -158,16 +156,16 @@ const Leadership = () => {
                     </div>
                 </div>
 
-                {/* Professional Endorsement */}
+                {/* Professional Quote Pod */}
                 <div className={`mt-24 transition-all duration-[2000ms] delay-500 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-                    <div className="bg-gradient-to-br from-white/[0.03] to-transparent rounded-[40px] p-12 lg:p-16 border border-white/5 relative overflow-hidden">
-                        <div className="absolute -top-10 -right-10 text-[200px] text-white/5 font-black leading-none pointer-events-none">"</div>
-                        <p className="text-2xl lg:text-3xl text-gray-300 font-medium italic mb-8 leading-relaxed relative z-10">
-                            Our mission is simple: to provide <span className="text-white italic">compassionate, professional care</span> that empowers our patients to live their best lives at home.
+                    <div className="bg-white rounded-[40px] p-12 lg:p-16 shadow-2xl shadow-purple-900/5 border border-purple-50 relative overflow-hidden">
+                        <div className="absolute -top-10 -right-10 text-[200px] text-purple-50 font-black leading-none pointer-events-none">"</div>
+                        <p className="text-2xl lg:text-3xl text-gray-700 font-medium italic mb-8 leading-relaxed relative z-10">
+                            Our mission is simple: to provide <span className="text-purple-700 italic font-black">compassionate, professional care</span> that empowers our patients to live their best lives at home.
                         </p>
                         <div className="flex items-center gap-4">
                             <span className="w-12 h-px bg-purple-500"></span>
-                            <p className="text-purple-400 font-black uppercase tracking-widest text-xs">Jeonalyn Ashby, BSN — Founder & CEO</p>
+                            <p className="text-purple-600 font-black uppercase tracking-widest text-xs">Jeonalyn Ashby, BSN — Founder & CEO</p>
                         </div>
                     </div>
                 </div>

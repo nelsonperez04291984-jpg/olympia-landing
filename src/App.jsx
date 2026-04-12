@@ -16,42 +16,8 @@ import StatusPortal from './pages/StatusPortal'
 import QRCodePage from './pages/QRCodePage'
 import { Routes, Route } from 'react-router-dom'
 
-const CustomCursor = () => {
-    const [position, setPosition] = React.useState({ x: 0, y: 0 });
-    const [isHovering, setIsHovering] = React.useState(false);
-
-    React.useEffect(() => {
-        const handleMouseMove = (e) => setPosition({ x: e.clientX, y: e.clientY });
-        const handleMouseOver = (e) => {
-            if (e.target.closest('button, a, input, [role="button"]')) setIsHovering(true);
-        };
-        const handleMouseOut = (e) => setIsHovering(false);
-
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseover', handleMouseOver);
-        window.addEventListener('mouseout', handleMouseOut);
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('mouseover', handleMouseOver);
-            window.removeEventListener('mouseout', handleMouseOut);
-        };
-    }, []);
-
-    return (
-        <div 
-            className={`custom-cursor hidden lg:block ${isHovering ? 'cursor-active' : ''}`}
-            style={{ 
-                left: `${position.x}px`, 
-                top: `${position.y}px`, 
-                transform: `translate(-50%, -50%) ${isHovering ? 'scale(2.5)' : 'scale(1)'}` 
-            }}
-        />
-    );
-};
-
 const MainLanding = () => (
     <div className="relative">
-        <div className="absolute inset-0 h-screen mesh-background opacity-30 mix-blend-soft-light pointer-events-none sticky top-0"></div>
         <Hero />
         <main className="relative z-10">
             <About />
@@ -66,8 +32,7 @@ const MainLanding = () => (
 
 export default function App() {
   return (
-    <div className="font-sans text-gray-800 overflow-x-hidden min-h-screen bg-[#0f172a] selection:bg-purple-500/30 selection:text-white">
-      <CustomCursor />
+    <div className="font-sans text-gray-800 overflow-x-hidden min-h-screen bg-white selection:bg-purple-500/30 selection:text-white">
       <ChatWidget />
       <Routes>
         <Route path="/" element={<MainLanding />} />
@@ -82,25 +47,6 @@ export default function App() {
       <Footer />
 
       <style>{`
-        .custom-cursor {
-          position: fixed;
-          width: 20px;
-          height: 20px;
-          border: 2px solid #9333ea;
-          border-radius: 50%;
-          pointer-events: none;
-          z-index: 9999;
-          transition: transform 0.2s ease;
-        }
-        .cursor-active {
-          background: rgba(147, 51, 234, 0.2);
-        }
-        .mesh-background {
-          background: radial-gradient(circle at 50% 50%, #7e22ce 0%, transparent 50%),
-                      radial-gradient(circle at 0% 0%, #3b82f6 0%, transparent 50%),
-                      radial-gradient(circle at 100% 100%, #ec4899 0%, transparent 50%);
-          filter: blur(100px);
-        }
         @keyframes blob {
           0%, 100% { transform: translate(0, 0) scale(1); }
           33% { transform: translate(30px, -50px) scale(1.1); }
