@@ -5,7 +5,6 @@ import Services from './sections/Services'
 import Leadership from './sections/Leadership'
 import Contact from './sections/Contact'
 import Footer from './sections/Footer'
-import ScrollToTop from './components/ScrollToTop'
 import ChatWidget from './components/ChatWidget'
 import AIFaq from './sections/AIFaq'
 import Testimonials from './sections/Testimonials'
@@ -46,8 +45,7 @@ export default function App() {
         <Route path="/qr" element={<QRCodePage />} />
       </Routes>
       <Footer />
-      <ScrollToTop />
-      
+
       <style>{`
         @keyframes blob {
           0%, 100% { transform: translate(0, 0) scale(1); }
