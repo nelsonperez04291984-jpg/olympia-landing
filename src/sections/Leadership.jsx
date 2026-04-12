@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Heart, Shield, Star, Users, ArrowRight } from 'lucide-react'
+import { Heart, Shield, Star, Users, ArrowRight, MapPin } from 'lucide-react'
 
 const useInView = (threshold = 0.1) => {
     const [isInView, setIsInView] = useState(false)
