@@ -128,15 +128,15 @@ const Hero = () => {
           </div>
 
           <h1 className="text-5xl md:text-8xl font-black text-white mb-8 tracking-tight animate-fadeInUp animation-delay-200">
-            Olympia Home Health Inc.
+            Skilled Nursing & Home Care in Orange County.
           </h1>
 
           <p className="text-xl md:text-2xl text-purple-100 mb-6 max-w-3xl mx-auto font-medium animate-fadeInUp animation-delay-400">
-            Compassionate Care. Professional Service. Trusted Support.
+            Olympia Home Health Inc. — Compassionate Care. Trusted Support.
           </p>
 
           <p className="text-lg text-purple-200 mb-16 max-w-2xl mx-auto font-medium animate-fadeInUp animation-delay-600">
-            Delivering exceptional home health care with dedication, expertise, and a personal touch
+            Delivering exceptional medical and rehabilitative care with an RN-led clinical approach across Huntington Beach and all of Orange County.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center animate-fadeInUp animation-delay-800">

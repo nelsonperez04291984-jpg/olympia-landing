@@ -458,7 +458,7 @@ const About = () => {
                                             </div>
                                             <h4 className="text-xl font-black text-gray-900 mb-2">{item.county}</h4>
                                             <p className="text-gray-500 text-xs font-medium leading-relaxed">
-                                                {item.cities} & Surrounding Areas
+                                                Home Health Services in {item.cities} & Surrounding Areas
                                             </p>
                                         </div>
                                     ))}

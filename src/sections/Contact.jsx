@@ -223,20 +223,21 @@ export default function Contact() {
                             <h3 className="text-3xl font-black text-white mb-8 tracking-tighter">Coordination Hub</h3>
                             <div className="space-y-12">
                                 {[
-                                    { label: 'Direct Line', value: '(657) 377-0776', icon: Phone, sub: 'Intake available 9AM–5PM' },
-                                    { label: 'Secure Email', value: 'olympiahomehealthinc@gmail.com', icon: Mail, sub: 'Clinical Response within 2hrs' },
-                                    { label: 'Operations', value: 'Huntington Beach, CA', icon: MapPin, sub: 'Regional Hub' }
+                                [
+                                    { label: 'Direct Line', value: '(657) 377-0776', icon: Phone, sub: 'Intake available 9AM–5PM', href: 'tel:6573770776' },
+                                    { label: 'Secure Email', value: 'olympiahomehealthinc@gmail.com', icon: Mail, sub: 'Clinical Response within 2hrs', href: 'mailto:olympiahomehealthinc@gmail.com' },
+                                    { label: 'Operations', value: 'Huntington Beach, CA', icon: MapPin, sub: 'Regional Hub', href: 'https://goo.gl/maps/YOUR_MAP_ID' }
                                 ].map((item, i) => (
-                                    <div key={i} className="flex gap-6 group/info">
+                                    <a key={i} href={item.href} className="flex gap-6 group/info outline-none focus:ring-2 focus:ring-white/20 rounded-2xl p-2 -ml-2 transition-all">
                                         <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 group-hover/info:bg-white/20 transition-all">
                                             <item.icon className="text-white" size={20} />
                                         </div>
                                         <div>
                                             <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">{item.label}</p>
-                                            <p className="text-lg font-black text-white mb-1">{item.value}</p>
+                                            <p className="text-lg font-black text-white mb-1 group-hover:text-purple-300 transition-colors">{item.value}</p>
                                             <p className="text-xs text-purple-200 opacity-60 font-medium">{item.sub}</p>
                                         </div>
-                                    </div>
+                                    </a>
                                 ))}
                             </div>
 
