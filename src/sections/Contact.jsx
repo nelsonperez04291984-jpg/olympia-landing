@@ -223,7 +223,6 @@ export default function Contact() {
                             <h3 className="text-3xl font-black text-white mb-8 tracking-tighter">Coordination Hub</h3>
                             <div className="space-y-12">
                                 {[
-                                [
                                     { label: 'Direct Line', value: '(657) 377-0776', icon: Phone, sub: 'Intake available 9AM–5PM', href: 'tel:6573770776' },
                                     { label: 'Secure Email', value: 'olympiahomehealthinc@gmail.com', icon: Mail, sub: 'Clinical Response within 2hrs', href: 'mailto:olympiahomehealthinc@gmail.com' },
                                     { label: 'Operations', value: 'Huntington Beach, CA', icon: MapPin, sub: 'Regional Hub', href: 'https://goo.gl/maps/YOUR_MAP_ID' }
