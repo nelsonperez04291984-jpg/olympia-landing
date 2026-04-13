@@ -1,9 +1,7 @@
-import React from 'react'
-import { QRCodeSVG } from 'qrcode.react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Download, Printer } from 'lucide-react'
 
-const SITE_URL = 'https://olympia-landing.vercel.app/'
+const SITE_URL = 'https://olympiahhi.com/'
 
 const QRCodePage = () => {
   const handlePrint = () => {
@@ -11,32 +9,10 @@ const QRCodePage = () => {
   }
 
   const handleDownload = () => {
-    const svg = document.getElementById('qr-code-svg')
-    if (!svg) return
-
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')
-    const size = 1024
-    canvas.width = size
-    canvas.height = size
-
-    const svgData = new XMLSerializer().serializeToString(svg)
-    const img = new Image()
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
-    const url = URL.createObjectURL(svgBlob)
-
-    img.onload = () => {
-      ctx.fillStyle = '#ffffff'
-      ctx.fillRect(0, 0, size, size)
-      ctx.drawImage(img, 0, 0, size, size)
-      URL.revokeObjectURL(url)
-
-      const link = document.createElement('a')
-      link.download = 'olympia-home-health-qr.png'
-      link.href = canvas.toDataURL('image/png')
-      link.click()
-    }
-    img.src = url
+    const link = document.createElement('a')
+    link.download = 'olympia-home-health-qr.png'
+    link.href = '/url_qrcodecreator.com_20_00_48.png'
+    link.click()
   }
 
   return (
@@ -55,7 +31,7 @@ const QRCodePage = () => {
 
         {/* QR Card */}
         <div className="bg-white rounded-3xl shadow-2xl p-10 text-center print:shadow-none print:rounded-none">
-          {/* Logo & Branding */}
+          {/* Logo & Branding - Hidden on print as the QR already has it */}
           <div className="flex flex-col items-center justify-center mb-4">
             <img
               src="/logo-qr-trimmed.png"
@@ -66,22 +42,10 @@ const QRCodePage = () => {
 
           {/* QR Code */}
           <div className="inline-block p-6 bg-white rounded-2xl border-2 border-gray-100 mb-6">
-            <QRCodeSVG
-              id="qr-code-svg"
-              value={SITE_URL}
-              size={256}
-              level="H"
-              includeMargin={true}
-              bgColor="#ffffff"
-              fgColor="#1a1a2e"
-              imageSettings={{
-                src: '/logo-qr-trimmed.png',
-                x: undefined,
-                y: undefined,
-                height: 56,
-                width: 48,
-                excavate: true,
-              }}
+            <img
+              src="/url_qrcodecreator.com_20_00_48.png"
+              alt="QR Code"
+              className="w-64 h-64 object-contain"
             />
           </div>
 

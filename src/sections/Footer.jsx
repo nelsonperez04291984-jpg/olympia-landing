@@ -1,6 +1,5 @@
 import React from 'react'
 import { Linkedin, Mail } from 'lucide-react'
-import { QRCodeSVG } from 'qrcode.react'
 import { Link } from 'react-router-dom'
 
 const Footer = () => {
@@ -74,12 +73,10 @@ const Footer = () => {
           <div>
             <h4 className="text-white font-semibold mb-4">Scan & Visit</h4>
             <Link to="/qr" className="inline-block p-3 bg-white rounded-xl hover:shadow-lg hover:shadow-purple-500/20 transition-all hover:scale-105">
-              <QRCodeSVG
-                value="https://olympia-landing.vercel.app/"
-                size={100}
-                level="H"
-                bgColor="#ffffff"
-                fgColor="#1a1a2e"
+              <img
+                src="/url_qrcodecreator.com_20_00_48.png"
+                alt="Scan to share"
+                className="w-24 h-24 object-contain"
               />
             </Link>
             <p className="text-xs text-gray-500 mt-2">Scan or click to share</p>
