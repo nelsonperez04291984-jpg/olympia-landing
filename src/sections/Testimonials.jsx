@@ -98,7 +98,7 @@ const Testimonials = () => {
     };
 
     return (
-        <section id="testimonials" className="py-24 bg-gradient-to-tr from-purple-900 via-purple-800 to-indigo-900 text-white relative overflow-hidden">
+        <section id="testimonials" className="py-12 bg-gradient-to-tr from-purple-900 via-purple-800 to-indigo-900 text-white relative overflow-hidden">
             {/* Background elements */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
                 <div className="absolute -top-20 -left-20 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
@@ -107,15 +107,17 @@ const Testimonials = () => {
 
             <div ref={ref} className="max-w-6xl mx-auto px-6 relative z-10">
                 
-                <div className={`text-center mb-16 transition-all duration-1000 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-                    <span className="inline-block px-4 py-2 bg-white/10 backdrop-blur-sm text-purple-100 border border-white/20 rounded-full text-sm font-semibold mb-4">
-                        Patient Stories
-                    </span>
-                    <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                <div className={`text-center mb-10 transition-all duration-1000 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                    <div className="flex items-center justify-center gap-3 mb-3">
+                        <span className="h-px w-8 bg-purple-400/50"></span>
+                        <span className="text-[9px] font-black uppercase tracking-[0.4em] text-purple-100">Patient Stories</span>
+                        <span className="h-px w-8 bg-purple-400/50"></span>
+                    </div>
+                    <h2 className="text-2xl md:text-4xl font-black mb-3 tracking-tighter">
                         Trusted by Families
                     </h2>
-                    <p className="text-lg text-purple-200 max-w-2xl mx-auto">
-                        Don't just take our word for it. Hear from those who have experienced our care firsthand.
+                    <p className="text-sm text-purple-200 max-w-2xl mx-auto font-medium">
+                        Hear from those who have experienced our care firsthand.
                     </p>
                 </div>
 
@@ -140,7 +142,7 @@ const Testimonials = () => {
                     </button>
 
                     {/* Testimonial Cards */}
-                    <div className="relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 p-8 md:p-12 shadow-2xl">
+                    <div className="relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 p-6 md:p-10 shadow-2xl">
                         <Quote className="absolute top-8 right-8 text-purple-400/20 w-24 h-24" />
                         
                         <div className="relative min-h-[220px] flex flex-col justify-center">
@@ -161,13 +163,13 @@ const Testimonials = () => {
                                         ))}
                                     </div>
                                     
-                                    <p className="text-xl md:text-2xl font-light leading-relaxed mb-8 text-purple-50 italic">
+                                    <p className="text-lg md:text-xl font-light leading-relaxed mb-6 text-purple-50 italic">
                                         "{test.text}"
                                     </p>
                                     
                                     <div>
-                                        <p className="font-bold text-lg">{test.author}</p>
-                                        <p className="text-purple-300">{test.location}</p>
+                                        <p className="font-bold text-base">{test.author}</p>
+                                        <p className="text-purple-300 text-xs">{test.location}</p>
                                     </div>
                                 </div>
                             ))}
@@ -175,13 +177,13 @@ const Testimonials = () => {
                     </div>
 
                     {/* Pagination Dots */}
-                    <div className="flex justify-center gap-3 mt-8">
+                    <div className="flex justify-center gap-3 mt-6">
                         {testimonials.map((_, idx) => (
                             <button
                                 key={idx}
                                 onClick={() => setActiveIndex(idx)}
-                                className={`h-2 rounded-full transition-all duration-300 ${
-                                    idx === activeIndex ? 'w-8 bg-purple-400' : 'w-2 bg-purple-400/30'
+                                className={`h-1.5 rounded-full transition-all duration-300 ${
+                                    idx === activeIndex ? 'w-6 bg-purple-400' : 'w-1.5 bg-purple-400/30'
                                 }`}
                                 aria-label={`Go to testimonial ${idx + 1}`}
                             />
@@ -189,12 +191,12 @@ const Testimonials = () => {
                     </div>
 
                     {/* Add Review Button */}
-                    <div className="flex justify-center mt-12">
+                    <div className="flex justify-center mt-8">
                         <button 
                             onClick={() => setIsModalOpen(true)}
-                            className="group flex items-center gap-2 px-8 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 rounded-full font-semibold transition-all hover:scale-105 shadow-lg"
+                            className="group flex items-center gap-2 px-6 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 rounded-full font-black text-[9px] uppercase tracking-widest transition-all hover:scale-105 shadow-lg"
                         >
-                            <MessageSquarePlus className="text-purple-300 group-hover:text-white transition-colors" />
+                            <MessageSquarePlus className="text-purple-300 group-hover:text-white transition-colors" size={14} />
                             <span>Share Your Experience</span>
                         </button>
                     </div>

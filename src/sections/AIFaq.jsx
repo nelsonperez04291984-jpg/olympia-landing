@@ -81,40 +81,40 @@ const AIFaq = () => {
     };
 
     return (
-        <section id="faq" className="py-24 bg-purple-50 relative overflow-hidden">
+        <section id="faq" className="py-12 bg-purple-50 relative overflow-hidden">
             {/* Background Decorations */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-purple-200 rounded-full filter blur-3xl opacity-30 transform translate-x-1/2 -translate-y-1/2"></div>
             <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-200 rounded-full filter blur-3xl opacity-30 transform -translate-x-1/2 translate-y-1/2"></div>
 
             <div className="max-w-4xl mx-auto px-6 relative z-10">
-                <div className="text-center mb-12 animate-fadeInUp">
-                    <div className="inline-flex items-center justify-center p-3 bg-purple-100 rounded-full mb-4">
-                        <MessageSquare className="text-purple-600 w-8 h-8" />
+                <div className="text-center mb-8 animate-fadeInUp">
+                    <div className="inline-flex items-center justify-center p-2 bg-purple-100 rounded-full mb-3">
+                        <MessageSquare className="text-purple-600 w-6 h-6" />
                     </div>
-                    <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                        AI-Powered Resource Center
+                    <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-3 tracking-tighter">
+                        AI-Powered FAQ
                     </h2>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                        Have questions about our services, insurance, or hiring? Ask our intelligent assistant to instantly search our knowledge base.
+                    <p className="text-sm text-gray-600 max-w-2xl mx-auto font-medium">
+                        Have questions about our services or insurance? Ask our intelligent assistant for instant answers.
                     </p>
                 </div>
 
-                <div className="bg-white rounded-3xl shadow-xl border border-purple-100 p-8 md:p-12 animate-fadeInUp animation-delay-200">
-                    <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto mb-8">
+                <div className="bg-white rounded-3xl shadow-xl border border-purple-100 p-6 md:p-10 animate-fadeInUp animation-delay-200">
+                    <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto mb-6">
                         <input
                             type="text"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             placeholder="e.g., Do you accept Medicare?"
-                            className="w-full pl-6 pr-16 py-4 rounded-full border-2 border-purple-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all text-lg text-gray-800 placeholder-gray-400 outline-none"
+                            className="w-full pl-6 pr-16 py-3.5 rounded-full border-2 border-purple-200 focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all text-base text-gray-800 placeholder-gray-400 outline-none"
                         />
                         <button
                             type="submit"
                             disabled={isLoading || !query.trim()}
-                            className="absolute right-2 top-2 bottom-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full px-6 flex items-center justify-center hover:shadow-lg transition-all disabled:opacity-50 disabled:shadow-none"
+                            className="absolute right-1.5 top-1.5 bottom-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-full px-5 flex items-center justify-center hover:shadow-lg transition-all disabled:opacity-50 disabled:shadow-none"
                             aria-label="Ask Question"
                         >
-                            {isLoading ? <Loader2 className="animate-spin w-5 h-5" /> : <Search className="w-5 h-5" />}
+                            {isLoading ? <Loader2 className="animate-spin w-4 h-4" /> : <Search className="w-4 h-4" />}
                         </button>
                     </form>
 

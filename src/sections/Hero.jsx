@@ -38,7 +38,7 @@ const Hero = () => {
 
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <img src="/log_latest.png" alt="Olympia Logo" className="w-12 h-12 object-contain" />
+              {/* <img src="/log_latest.png" alt="Olympia Logo" className="w-12 h-12 object-contain" /> */}
               <span className={`font-bold text-xl transition-all duration-300 ${scrolled ? 'text-purple-700' : 'text-white drop-shadow-lg'}`}>
                 Olympia Home Health
               </span>
@@ -151,77 +151,85 @@ const Hero = () => {
 
         {/* Hero Content */}
         <div
-          className="relative z-20 max-w-6xl mx-auto px-6 py-12 text-center"
+          className="relative z-20 max-w-5xl mx-auto px-6 py-12 text-center"
           style={{ transform: `translateY(${scrollY * 0.2}px)` }}
         >
+          {/* Logo Container - Refined & Centered */}
+          <div className="relative group inline-flex justify-center mb-6">
+            <div className="absolute inset-0 bg-white/20 rounded-full blur-[40px] group-hover:bg-white/40 transition-all duration-1000 animate-pulse"></div>
+            <div className="relative w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 animate-float">
+              <img 
+                src="/log_latest.png" 
+                alt="Olympia Logo" 
+                className="w-full h-full object-contain filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.2)] transform transition-all duration-700 group-hover:scale-105" 
+              />
+            </div>
+          </div>
 
-          <h1 className="text-3xl md:text-5xl font-black text-white mb-3 tracking-tight drop-shadow-[0_0_40px_rgba(255,255,255,0.25)]">
-            Skilled Nursing Care
-            <span className="block text-purple-200">
-              Delivered in Your Home
-            </span>
-          </h1>
+          {/* Text Content */}
+          <div className="mb-10">
+            <h1 className="text-3XL md:text-5xl lg:text-5xl font-black text-white mb-3 tracking-tight drop-shadow-[0_0_40px_rgba(255,255,255,0.25)]">
+              Olympia Home Health
+            </h1>
 
-          <p className="text-base md:text-lg text-purple-100 mb-3 max-w-3xl mx-auto font-medium">
-            Olympia Home Health Inc. — Compassionate Care. Trusted Support.
-          </p>
+            <p className="text-base md:text-lg text-purple-100 mb-2 font-bold tracking-tight">
+              Compassionate Care. <span className="text-white">Trusted Support.</span>
+            </p>
 
-          <p className="text-sm md:text-base text-purple-200 mb-8 max-w-2xl mx-auto font-medium">
-            RN-led medical and rehabilitative care serving families across Huntington Beach and all of Orange County.
-          </p>
+            <p className="text-sm md:text-base text-purple-200 mx-auto max-w-2xl font-medium leading-relaxed opacity-90">
+              RN-led medical and rehabilitative care serving families across Huntington Beach and all of Southern California.
+            </p>
+          </div>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-
+          <div className="flex flex-col sm:flex-row gap-5 justify-center items-center mb-12">
             <a
               href="#contact"
-              className="group relative inline-flex items-center justify-center px-10 py-4 text-lg font-bold text-purple-900 bg-white rounded-full shadow-2xl transition-all duration-300 hover:scale-105 overflow-hidden"
+              className="group relative inline-flex items-center justify-center px-10 py-4 text-lg font-black text-purple-900 bg-white rounded-full shadow-2xl transition-all duration-300 hover:scale-105 overflow-hidden"
             >
-              Request Care Consultation
+              Request Consultation
               <span className="absolute inset-0 bg-gradient-to-r from-purple-400 to-indigo-400 opacity-0 group-hover:opacity-20 blur-xl transition duration-500"></span>
             </a>
 
             <a
               href="#services"
-              className="inline-flex items-center justify-center px-10 py-4 text-lg font-bold text-white bg-white/10 backdrop-blur-sm border-2 border-white/30 rounded-full transition-all duration-300 hover:bg-white/20 hover:scale-105"
+              className="inline-flex items-center justify-center px-10 py-4 text-base font-bold text-white bg-white/10 backdrop-blur-sm border-2 border-white/30 rounded-full transition-all duration-300 hover:bg-white/20 hover:scale-105"
             >
               View Our Services
             </a>
-
           </div>
 
           {/* Trust Indicators */}
-          <div className="mt-8 flex flex-wrap justify-center gap-5 text-[10px] md:text-xs text-purple-200 font-semibold mb-8">
-            <div>✓ RN-Led Clinical Care</div>
-            <div>✓ ACHC Accredited</div>
-            <div>✓ Serving All Orange County</div>
-            <div>✓ Compassionate In-Home Care</div>
+          <div className="flex flex-wrap justify-center gap-6 text-[10px] md:text-xs text-purple-200 font-bold mb-12 border-t border-white/10 pt-8">
+            <div className="flex items-center gap-2"><div className="w-1 h-1 bg-white rounded-full"></div> RN-Led Clinical Care</div>
+            <div className="flex items-center gap-2"><div className="w-1 h-1 bg-white rounded-full"></div> ACHC Accredited</div>
+            <div className="flex items-center gap-2"><div className="w-1 h-1 bg-white rounded-full"></div> Serving Southern California</div>
+            <div className="flex items-center gap-2"><div className="w-1 h-1 bg-white rounded-full"></div> Elite In-Home Support</div>
           </div>
 
-          {/* ACHC ACCREDITATION FEATURED BLOCK (Moved from About) */}
-          <div className="max-w-2xl mx-auto mt-4 mb-8 px-4">
-            <div className="bg-white/5 backdrop-blur-2xl rounded-[24px] px-5 py-5 md:px-8 md:py-6 border border-white/10 shadow-3xl relative overflow-hidden group/achc hover:bg-white/10 transition-all duration-700">
-                {/* Immersive background glow */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-400/10 rounded-full filter blur-[100px] -translate-y-1/2 translate-x-1/2 group-hover/achc:bg-yellow-400/20 transition-all duration-1000"></div>
-                
-                <div className="flex flex-col md:flex-row items-center gap-6 relative z-10">
-                    <div className="relative">
-                        <div className="absolute inset-0 bg-yellow-400/10 rounded-full blur-3xl animate-pulse"></div>
-                        <div className="achc-seal-container achc-seal-shadow w-20 h-20 md:w-24 md:h-24 transform transition-all duration-700 group-hover/achc:rotate-6 group-hover/achc:scale-110">
-                            <img src="/ACHC.png" alt="ACHC Accredited" className="w-full h-full object-contain" />
-                        </div>
-                    </div>
-                    <div className="flex-1 text-center md:text-left">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-400/20 border border-yellow-400/30 rounded-full mb-3">
-                            <div className="w-1.2 h-1.2 bg-yellow-400 rounded-full animate-ping"></div>
-                            <span className="text-[8px] font-black text-yellow-500 uppercase tracking-[0.2em]">Gold Standard of Care</span>
-                        </div>
-                        <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight">Accredited Excellence</h3>
-                        <p className="text-purple-100 text-[13px] leading-relaxed mb-1 font-medium">
-                            Olympia Home Health Inc. is proud to be accredited by the **Accreditation Commission for Health Care**. Our guarantee of quality and elite clinical standards.
-                        </p>
-                    </div>
+          {/* ACHC ACCREDITATION FEATURED BLOCK */}
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-white/5 backdrop-blur-3xl rounded-[32px] px-6 py-6 border border-white/10 shadow-3xl relative overflow-hidden group/achc hover:bg-white/10 transition-all duration-700">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-400/5 rounded-full filter blur-[100px] -translate-y-1/2 translate-x-1/2 group-hover/achc:bg-yellow-400/20 transition-all duration-1000"></div>
+
+              <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-yellow-400/10 rounded-full blur-3xl animate-pulse"></div>
+                  <div className="achc-seal-container achc-seal-shadow w-20 h-20 transform transition-all duration-700 group-hover/achc:rotate-6 group-hover/achc:scale-110">
+                    <img src="/ACHC.png" alt="ACHC Accredited" className="w-full h-full object-contain" />
+                  </div>
                 </div>
+                <div className="flex-1 text-center md:text-left">
+                  <div className="inline-flex items-center gap-2 px-3 py-0.5 bg-yellow-400/20 border border-yellow-400/30 rounded-full mb-3">
+                    <div className="w-1 h-1 bg-yellow-400 rounded-full animate-ping"></div>
+                    <span className="text-[9px] font-black text-yellow-500 uppercase tracking-[0.2em]">Gold Standard of Care</span>
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight">Accredited Excellence</h3>
+                  <p className="text-purple-100 text-[13px] leading-relaxed mb-0.5 font-medium opacity-80">
+                    Setting the elite standard for clinical home health in California.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
