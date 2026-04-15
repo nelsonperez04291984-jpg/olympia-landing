@@ -59,7 +59,7 @@ const Leadership = () => {
     const [ref, isInView] = useInView()
 
     return (
-        <section id="leadership" className="py-24 bg-gradient-to-br from-purple-50 via-white to-purple-50 relative overflow-hidden">
+        <section id="leadership" className="py-12 bg-gradient-to-br from-purple-50 via-white to-purple-50 relative overflow-hidden">
             {/* Background Decorations */}
             <div className="absolute top-0 left-0 w-96 h-96 bg-purple-200 rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
             <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-rose-200 rounded-full filter blur-[120px] opacity-20"></div>
@@ -67,17 +67,17 @@ const Leadership = () => {
             <div ref={ref} className="max-w-7xl mx-auto px-6 relative z-10">
 
                 {/* Section Header */}
-                <div className={`text-center mb-24 transition-all duration-[1500ms] ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-                    <div className="flex items-center justify-center gap-3 mb-6">
+                <div className={`text-center mb-10 transition-all duration-[1500ms] ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                    <div className="flex items-center justify-center gap-3 mb-3">
                         <span className="h-px w-8 bg-purple-500"></span>
-                        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-600">Who We Are</span>
+                        <span className="text-[9px] font-black uppercase tracking-[0.4em] text-purple-600">Who We Are</span>
                         <span className="h-px w-8 bg-purple-500"></span>
                     </div>
-                    <h2 className="text-4xl md:text-6xl font-black text-gray-900 mb-6 tracking-tighter">
+                    <h2 className="text-2xl md:text-4xl font-black text-gray-900 mb-3 tracking-tighter">
                         Mission & Values
                     </h2>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto font-medium">
-                        Built on a foundation of compassion and clinical excellence, our mission guides everything we do.
+                    <p className="text-sm text-gray-600 max-w-2xl mx-auto font-medium">
+                        Built on clinical excellence, our mission guides everything we do.
                     </p>
                 </div>
 
@@ -88,7 +88,7 @@ const Leadership = () => {
                         {/* --- LEFT SIDE: THE EXECUTIVE ID --- */}
                         <div className="lg:w-[40%] relative bg-white flex flex-col border-b lg:border-b-0 lg:border-r border-gray-100">
                             {/* Branding Header: Simplified High-Fidelity Flow */}
-                            <div className="bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-900 rounded-b-[100px] pt-16 pb-20 relative px-8 flex flex-col items-center">
+                            <div className="bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-900 rounded-b-[60px] pt-8 pb-10 relative px-8 flex flex-col items-center">
                                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
                                 <div className="relative z-10 flex flex-col items-center">
                                     <div className="relative mb-6 group/logo">
@@ -106,8 +106,8 @@ const Leadership = () => {
                             {/* Executive Portrait: Integrated Shadow Frame */}
                             <div className="relative z-20 -mt-16 px-12 flex flex-col items-center pb-12">
                                 <div className="relative group/portrait">
-                                    <div className="absolute -inset-1.5 bg-gradient-to-tr from-[#B8860B] via-[#FFD700] to-[#B8860B] rounded-[40px] blur opacity-40"></div>
-                                    <div className="relative w-full aspect-[4/5] max-w-[260px] bg-white rounded-[32px] overflow-hidden border-[6px] border-[#D4AF37] shadow-3xl">
+                                    <div className="absolute -inset-1.5 bg-gradient-to-tr from-[#B8860B] via-[#FFD700] to-[#B8860B] rounded-[30px] blur opacity-40"></div>
+                                    <div className="relative w-full aspect-[4/5] max-w-[180px] bg-white rounded-[24px] overflow-hidden border-[4px] border-[#D4AF37] shadow-2xl">
                                         <img
                                             src="/jeonalyn.jpg"
                                             alt="Jeonalyn Ashby, CEO"
@@ -116,11 +116,11 @@ const Leadership = () => {
                                     </div>
                                 </div>
 
-                                <div className="mt-8 text-center w-full">
-                                    <h4 className="text-3xl font-black text-gray-900 tracking-tighter uppercase mb-1">Jeonalyn Ashby</h4>
+                                <div className="mt-6 text-center w-full">
+                                    <h4 className="text-2xl font-black text-gray-900 tracking-tighter uppercase mb-1">Jeonalyn Ashby</h4>
                                     <div className="flex items-center justify-center gap-3">
                                         <div className="h-px w-6 bg-purple-100"></div>
-                                        <p className="text-xs font-black text-purple-600 uppercase tracking-[0.4em]">CEO</p>
+                                        <p className="text-[10px] font-black text-purple-600 uppercase tracking-[0.4em]">CEO</p>
                                         <div className="h-px w-6 bg-purple-100"></div>
                                     </div>
                                 </div>
@@ -137,30 +137,30 @@ const Leadership = () => {
                         </div>
 
                         {/* --- RIGHT SIDE: THE CORPORATE MISSION --- */}
-                        <div className="lg:w-[60%] p-8 lg:p-20 relative flex flex-col justify-center bg-gray-50/30">
+                        <div className="lg:w-[60%] p-6 lg:p-10 relative flex flex-col justify-center bg-gray-50/30">
                             {/* Decorative Grid */}
                             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/clothe.png')] opacity-[0.03] pointer-events-none"></div>
 
                             <div className={`transition-all duration-1000 ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`} style={{ transitionDelay: '300ms' }}>
-                                <span className="inline-block px-4 py-2 bg-purple-50 text-purple-700 rounded-lg text-[10px] font-black uppercase tracking-[0.4em] mb-10 border border-purple-100">
+                                <span className="inline-block px-4 py-2 bg-purple-50 text-purple-700 rounded-lg text-[8px] font-black uppercase tracking-[0.4em] mb-4 border border-purple-100">
                                     Our Mission
                                 </span>
-                                <h3 className="text-4xl md:text-6xl font-black text-gray-900 mb-10 leading-[1] tracking-tighter">
+                                <h3 className="text-2xl md:text-4xl font-black text-gray-900 mb-4 leading-[1.1] tracking-tighter">
                                     Caring Beyond Limits — One Patient, One Home.
                                 </h3>
                             </div>
 
-                            <p className={`text-gray-600 text-lg md:text-xl font-medium leading-[1.6] mb-12 transition-all duration-1000 ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`} style={{ transitionDelay: '600ms' }}>
-                                At Olympia Home Health, our mission is to deliver exceptional, compassionate healthcare directly to our patients' homes. We believe everyone deserves <span className="text-purple-700 font-black">high-quality care</span> in the dignity of their own environment.
+                            <p className={`text-gray-600 text-sm md:text-base font-medium leading-[1.5] mb-6 transition-all duration-1000 ${isInView ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`} style={{ transitionDelay: '600ms' }}>
+                                At Olympia Home Health, our mission is to deliver exceptional healthcare directly to our patients' homes. We believe everyone deserves <span className="text-purple-700 font-black">high-quality care</span> in their own environment.
                             </p>
 
                             <div className={`transition-all duration-1000 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`} style={{ transitionDelay: '900ms' }}>
                                 <a
                                     href="#contact"
-                                    className="group/btn inline-flex items-center gap-4 px-12 py-6 bg-gradient-to-br from-purple-600 to-indigo-800 text-white rounded-full hover:shadow-3xl hover:scale-105 transition-all font-black text-xs uppercase tracking-[0.3em]"
+                                    className="group/btn inline-flex items-center gap-4 px-8 py-4 bg-gradient-to-br from-purple-600 to-indigo-800 text-white rounded-full hover:shadow-3xl hover:scale-105 transition-all font-black text-[9px] uppercase tracking-[0.2em]"
                                 >
                                     Initiate Consultation
-                                    <ArrowRight size={18} className="group-hover/btn:translate-x-2 transition-transform" />
+                                    <ArrowRight size={14} className="group-hover/btn:translate-x-2 transition-transform" />
                                 </a>
                             </div>
                         </div>
@@ -169,28 +169,28 @@ const Leadership = () => {
 
                 {/* Core Values: Interactive Grid */}
                 <div className={`transition-all duration-[2000ms] ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`} style={{ transitionDelay: '400ms' }}>
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {values.map((value, i) => {
                             return (
                                 <div
                                     key={i}
-                                    className={`group relative bg-white rounded-[40px] p-8 shadow-2xl shadow-purple-900/5 border border-purple-50 hover:shadow-purple-900/10 hover:-translate-y-2 transition-all duration-700 cursor-default overflow-hidden`}
+                                    className={`group relative bg-white rounded-[32px] p-6 shadow-2xl shadow-purple-900/5 border border-purple-100/50 hover:shadow-purple-900/10 hover:-translate-y-2 transition-all duration-700 cursor-default overflow-hidden`}
                                     style={{ transitionDelay: `${600 + i * 150}ms` }}
                                 >
                                     {/* Accent Blur */}
                                     <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br ${value.color} to-transparent rounded-full filter blur-2xl opacity-10 group-hover:opacity-30 transition-opacity`}></div>
 
-                                    <div className="relative mb-8 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-700">
+                                    <div className="relative mb-6 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-700">
                                         <div className="absolute inset-0 bg-purple-100 rounded-3xl blur-2xl opacity-0 group-hover:opacity-40 transition-opacity"></div>
-                                        <div className="w-16 h-16 bg-purple-50 rounded-2xl border border-purple-100 flex items-center justify-center relative shadow-inner">
-                                            <img src={value.iconSrc} alt={value.title} className="w-10 h-10 object-contain" />
+                                        <div className="w-14 h-14 bg-purple-50 rounded-2xl border border-purple-100 flex items-center justify-center relative shadow-inner">
+                                            <img src={value.iconSrc} alt={value.title} className="w-8 h-8 object-contain" />
                                         </div>
                                     </div>
 
-                                    <h4 className="text-xl font-black text-gray-900 mb-3 group-hover:text-purple-700 transition-colors">
+                                    <h4 className="text-lg font-black text-gray-900 mb-2 group-hover:text-purple-700 transition-colors">
                                         {value.title}
                                     </h4>
-                                    <p className="text-[13px] text-gray-600 font-medium leading-relaxed">
+                                    <p className="text-[12px] text-gray-600 font-medium leading-relaxed">
                                         {value.description}
                                     </p>
                                 </div>
@@ -200,15 +200,15 @@ const Leadership = () => {
                 </div>
 
                 {/* Professional Quote Pod */}
-                <div className={`mt-24 transition-all duration-[2000ms] delay-500 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-                    <div className="bg-white rounded-[40px] p-12 lg:p-16 shadow-2xl shadow-purple-900/5 border border-purple-50 relative overflow-hidden">
-                        <div className="absolute -top-10 -right-10 text-[200px] text-purple-50 font-black leading-none pointer-events-none">"</div>
-                        <p className="text-2xl lg:text-3xl text-gray-700 font-medium italic mb-8 leading-relaxed relative z-10">
+                <div className={`mt-16 transition-all duration-[2000ms] delay-500 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                    <div className="bg-white rounded-[32px] p-8 lg:p-12 shadow-2xl shadow-purple-900/5 border border-purple-50 relative overflow-hidden">
+                        <div className="absolute -top-10 -right-10 text-[160px] text-purple-50 font-black leading-none pointer-events-none">"</div>
+                        <p className="text-xl lg:text-2xl text-gray-700 font-medium italic mb-6 leading-relaxed relative z-10">
                             Our mission is simple: to provide <span className="text-purple-700 italic font-black">compassionate, professional care</span> that empowers our patients to live their best lives at home.
                         </p>
                         <div className="flex items-center gap-4">
                             <span className="w-12 h-px bg-purple-500"></span>
-                            <p className="text-purple-600 font-black uppercase tracking-widest text-xs">Jeonalyn Ashby, BSN — Founder & CEO</p>
+                            <p className="text-purple-600 font-black uppercase tracking-widest text-[10px]">Jeonalyn Ashby, BSN — Founder & CEO</p>
                         </div>
                     </div>
                 </div>

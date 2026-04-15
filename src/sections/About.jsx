@@ -79,7 +79,7 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
 
         try {
             const genAI = new GoogleGenerativeAI(API_KEY);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
             const prompt = `
             You are an intelligent intake assistant for Olympia Home Health (based in Huntington Beach, CA).
@@ -164,17 +164,17 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
 
 
     return (
-        <div className="max-w-3xl mx-auto p-10 bg-white/40 backdrop-blur-xl rounded-[40px] shadow-[0_32px_64px_-16px_rgba(88,28,135,0.15)] border border-white/60 relative overflow-hidden group">
+        <div className="max-w-2xl mx-auto p-5 md:p-6 bg-white/40 backdrop-blur-xl rounded-[24px] shadow-[0_32px_64px_-16px_rgba(88,28,135,0.15)] border border-white/60 relative overflow-hidden group">
             {/* Animated Glow Backdrop */}
             <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-400/20 rounded-full filter blur-[80px] group-hover:bg-purple-400/30 transition-colors duration-700"></div>
             <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-400/10 rounded-full filter blur-[80px] group-hover:bg-emerald-400/20 transition-colors duration-700"></div>
 
             <div className="relative z-10">
-                <div className="flex flex-col items-center mb-10">
-                    <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl flex items-center justify-center shadow-2xl mb-6 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
-                        <Zap size={32} className="text-white fill-purple-200/50" />
+                <div className="flex flex-col items-center mb-6">
+                    <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl flex items-center justify-center shadow-2xl mb-3 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                        <Zap size={24} className="text-white fill-purple-200/50" />
                     </div>
-                    <h4 className="text-3xl font-black text-gray-900 tracking-tight mb-2">
+                    <h4 className="text-xl font-black text-gray-900 tracking-tight mb-1 text-center">
                         Intelligent Care Matcher
                     </h4>
                     <div className="flex items-center gap-2">
@@ -246,9 +246,6 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
 // --- END NEW COMPONENT ---
 
 
-const About = () => {
-    const [ref, isInView] = useInView()
-
     // Coverage from San Diego County to Kern County
     const serviceAreas = [
         // Orange County
@@ -271,42 +268,44 @@ const About = () => {
     const commitments = [
         {
             title: "Holistic & Patient-Centered Care",
-            description: "We focus on the patient's dignity and independence, integrating physical needs with emotional and social well-being in every tailored plan.",
+            description: "We focus on the patient's dignity and independence, integrating physical needs with emotional and social well-being.",
             iconSrc: "/assets/branding/icon_comfort.png"
         },
         {
             title: "RN-Led Clinical Oversight",
-            description: "Every care team is managed and monitored by Registered Nurses (RNs) to ensure adherence to the highest clinical and safety standards.",
+            description: "Every care team is monitored by Registered Nurses (RNs) to ensure adherence to hospital-grade safety standards.",
             iconSrc: "/assets/branding/icon_oversight.png"
         },
         {
-            title: "Unwavering Family Communication",
-            description: "We provide consistent, transparent updates to family members, ensuring confidence and peace of mind regarding the care their loved ones receive.",
+            title: "Family Communication",
+            description: "We provide transparent updates to family members, ensuring confidence and peace of mind.",
             iconSrc: "/assets/branding/icon_community.png"
         }
     ]
 
     return (
-        <section id="about" className="py-24 bg-white relative overflow-hidden">
-            {/* Background Elements */}
-            <div className="absolute top-20 left-0 w-96 h-96 bg-emerald-100 rounded-full filter blur-3xl opacity-20"></div>
-            <div className="absolute bottom-20 right-0 w-96 h-96 bg-purple-100 rounded-full filter blur-3xl opacity-20"></div>
+        <section id="about" className="py-12 bg-gradient-to-br from-purple-50 via-white to-indigo-50 relative overflow-hidden">
+            {/* Background Decorations */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-200/40 rounded-full filter blur-[100px]-z-10"></div>
+            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-100/50 rounded-full filter blur-[100px]-z-10"></div>
 
             <div ref={ref} className="max-w-7xl mx-auto px-6 relative z-10">
 
                 {/* Section Header */}
-                <div className={`text-center mb-16 transition-all duration-1000 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-                    <span className="inline-block px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold mb-4">
-                        About Olympia Home Health
-                    </span>
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-                        Your Trusted Partner for Compassionate Home Health Care
+                <div className={`text-center mb-8 transition-all duration-[1500ms] ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                    <div className="flex items-center justify-center gap-3 mb-2">
+                        <span className="h-px w-8 bg-purple-500"></span>
+                        <span className="text-[8px] font-black uppercase tracking-[0.4em] text-purple-600">Our Foundation</span>
+                        <span className="h-px w-8 bg-purple-500"></span>
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-2 tracking-tighter">
+                        RN-led Clinical Care
                     </h2>
-                    <p className="text-2xl text-purple-700 font-bold mb-4">
-                        Bringing Exceptional Care and Comfort Right to Your Doorstep.
+                    <p className="text-lg text-purple-700 font-bold mb-2">
+                        Exceptional Care & Comfort.
                     </p>
-                    <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                        Olympia Home Health Inc is dedicated to providing coordinated, comprehensive, and patient-centered services to homebound individuals across Southern California — from San Diego to Kern County.
+                    <p className="text-sm text-gray-600 max-w-xl mx-auto">
+                        Olympia Home Health Inc provides patient-centered services across Southern California.
                     </p>
                 </div>
 
@@ -385,11 +384,11 @@ const About = () => {
                                         </div>
                                         <span className="text-[10px] font-black uppercase tracking-[0.3em] text-purple-600">Regional Coverage</span>
                                     </div>
-                                    <h3 className="text-4xl md:text-6xl font-black text-gray-900 leading-tight mb-6">
+                                    <h3 className="text-2xl md:text-4xl font-black text-gray-900 leading-tight mb-3">
                                         Clinical Presence
                                     </h3>
-                                    <p className="text-gray-600 text-lg font-medium leading-relaxed">
-                                        Providing premium home health coordination across **Southern California**, spanning 7 strategic counties.
+                                    <p className="text-gray-600 text-sm font-medium leading-relaxed">
+                                        Providing premium home health coordination across **Southern California**.
                                     </p>
                                 </div>
                                 <div className="hidden lg:block">

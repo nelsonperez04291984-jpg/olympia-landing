@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Mail, Phone, MapPin, Loader2, CheckCircle, User, Stethoscope, UploadCloud } from 'lucide-react'
-import CalendlyEmbed from '../widgets/CalendlyEmbed'
 
 // --- Resettable Intersection Observer hook ---
 const useInView = (threshold = 0.1) => {
@@ -108,17 +107,17 @@ export default function Contact() {
     const fileInputClasses = "hidden"
 
     return (
-        <section id="contact" className="py-24 bg-gradient-to-br from-purple-800 via-purple-700 to-indigo-900 relative overflow-hidden">
+        <section id="contact" className="py-12 bg-gradient-to-br from-purple-800 via-purple-700 to-indigo-900 relative overflow-hidden">
             {/* Background Atmosphere */}
             <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white/5 rounded-full filter blur-[120px] pointer-events-none"></div>
             <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-400/10 rounded-full filter blur-[100px] pointer-events-none"></div>
 
             <div ref={ref} className="max-w-7xl mx-auto px-6 relative z-10">
-                <div className="grid lg:grid-cols-2 gap-20">
+                <div className="grid lg:grid-cols-2 gap-12">
 
                     {/* Left Column: Form */}
                     <div className={`transition-all duration-[1500ms] ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-                        <div className="flex items-center gap-3 mb-10">
+                        <div className="flex items-center gap-3 mb-6">
                             {[
                                 { id: 'family', label: 'Patient/Family', icon: User },
                                 { id: 'professional', label: 'Clinical Provider', icon: Stethoscope }
@@ -126,7 +125,7 @@ export default function Contact() {
                                 <button
                                     key={mode.id}
                                     onClick={() => setEntryMode(mode.id)}
-                                    className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${entryMode === mode.id ? 'bg-white text-purple-900 shadow-2xl' : 'bg-white/10 text-white border border-white/10 hover:bg-white/20'}`}
+                                    className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${entryMode === mode.id ? 'bg-white text-purple-900 shadow-2xl' : 'bg-white/10 text-white border border-white/10 hover:bg-white/20'}`}
                                 >
                                     <mode.icon size={14} />
                                     {mode.label}
@@ -134,19 +133,19 @@ export default function Contact() {
                             ))}
                         </div>
 
-                        <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tighter">
+                        <h2 className="text-2xl md:text-4xl font-black text-white mb-2 tracking-tighter">
                             {entryMode === 'family' ? 'Get Started' : 'Referral Portal'}
                         </h2>
 
-                        <p className="text-purple-100 font-medium leading-relaxed mb-12 max-w-lg opacity-80">
+                        <p className="text-purple-100 text-xs font-medium leading-relaxed mb-6 max-w-lg opacity-80">
                             {entryMode === 'family'
-                                ? "Fill out the form below to initiate your care path. Our team will contact you shortly."
-                                : "Submit clinical packets through our secure intake coordination system for priority assessment."}
+                                ? "Fill out the form below to initiate your care path."
+                                : "Submit clinical packets through our secure intake coordination system."}
                         </p>
 
-                        <form className="space-y-8" onSubmit={handleSubmit}>
+                        <form className="space-y-6" onSubmit={handleSubmit}>
                             {/* Input Grid */}
-                            <div className="grid sm:grid-cols-2 gap-6">
+                            <div className="grid sm:grid-cols-2 gap-5">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase tracking-[0.4em] text-white ml-1">Patient Name</label>
                                     <input required name="Patient_Name" placeholder="Full Name" className={inputClasses} />
@@ -164,9 +163,9 @@ export default function Contact() {
 
                             {/* Professional Path Extension */}
                             {entryMode === 'professional' && (
-                                <div className="animate-fadeInUp space-y-8 pt-4">
-                                    <div className="p-8 rounded-[32px] bg-white/10 border border-white/10 space-y-8 shadow-inner">
-                                        <div className="grid sm:grid-cols-2 gap-6">
+                                <div className="animate-fadeInUp space-y-6 pt-2">
+                                    <div className="p-6 rounded-[24px] bg-white/10 border border-white/10 space-y-6 shadow-inner">
+                                        <div className="grid sm:grid-cols-2 gap-5">
                                             <div className="space-y-2">
                                                 <label className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-200 ml-1">Physician Name</label>
                                                 <input required name="Physician_Name" placeholder="Dr. Full Name" className={inputClasses} />
@@ -177,40 +176,18 @@ export default function Contact() {
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div className="p-8 rounded-[32px] bg-white/5 border border-white/10 space-y-6">
-                                        <div className="flex items-center justify-between">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.4em] text-white opacity-60">Attachment Packet</label>
-                                            {isUploading && <span className="text-[8px] font-black text-white uppercase animate-pulse">Syncing...</span>}
-                                        </div>
-                                        <input id="public_upload" type="file" multiple onChange={handleFileUpload} className="hidden" />
-                                        <label htmlFor="public_upload" className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-white/20 rounded-[28px] cursor-pointer hover:border-white/50 hover:bg-white/10 transition-all group/upload">
-                                            <UploadCloud size={32} className="text-white opacity-20 group-hover/upload:opacity-100 transition-opacity mb-4" />
-                                            <span className="text-xs font-black text-white opacity-60">Click to upload packets</span>
-                                        </label>
-
-                                        {uploadedDocs.length > 0 && (
-                                            <div className="flex flex-wrap gap-2">
-                                                {uploadedDocs.map((url, i) => (
-                                                    <div key={i} className="bg-white text-purple-900 px-4 py-2 rounded-xl text-[10px] font-black">
-                                                        UPLOADED_{i + 1}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
                                 </div>
                             )}
 
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase tracking-[0.4em] text-white ml-1">Comments</label>
-                                <textarea required name="Message" rows="4" placeholder="Briefly describe required services" className={inputClasses} />
+                                <textarea required name="Message" rows="2" placeholder="Briefly describe required services" className={inputClasses} />
                             </div>
 
                             <button
                                 type="submit"
                                 disabled={status === 'sending' || status === 'sent'}
-                                className={`w-full py-5 rounded-full font-black text-[11px] uppercase tracking-[0.3em] transition-all duration-500 hover:scale-105 ${status === 'sent' ? 'bg-green-500 text-white shadow-2xl' : 'bg-white text-purple-900 shadow-2xl hover:bg-gray-100'}`}
+                                className={`w-full py-4 rounded-full font-black text-[11px] uppercase tracking-[0.3em] transition-all duration-500 hover:scale-105 ${status === 'sent' ? 'bg-green-500 text-white shadow-2xl' : 'bg-white text-purple-900 shadow-2xl hover:bg-gray-100'}`}
                             >
                                 {status === 'sending' ? 'Sending...' : status === 'sent' ? 'Referral Received' : 'Send Secure Message'}
                             </button>
@@ -218,34 +195,28 @@ export default function Contact() {
                     </div>
 
                     {/* Right Column: Info Pods */}
-                    <div className={`space-y-8 transition-all duration-[1500ms] delay-300 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-24'}`}>
-                        <div className="bg-white/10 backdrop-blur-3xl rounded-[48px] p-12 border border-white/10 h-fit shadow-2xl">
-                            <h3 className="text-3xl font-black text-white mb-8 tracking-tighter">Coordination Hub</h3>
-                            <div className="space-y-12">
+                    <div className={`space-y-6 transition-all duration-[1500ms] delay-300 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-24'}`}>
+                        <div className="bg-white/10 backdrop-blur-3xl rounded-[32px] p-8 md:p-10 border border-white/10 h-fit shadow-2xl">
+                            <h3 className="text-2xl font-black text-white mb-6 tracking-tighter">Coordination Hub</h3>
+                            <div className="space-y-8">
                                 {[
                                     { label: 'Direct Line', value: '(657) 377-0776', icon: Phone, sub: 'Intake available 9AM–5PM', href: 'tel:6573770776' },
                                     { label: 'Secure Email', value: 'olympiahomehealthinc@gmail.com', icon: Mail, sub: 'Clinical Response within 2hrs', href: 'mailto:olympiahomehealthinc@gmail.com' },
                                     { label: 'Operations', value: 'Huntington Beach, CA', icon: MapPin, sub: 'Regional Hub', href: 'https://goo.gl/maps/YOUR_MAP_ID' }
                                 ].map((item, i) => (
-                                    <a key={i} href={item.href} className="flex gap-6 group/info outline-none focus:ring-2 focus:ring-white/20 rounded-2xl p-2 -ml-2 transition-all">
-                                        <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 group-hover/info:bg-white/20 transition-all">
-                                            <item.icon className="text-white" size={20} />
+                                    <a key={i} href={item.href} className="flex gap-4 group/info outline-none focus:ring-2 focus:ring-white/20 rounded-2xl p-2 -ml-2 transition-all">
+                                        <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 group-hover/info:bg-white/20 transition-all">
+                                            <item.icon className="text-white" size={18} />
                                         </div>
                                         <div>
-                                            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">{item.label}</p>
-                                            <p className="text-lg font-black text-white mb-1 group-hover:text-purple-300 transition-colors">{item.value}</p>
-                                            <p className="text-xs text-purple-200 opacity-60 font-medium">{item.sub}</p>
+                                            <p className="text-[9px] font-black text-white/40 uppercase tracking-widest mb-1">{item.label}</p>
+                                            <p className="text-base font-black text-white mb-0.5 group-hover:text-purple-300 transition-colors uppercase">{item.value}</p>
+                                            <p className="text-[10px] text-purple-200 opacity-60 font-medium">{item.sub}</p>
                                         </div>
                                     </a>
                                 ))}
                             </div>
 
-                            {/* Calendly Integration */}
-                            <div className="mt-16 pt-12 border-t border-white/10">
-                                <h4 className="text-xl font-black text-white mb-4 tracking-tighter">Schedule Strategy Call</h4>
-                                <p className="text-sm text-purple-100 opacity-60 font-medium mb-8">Access our clinical calendars to book a priority video consultation.</p>
-                                <CalendlyEmbed />
-                            </div>
                         </div>
                     </div>
                 </div>
