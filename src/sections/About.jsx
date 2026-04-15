@@ -246,6 +246,9 @@ const ServiceAreaChecker = ({ serviceAreas }) => {
 // --- END NEW COMPONENT ---
 
 
+const About = () => {
+    const [ref, isInView] = useInView()
+
     // Coverage from San Diego County to Kern County
     const serviceAreas = [
         // Orange County
