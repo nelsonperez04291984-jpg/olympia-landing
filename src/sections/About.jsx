@@ -355,37 +355,6 @@ const About = () => {
                     </div>
                 </div>
 
-                {/* ACHC ACCREDITATION HIGHLIGHT */}
-                <div className={`mb-16 transition-all duration-1000 delay-400 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-3xl p-8 border-2 border-yellow-200 shadow-xl overflow-hidden relative">
-                        {/* Decorative background circle */}
-                        <div className="absolute -right-20 -top-20 w-64 h-64 bg-yellow-200 rounded-full opacity-20"></div>
-
-                        <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-                            <div className="relative group">
-                                <div className="absolute inset-0 bg-yellow-400/20 rounded-full blur-2xl animate-pulse"></div>
-                                <div className="achc-seal-container achc-seal-shadow w-40 h-40 transform transition-transform group-hover:rotate-6 active:scale-95">
-                                    <img
-                                        src="/ACHC.png"
-                                        alt="ACHC Certification"
-                                    />
-                                </div>
-                            </div>
-                            <div className="flex-1 text-center md:text-left">
-                                <span className="inline-block px-4 py-1 bg-yellow-200 text-yellow-800 rounded-full text-sm font-bold mb-3 uppercase tracking-wider">
-                                    Gold Standard of Care
-                                </span>
-                                <h3 className="text-3xl font-bold text-gray-900 mb-4">Accredited Excellence</h3>
-                                <p className="text-lg text-gray-700 leading-relaxed mb-4">
-                                    Olympia Home Health Inc. is proud to be accredited by the **Accreditation Commission for Health Care (ACHC)**. This prestigious accreditation reflects our commitment to meeting the highest national standards for quality, safety, and clinical excellence.
-                                </p>
-                                <p className="text-gray-600 italic">
-                                    "When you choose an ACHC-accredited provider, you're choosing a partner dedicated to the best possible patient outcomes."
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 {/* SERVICE AREA CHECKER (REPLACEMENT SECTION) */}
                 <div className={`mb-16 transition-all duration-1000 delay-500 ${isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
