@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Shield, Heart, Users, Award, Clock, MapPin, Phone, Mail, CheckCircle, Search, XCircle, ArrowRight, Loader2, Zap } from 'lucide-react'
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import InteractiveMap from '../components/InteractiveMap';
 
 // --- 1. Intersection Observer hook ---
 const useInView = (threshold = 0.1) => {
@@ -435,8 +436,8 @@ const About = () => {
                             </div>
 
                             <div className="grid lg:grid-cols-12 gap-6 items-start">
-                                {/* Left Side: Bento Cards for Counties */}
-                                <div className="lg:col-span-7 grid sm:grid-cols-2 gap-4">
+                                {/* Left Side: Bento Cards for Counties (Downsized for Map prominence) */}
+                                <div className="lg:col-span-5 grid sm:grid-cols-2 gap-4">
                                     {[
                                         { county: 'Orange County', cities: 'Huntington Beach, Irvine, Anaheim', size: 'col-span-2', icon: '01' },
                                         { county: 'San Diego', cities: 'Chula Vista, Oceanside', size: 'col-span-1', icon: '02' },
@@ -448,7 +449,7 @@ const About = () => {
                                     ].map((item, i) => (
                                         <div 
                                             key={i} 
-                                            className={`${item.size} group/tile bg-white hover:bg-purple-50 rounded-[28px] p-6 shadow-xl shadow-purple-900/5 border border-purple-100/50 transition-all duration-500 hover:-translate-y-1 hover:shadow-purple-900/10`}
+                                            className={`${item.size} group/tile bg-white hover:bg-purple-50 rounded-[24px] p-4 shadow-xl shadow-purple-900/5 border border-purple-100/50 transition-all duration-500 hover:-translate-y-1 hover:shadow-purple-900/10`}
                                         >
                                             <div className="flex justify-between items-start mb-4">
                                                 <span className="text-[10px] font-black text-purple-300 uppercase tracking-tighter">Region {item.icon}</span>
@@ -456,7 +457,7 @@ const About = () => {
                                                     <CheckCircle className="text-purple-600 group-hover/tile:text-white" size={14} />
                                                 </div>
                                             </div>
-                                            <h4 className="text-xl font-black text-gray-900 mb-2">{item.county}</h4>
+                                            <h4 className="text-lg font-black text-gray-900 mb-1">{item.county}</h4>
                                             <p className="text-gray-500 text-xs font-medium leading-relaxed">
                                                 Home Health Services in {item.cities} & Surrounding Areas
                                             </p>
@@ -464,46 +465,27 @@ const About = () => {
                                     ))}
                                 </div>
 
-                                {/* Right Side: Map UI */}
-                                <div className="lg:col-span-5 space-y-6">
-                                    <div className="bg-white rounded-[36px] p-2 shadow-2xl border border-purple-100 overflow-hidden relative group/map">
-                                        <div className="absolute top-6 left-6 z-20 bg-white/90 backdrop-blur-xl border border-purple-200 rounded-2xl p-4 shadow-xl">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                                                <span className="text-[8px] font-black text-gray-900 uppercase tracking-[0.2em]">Operational HQ</span>
-                                            </div>
-                                            <h5 className="text-xs font-black text-purple-700">Huntington Beach, CA</h5>
-                                        </div>
+                                {/* Right Side: Map UI (Expanded focus) */}
+                                <div className="lg:col-span-7">
+                                    <InteractiveMap />
+                                </div>
+                            </div>
 
-                                        <div className="relative overflow-hidden rounded-[30px] border border-purple-50">
-                                            <iframe
-                                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3322.123!2d-117.9530!3d33.6846!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80dd268e46639c73%3A0x5fa279993a2740d6!2s20422%20Beach%20Blvd%20%23320%2C%20Huntington%20Beach%2C%20CA%2092648!5e0!3m2!1sen!2sus!4v1234567890"
-                                                width="100%"
-                                                height="420"
-                                                style={{ border: 0 }}
-                                                allowFullScreen=""
-                                                loading="lazy"
-                                                title="Operations Map"
-                                            ></iframe>
-                                        </div>
+                            {/* Intake CTA moved below the grid for more map height */}
+                            <div className="mt-8 bg-gradient-to-br from-purple-600 to-purple-800 rounded-[32px] p-6 shadow-2xl relative overflow-hidden group/cta">
+                                <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-1/4 -translate-y-1/4 text-white">
+                                    <Phone size={80} fill="currentColor" />
+                                </div>
+                                <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                                    <div>
+                                        <h4 className="text-xl font-black text-white mb-2 tracking-tight">Direct Intake Coordination</h4>
+                                        <p className="text-purple-100 text-xs font-medium leading-relaxed max-w-sm">
+                                            Our team can authorize extended range cases immediately.
+                                        </p>
                                     </div>
-
-                                    <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-[36px] p-8 shadow-2xl relative overflow-hidden group/cta">
-                                        <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-1/4 -translate-y-1/4">
-                                            <Phone size={120} className="text-white fill-white" />
-                                        </div>
-                                        <div className="relative z-10">
-                                            <h4 className="text-2xl font-black text-white mb-4">Direct Intake Coordination</h4>
-                                            <p className="text-purple-100 text-sm font-medium leading-relaxed mb-6">
-                                                Unauthorized in your city? Our team can authorize extended range cases immediately.
-                                            </p>
-                                            <div className="flex items-center gap-4">
-                                                <a href="tel:6573770776" className="px-8 py-4 bg-white text-purple-900 rounded-2xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all shadow-xl">
-                                                    (657) 377-0776
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <a href="tel:6573770776" className="inline-flex items-center justify-center px-6 py-3 bg-white text-purple-900 rounded-xl font-black text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-xl whitespace-nowrap">
+                                        (657) 377-0776
+                                    </a>
                                 </div>
                             </div>
                         </div>
