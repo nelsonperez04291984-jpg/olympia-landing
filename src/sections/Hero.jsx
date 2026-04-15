@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Menu, X, ChevronDown } from 'lucide-react'
+import MagneticButton from '../components/MagneticButton'
 
 const Hero = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -181,22 +182,23 @@ const Hero = () => {
             </p>
           </div>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-5 justify-center items-center mb-12">
-            <a
-              href="#contact"
-              className="group relative inline-flex items-center justify-center px-10 py-4 text-lg font-black text-purple-900 bg-white rounded-full shadow-2xl transition-all duration-300 hover:scale-105 overflow-hidden"
+          {/* CTA Buttons - High Fidelity DesignSpells Interaction */}
+          <div className="flex flex-col sm:flex-row gap-8 justify-center items-center mb-12">
+            <MagneticButton 
+              href="#contact" 
+              variant="primary"
+              className="px-12 py-5 text-xl font-black text-purple-900 bg-white rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.2)]"
             >
               Request Consultation
-              <span className="absolute inset-0 bg-gradient-to-r from-purple-400 to-indigo-400 opacity-0 group-hover:opacity-20 blur-xl transition duration-500"></span>
-            </a>
+            </MagneticButton>
 
-            <a
-              href="#services"
-              className="inline-flex items-center justify-center px-10 py-4 text-base font-bold text-white bg-white/10 backdrop-blur-sm border-2 border-white/30 rounded-full transition-all duration-300 hover:bg-white/20 hover:scale-105"
+            <MagneticButton 
+              href="#services" 
+              variant="secondary"
+              className="px-12 py-5 text-lg font-bold text-white bg-white/10 backdrop-blur-md border-2 border-white/20 rounded-full"
             >
               View Our Services
-            </a>
+            </MagneticButton>
           </div>
 
           {/* Trust Indicators */}
