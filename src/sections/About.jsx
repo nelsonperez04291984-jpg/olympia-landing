@@ -289,7 +289,6 @@ const About = () => {
     return (
         <section id="about" className="py-12 bg-gradient-to-br from-purple-50 via-white to-indigo-50 relative overflow-hidden">
             {/* Background Decorations */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-200/40 rounded-full filter blur-[100px]-z-10"></div>
             <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-100/50 rounded-full filter blur-[100px]-z-10"></div>
 
             <div ref={ref} className="max-w-7xl mx-auto px-6 relative z-10">
@@ -377,7 +376,7 @@ const About = () => {
                         {/* Immersive Background Elements */}
                         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-200/20 rounded-full filter blur-[120px] -translate-y-1/2 translate-x-1/2 animate-pulse"></div>
                         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-100/20 rounded-full filter blur-[100px] translate-y-1/2 -translate-x-1/2"></div>
-                        
+
                         <div className="relative z-10">
                             <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
                                 <div className="max-w-2xl">
@@ -398,9 +397,9 @@ const About = () => {
                                     <div className="bg-white/60 border border-purple-100 rounded-3xl p-6 backdrop-blur-xl shadow-xl">
                                         <div className="flex items-center gap-4">
                                             <div className="flex -space-x-2">
-                                                {[1,2,3].map(i => <div key={i} className="w-10 h-10 rounded-full border-4 border-white bg-purple-600 flex items-center justify-center text-[10px] font-black text-white">BSN</div>)}
+                                                {[1, 2, 3].map(i => <div key={i} className="w-10 h-10 rounded-full border-4 border-white bg-purple-600 flex items-center justify-center text-[10px] font-black text-white">BSN</div>)}
                                             </div>
-                                            <p className="text-[10px] font-black text-purple-900 uppercase tracking-widest leading-tight">Professional units<br/>Active coordination</p>
+                                            <p className="text-[10px] font-black text-purple-900 uppercase tracking-widest leading-tight">Professional units<br />Active coordination</p>
                                         </div>
                                     </div>
                                 </div>
@@ -418,8 +417,8 @@ const About = () => {
                                         { county: 'Ventura', cities: 'Oxnard, Thousand Oaks', size: 'col-span-1', icon: '06' },
                                         { county: 'Kern County', cities: 'Bakersfield, Delano', size: 'col-span-1', icon: '07' },
                                     ].map((item, i) => (
-                                        <div 
-                                            key={i} 
+                                        <div
+                                            key={i}
                                             className={`${item.size} group/tile bg-white hover:bg-purple-50 rounded-[24px] p-4 shadow-xl shadow-purple-900/5 border border-purple-100/50 transition-all duration-500 hover:-translate-y-1 hover:shadow-purple-900/10`}
                                         >
                                             <div className="flex justify-between items-start mb-4">
