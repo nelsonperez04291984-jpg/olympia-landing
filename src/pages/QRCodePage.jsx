@@ -11,7 +11,7 @@ const QRCodePage = () => {
   const handleDownload = () => {
     const link = document.createElement('a')
     link.download = 'olympia-home-health-qr.png'
-    link.href = '/url_qrcodecreator.com_20_00_48.png'
+    link.href = '/qr_620.png'
     link.click()
   }
 
@@ -43,7 +43,7 @@ const QRCodePage = () => {
           {/* QR Code */}
           <div className="inline-block p-6 bg-white rounded-2xl border-2 border-gray-100 mb-6">
             <img
-              src="/url_qrcodecreator.com_20_00_48.png"
+              src="/qr_620.png"
               alt="QR Code"
               className="w-64 h-64 object-contain"
             />
