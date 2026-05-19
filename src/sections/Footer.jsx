@@ -74,7 +74,7 @@ const Footer = () => {
             <h4 className="text-white font-semibold mb-4">Scan & Visit</h4>
             <Link to="/qr" className="inline-block p-3 bg-white rounded-xl hover:shadow-lg hover:shadow-purple-500/20 transition-all hover:scale-105">
               <img
-                src="/Olympia Home Health Inc.png"
+                src="/https_olympiahhi_com_.png"
                 alt="Scan to share"
                 className="w-24 h-24 object-contain"
               />

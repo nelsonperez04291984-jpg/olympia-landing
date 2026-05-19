@@ -61,26 +61,7 @@ const Testimonials = () => {
         }
     };
 
-    const testimonials = [
-        {
-            text: "Olympia Home Health was a godsend after my mother's surgery. The nurses were not only incredibly professional but showed genuine compassion every single day. I couldn't have asked for a better team to support her recovery at home.",
-            author: "Sarah M.",
-            location: "Huntington Beach",
-            rating: 5
-        },
-        {
-            text: "The physical therapy team helped my husband regain his mobility faster than we ever thought possible. They were patient, encouraging, and highly skilled. We are forever grateful to Olympia.",
-            author: "Robert T.",
-            location: "Irvine",
-            rating: 5
-        },
-        {
-            text: "From the very first intake call to the daily visits, the entire staff has been exceptional. They handle all the complicated medical details so I can just focus on spending quality time with my father.",
-            author: "Emily K.",
-            location: "Costa Mesa",
-            rating: 5
-        }
-    ];
+    const testimonials = [];
 
     useEffect(() => {
         const interval = setInterval(() => {

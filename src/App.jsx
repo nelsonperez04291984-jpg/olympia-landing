@@ -17,17 +17,17 @@ import QRCodePage from './pages/QRCodePage'
 import { Routes, Route } from 'react-router-dom'
 
 const MainLanding = () => (
-    <div className="relative">
-        <Hero />
-        <main className="relative z-10">
-            <About />
-            <Services />
-            <AIFaq />
-            <Testimonials />
-            <Leadership />
-            <Contact />
-        </main>
-    </div>
+  <div className="relative">
+    <Hero />
+    <main className="relative z-10">
+      <About />
+      <Services />
+      <AIFaq />
+      <Testimonials />
+      <Leadership />
+      <Contact />
+    </main>
+  </div>
 );
 
 export default function App() {
