@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Heart, Shield, Star, Users, ArrowRight, MapPin } from 'lucide-react'
+import { Heart, Shield, Star, Users, ArrowRight, MapPin, User } from 'lucide-react'
 
 const useInView = (threshold = 0.1) => {
     const [isInView, setIsInView] = useState(false)
@@ -107,12 +107,14 @@ const Leadership = () => {
                             <div className="relative z-20 -mt-16 px-12 flex flex-col items-center pb-12">
                                 <div className="relative group/portrait">
                                     <div className="absolute -inset-1.5 bg-gradient-to-tr from-[#B8860B] via-[#FFD700] to-[#B8860B] rounded-[30px] blur opacity-40"></div>
-                                    <div className="relative w-full aspect-[4/5] max-w-[180px] bg-white rounded-[24px] overflow-hidden border-[4px] border-[#D4AF37] shadow-2xl">
-                                        <img
+                                    <div className="relative w-full aspect-[4/5] max-w-[180px] bg-white rounded-[24px] overflow-hidden border-[4px] border-[#D4AF37] shadow-2xl flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-50">
+                                        {/* Image temporarily hidden */}
+                                        {/* <img
                                             src="/jeonalyn.jpg"
                                             alt="Jeonalyn Ashby, CEO"
                                             className="w-full h-full object-cover transition-all duration-1000 group-hover/portrait:scale-105"
-                                        />
+                                        /> */}
+                                        <User className="w-16 h-16 text-purple-300 transform group-hover/portrait:scale-110 transition-transform duration-500" />
                                     </div>
                                 </div>
 
