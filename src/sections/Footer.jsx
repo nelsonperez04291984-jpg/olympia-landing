@@ -14,7 +14,7 @@ const Footer = () => {
                 <span className="font-bold text-xl text-white">Olympia Home Health</span>
               </div>
               <div className="h-8 w-px bg-gray-700 mx-2 hidden sm:block"></div>
-              <div className="achc-seal-container achc-seal-shadow-dark w-12 h-12">
+              <div className="hidden achc-seal-container achc-seal-shadow-dark w-12 h-12">
                 <img src="/ACHC.png" alt="ACHC Accredited" />
               </div>
             </div>

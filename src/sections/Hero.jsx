@@ -217,7 +217,7 @@ const Hero = () => {
               <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
                 <div className="relative">
                   <div className="absolute inset-0 bg-yellow-400/10 rounded-full blur-3xl animate-pulse"></div>
-                  <div className="achc-seal-container achc-seal-shadow w-20 h-20 transform transition-all duration-700 group-hover/achc:rotate-6 group-hover/achc:scale-110">
+                  <div className="hidden achc-seal-container achc-seal-shadow w-20 h-20 transform transition-all duration-700 group-hover/achc:rotate-6 group-hover/achc:scale-110">
                     <img src="/ACHC.png" alt="ACHC Accredited" className="w-full h-full object-contain" />
                   </div>
                 </div>
