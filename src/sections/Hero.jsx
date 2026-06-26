@@ -211,7 +211,7 @@ const Hero = () => {
 
           {/* ACHC ACCREDITATION FEATURED BLOCK */}
           <div className="max-w-3xl mx-auto">
-            <div className="bg-white/5 backdrop-blur-3xl rounded-[32px] px-6 py-6 border border-white/10 shadow-3xl relative overflow-hidden group/achc hover:bg-white/10 transition-all duration-700">
+            <div style={{ display: 'none' }} className="bg-white/5 backdrop-blur-3xl rounded-[32px] px-6 py-6 border border-white/10 shadow-3xl relative overflow-hidden group/achc hover:bg-white/10 transition-all duration-700">
               <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-400/5 rounded-full filter blur-[100px] -translate-y-1/2 translate-x-1/2 group-hover/achc:bg-yellow-400/20 transition-all duration-1000"></div>
 
               <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
