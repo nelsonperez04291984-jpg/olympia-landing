@@ -110,7 +110,7 @@ const Leadership = () => {
                                     <div className="relative w-full aspect-[4/5] max-w-[180px] bg-white rounded-[24px] overflow-hidden border-[4px] border-[#D4AF37] shadow-2xl flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-50">
                                         {/* Image temporarily hidden */}
                                         {/* <img
-                                            src="/jeonalyn.jpg"
+                                            src="/ceo.jpg"
                                             alt="Jeonalyn Ashby, CEO"
                                             className="w-full h-full object-cover transition-all duration-1000 group-hover/portrait:scale-105"
                                         /> */}

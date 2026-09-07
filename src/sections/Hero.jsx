@@ -211,13 +211,13 @@ const Hero = () => {
 
           {/* ACHC ACCREDITATION FEATURED BLOCK */}
           <div className="max-w-3xl mx-auto">
-            <div style={{ display: 'none' }} className="bg-white/5 backdrop-blur-3xl rounded-[32px] px-6 py-6 border border-white/10 shadow-3xl relative overflow-hidden group/achc hover:bg-white/10 transition-all duration-700">
+            <div className="bg-white/5 backdrop-blur-3xl rounded-[32px] px-6 py-6 border border-white/10 shadow-3xl relative overflow-hidden group/achc hover:bg-white/10 transition-all duration-700">
               <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-400/5 rounded-full filter blur-[100px] -translate-y-1/2 translate-x-1/2 group-hover/achc:bg-yellow-400/20 transition-all duration-1000"></div>
 
               <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
                 <div className="relative">
                   <div className="absolute inset-0 bg-yellow-400/10 rounded-full blur-3xl animate-pulse"></div>
-                  <div style={{ display: 'none' }} className="achc-seal-container achc-seal-shadow w-20 h-20 transform transition-all duration-700 group-hover/achc:rotate-6 group-hover/achc:scale-110">
+                  <div className="achc-seal-container achc-seal-shadow w-20 h-20 transform transition-all duration-700 group-hover/achc:rotate-6 group-hover/achc:scale-110">
                     <img src="/ACHC.png" alt="ACHC Accredited" className="w-full h-full object-contain" />
                   </div>
                 </div>
