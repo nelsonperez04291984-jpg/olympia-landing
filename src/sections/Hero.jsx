@@ -158,7 +158,7 @@ const Hero = () => {
           {/* Logo Container - Refined & Centered */}
           <div className="relative group inline-flex justify-center mb-6">
             <div className="absolute inset-0 bg-white/20 rounded-full blur-[40px] group-hover:bg-white/40 transition-all duration-1000 animate-pulse"></div>
-            <div className="relative w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 animate-float">
+            <div className="relative w-40 h-20 md:w-56 md:h-28 lg:w-64 lg:h-32 animate-float">
               <img 
                 src="/log_latest.png" 
                 alt="Olympia Logo" 
