@@ -162,7 +162,7 @@ const Hero = () => {
               <img 
                 src="/log_latest.png" 
                 alt="Olympia Logo" 
-                className="w-full h-full object-contain filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.2)] transform transition-all duration-700 group-hover:scale-105" 
+                className="w-10 h-10 object-contain rounded-full" 
               />
             </div>
           </div>
